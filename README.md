@@ -1,7 +1,9 @@
 Sketchup-Blocks
 ===============
 
-Sketchup Blocks project for the CSIR Internet of Things research group
+Sketchup Blocks project for the CSIR Internet of Things research group.
+
+Read more about the Sketchup Blocks project at the developer blog: http://sketchupblocks.wordpress.com/
 
 We're making use of the General Public License. This makes our software free which everyone can redistrobute and
 and change under the conditions of the license.
