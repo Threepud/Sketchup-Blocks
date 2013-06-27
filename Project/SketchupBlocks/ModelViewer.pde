@@ -1,0 +1,3 @@
+class ModelViewer implements ModelChangeListener
+{
+}

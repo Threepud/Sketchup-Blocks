@@ -1,0 +1,3 @@
+class LocalLobby implements Lobby
+{
+}

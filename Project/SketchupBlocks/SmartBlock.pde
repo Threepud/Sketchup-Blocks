@@ -1,0 +1,3 @@
+class SmartBlock implements Block
+{
+}

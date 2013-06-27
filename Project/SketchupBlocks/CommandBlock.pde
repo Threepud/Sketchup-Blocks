@@ -1,0 +1,3 @@
+class CommandBlock implements Block
+{
+}

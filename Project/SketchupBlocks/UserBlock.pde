@@ -1,0 +1,3 @@
+class UserBlock implements Block
+{
+}
