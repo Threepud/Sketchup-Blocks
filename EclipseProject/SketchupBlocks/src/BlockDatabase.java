@@ -1,33 +1,74 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 class BlockDatabase
 {
-	private ArrayList<Block> blocks;
+	private HashMap<Integer, Block> blocks;
+	private String smartBlockPath;
+	private String commandBlockPath;
+	private String userBlockPath;
 	  
-	BlockDatabase()
+	BlockDatabase(String _smartBlockPath, String _commandBlockPath, String _userBlockPath)
 	{
-		//try to deserialize the block database
-		FileInputStream fileInputSteam;
-		ObjectInputStream objectInputStream;
-		try 
-		{
-			fileInputSteam = new FileInputStream(new File("blockDB.dat"));
-			objectInputStream = new ObjectInputStream(fileInputSteam);
-			blocks = (ArrayList)objectInputStream.readObject();
-			objectInputStream.close();
-		}
-		catch (FileNotFoundException e) 
-		{
-			System.out.println(e);
-		}
+		smartBlockPath = _smartBlockPath;
+		commandBlockPath = _commandBlockPath;
+		userBlockPath = _userBlockPath;
 		
-		//throw exception if no database is found
+		blocks = new HashMap<>();
+		loadBlockDatabases();
 	}
 	  
+	private void loadBlockDatabases() throws RuntimeException
+	{
+		boolean smartBlockDatabaseFound = false;
+		boolean commandBlockDatabaseFound = false;
+		boolean userBlockDatabaseFound = false;
+		
+		//load all block data into hash map
+		smartBlockDatabaseFound = loadSmartBlockData(smartBlockPath);
+		commandBlockDatabaseFound = loadCommandBlockData(commandBlockPath);
+		userBlockDatabaseFound = loadUserBlockData(userBlockPath);
+		
+		//throw exception if no database is found
+		if(!smartBlockDatabaseFound)
+			throw new DataBaseNotFoundException("Smart block database not found.");
+		if(!commandBlockDatabaseFound)
+			throw new DataBaseNotFoundException("");
+		if(!userBlockDatabaseFound)
+			throw new DataBaseNotFoundException("");
+	}
+	
+	private boolean loadSmartBlockData(String fileName)
+	{
+		
+		
+		return false;
+	}
+	
+	private boolean loadCommandBlockData(String fileName)
+	{
+		return false;
+	}
+	
+	private boolean loadUserBlockData(String fileName)
+	{
+		return false;
+	}
+	
+	private boolean saveSmartBlockData(String fileName)
+	{
+		return false;
+	}
+	
+	private boolean saveCommandBlockData(String fileName)
+	{
+		return false;
+	}
+	
+	private boolean saveUserBlockData(String fileName)
+	{
+		return false;
+	}
+	
 	public void insertBlock(Block block)
 	{
 	   
@@ -37,4 +78,13 @@ class BlockDatabase
 	{
 		return null;
 	} 
+	
+	public boolean saveDatabase()
+	{
+		saveSmartBlockData(smartBlockPath);
+		saveCommandBlockData(commandBlockPath);
+		saveUserBlockData(userBlockPath);
+		
+		return false;
+	}
 }
