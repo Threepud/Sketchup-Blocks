@@ -8,7 +8,7 @@ class Model
   
   Model()
   {
-    id = classIdCounter++;
+    id = classIdCounter++ +"";
   }
   
   void addModelBlock(ModelBlock modelBlock)
@@ -16,7 +16,7 @@ class Model
     blocks.add(modelBlock);
   }
   
-  public int getId()
+  public String getId()
   {
    return id; 
   }
