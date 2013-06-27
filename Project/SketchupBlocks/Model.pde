@@ -9,7 +9,7 @@ class Model
   {
   }
   
-  void addModelBlock(modelBlock : ModelBlock)
+  void addModelBlock(ModelBlock modelBlock)
   {
   }
 }

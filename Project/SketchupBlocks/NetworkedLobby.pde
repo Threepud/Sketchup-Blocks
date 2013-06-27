@@ -1,0 +1,3 @@
+class NetworkedLobby implements Lobby
+{
+}
