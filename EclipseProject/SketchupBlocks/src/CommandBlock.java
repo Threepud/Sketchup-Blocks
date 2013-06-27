@@ -1,4 +1,13 @@
 class CommandBlock extends Block
 {
-    private int type;
+	public enum CommandType
+	{
+		NEW,
+		SAVE,
+		LOAD,
+		EXPORT,
+		SPECTATE
+	}
+	
+    public CommandType type;
 }
