@@ -1,6 +1,4 @@
 interface ModelChangeListener
 {
-  public void fireModelChangeEvent(ModelBlock change)
-  {
-  }
+  void fireModelChangeEvent(ModelBlock change);
 }
