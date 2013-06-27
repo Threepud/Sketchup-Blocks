@@ -1,6 +1,4 @@
-import java.io.Serializable;
-
-class Block implements Serializable
+class Block
 {
   public int blockId;
   public int [] associatedFiducials;
