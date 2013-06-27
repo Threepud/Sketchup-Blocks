@@ -1,4 +1,4 @@
-class CommandBlock implements Block
+class CommandBlock extends Block
 {
     private int type;
 }

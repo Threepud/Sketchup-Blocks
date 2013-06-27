@@ -1,3 +1,3 @@
-class UserBlock implements Block
+class UserBlock extends Block
 {
 }

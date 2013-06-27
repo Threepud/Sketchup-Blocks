@@ -5,4 +5,9 @@ class Server implements ModelChangeListener
   Server(int _port)
   {
   }
+  
+  void fireModelChangeEvent(ModelBlock change)
+  {
+  }
+  
 }

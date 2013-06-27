@@ -9,7 +9,7 @@ class BlockDatabase
  
  Block findBlock(int fiducialID)
   {
-   
+    return null;
   } 
   
 }

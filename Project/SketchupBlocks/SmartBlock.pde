@@ -1,3 +1,3 @@
-class SmartBlock implements Block
+class SmartBlock extends Block
 {
 }

@@ -7,7 +7,7 @@ class LocalLobby implements Lobby
     
     public Model getModel()
     {
-      
+      return null;
     }
     
     public void setModel(Model model)
