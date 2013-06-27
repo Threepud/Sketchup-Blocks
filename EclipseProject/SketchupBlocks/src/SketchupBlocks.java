@@ -9,9 +9,13 @@ public class SketchupBlocks extends PApplet
 		    PApplet.main(new String[] { "--present", "SketchupBlocks" });
 	}*/
 	
+	Interpreter wimpie;
+	SessionManager sessMan;
+	
 	public void setup()
 	{
-	    
+		sessMan = new SessionManager(this);
+	    wimpie = new Interpreter(3333, sessMan, this);
 	}
 
 	public void draw() 

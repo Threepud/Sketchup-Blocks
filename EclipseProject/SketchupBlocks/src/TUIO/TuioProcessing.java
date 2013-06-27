@@ -99,14 +99,14 @@ public class TuioProcessing implements TuioListener {
 	}
 	
 	public void updateTuioObject(TuioObject tobj) {
-		
+		System.out.println("Update detected");
 		if (updateTuioObject!=null) {
 			try { 
 				updateTuioObject.invoke(parent, new Object[] { tobj });
 			}
-			catch (IllegalAccessException e) {}
-			catch (IllegalArgumentException e) {}
-			catch (InvocationTargetException e) {}
+			catch (IllegalAccessException e) {e.printStackTrace();}
+			catch (IllegalArgumentException e) {e.printStackTrace();}
+			catch (InvocationTargetException e) {e.printStackTrace();}
 		}
 	}
 	

@@ -3,7 +3,7 @@ import processing.net.*;
 import TUIO.*;
 import java.util.*;
 
-class Interpreter
+public class Interpreter
 {
 	private SessionManager sessionMan;
 	private PApplet parent;
@@ -16,7 +16,7 @@ class Interpreter
 		tuioClient  = new TuioProcessing(this, port);
 	}
   
-	void addTuioObject(TuioObject tobj) 
+	public void addTuioObject(TuioObject tobj) 
 	{
 		CameraEvent came = new CameraEvent();
 		came.rotation = tobj.getAngle();
@@ -28,7 +28,7 @@ class Interpreter
 	}
 
 	// called when an object is removed from the scene
-	void removeTuioObject(TuioObject tobj) 
+	public void removeTuioObject(TuioObject tobj) 
 	{
 		CameraEvent came = new CameraEvent();
 		came.rotation = tobj.getAngle();
@@ -40,7 +40,7 @@ class Interpreter
 	}
 	
 	// called when an object is moved
-	void updateTuioObject (TuioObject tobj) 
+	public void updateTuioObject (TuioObject tobj) 
 	{
 		CameraEvent came = new CameraEvent();
 		came.rotation = tobj.getAngle();
@@ -52,28 +52,28 @@ class Interpreter
 	}
 	
 	// called when a cursor is added to the scene
-	void addTuioCursor(TuioCursor tcur) 
+	public void addTuioCursor(TuioCursor tcur) 
 	{
 		//println("add cursor "+tcur.getCursorID()+" ("+tcur.getSessionID()+ ") " +tcur.getX()+" "+tcur.getY());
 	}
 	
 	// called when a cursor is moved
-	void updateTuioCursor (TuioCursor tcur) 
+	public void updateTuioCursor (TuioCursor tcur) 
 	{
 		//println("update cursor "+tcur.getCursorID()+" ("+tcur.getSessionID()+ ") " +tcur.getX()+" "+tcur.getY()
 	         // +" "+tcur.getMotionSpeed()+" "+tcur.getMotionAccel());
 	}
 	
 	// called when a cursor is removed from the scene
-	void removeTuioCursor(TuioCursor tcur) 
+	public void removeTuioCursor(TuioCursor tcur) 
 	{
 		//println("remove cursor "+tcur.getCursorID()+" ("+tcur.getSessionID()+")");
 	}
 
 	// called after each message bundle
 	// representing the end of an image frame
-	void refresh(TuioTime bundleTime) 
-	{ 
+	public void refresh(TuioTime bundleTime) 
+	{
 		parent.redraw();
 	}
 }
