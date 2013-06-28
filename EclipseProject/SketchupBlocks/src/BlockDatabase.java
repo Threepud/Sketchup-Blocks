@@ -2,6 +2,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 class BlockDatabase
@@ -77,17 +80,19 @@ class BlockDatabase
 	
 	private void loadSmartBlockLine(String line) throws RuntimeException
 	{
+		int index = 0;
 		String[] elements = line.split("\t");
 		
 		if(elements.length != 4)
 			throw new RecordFormatException("Smart block database record length exception.");
 		
 		SmartBlock tempBlock = new SmartBlock();
+		tempBlock.blockType = Block.BlockType.SMART;
 		
 		//block ID
 		try
 		{
-			tempBlock.blockId = Integer.parseInt(elements[0]);
+			tempBlock.blockId = Integer.parseInt(elements[index++]);
 		}
 		catch(NumberFormatException e)
 		{
@@ -95,7 +100,7 @@ class BlockDatabase
 		}
 		
 		//Associated Fiducial IDs
-		String[] stringAssociatedFiducials = elements[1].split(",");
+		String[] stringAssociatedFiducials = elements[index++].split(",");
 		int[] associatedFiducials = new int[stringAssociatedFiducials.length];
 		for(int x = 0; x < associatedFiducials.length; ++x)
 		{
@@ -111,7 +116,7 @@ class BlockDatabase
 		tempBlock.associatedFiducials = associatedFiducials;
 		
 		//Block Vertices
-		String[] stringVertices = elements[2].split(",");
+		String[] stringVertices = elements[index++].split(",");
 		float[] vertices = new float[stringVertices.length];
 		for(int x = 0; x < vertices.length; ++x)
 		{
@@ -127,7 +132,7 @@ class BlockDatabase
 		tempBlock.vertices = vertices;
 		
 		//Block indices
-		String[] stringIndices = elements[3].split(",");
+		String[] stringIndices = elements[index++].split(",");
 		int[] indices = new int[stringIndices.length];
 		for(int x = 0; x < indices.length; ++x)
 		{
@@ -151,17 +156,19 @@ class BlockDatabase
 	
 	private void loadCommandBlockLine(String line) throws RuntimeException
 	{
+		int index = 0;
 		String[] elements = line.split("\t");
 		
 		if(elements.length != 3)
 			throw new RecordFormatException("Command block database record length exception.");
 		
 		CommandBlock tempBlock = new CommandBlock();
+		tempBlock.blockType = Block.BlockType.COMMAND;
 		
 		//block ID
 		try
 		{
-			tempBlock.blockId = Integer.parseInt(elements[0]);
+			tempBlock.blockId = Integer.parseInt(elements[index++]);
 		}
 		catch(NumberFormatException e)
 		{
@@ -169,7 +176,7 @@ class BlockDatabase
 		}
 		
 		//Associated Fiducial IDs
-		String[] stringAssociatedFiducials = elements[1].split(",");
+		String[] stringAssociatedFiducials = elements[index++].split(",");
 		int[] associatedFiducials = new int[stringAssociatedFiducials.length];
 		for(int x = 0; x < associatedFiducials.length; ++x)
 		{
@@ -186,7 +193,7 @@ class BlockDatabase
 		
 		//command block type
 		CommandBlock.CommandType commandType;
-		switch(elements[2])
+		switch(elements[index++])
 		{
 			case "NEW":
 				commandType = CommandBlock.CommandType.NEW;
@@ -218,17 +225,19 @@ class BlockDatabase
 	//TODO: validate user information
 	private void loadUserBlockLine(String line) throws RuntimeException
 	{
+		int index = 0;
 		String[] elements = line.split("\t");
 		
 		if(elements.length != 5)
 			throw new RecordFormatException("User block database record length exception.");
 		
 		UserBlock tempBlock = new UserBlock();
+		tempBlock.blockType = Block.BlockType.USER;
 		
 		//block ID
 		try
 		{
-			tempBlock.blockId = Integer.parseInt(elements[0]);
+			tempBlock.blockId = Integer.parseInt(elements[index++]);
 		}
 		catch(NumberFormatException e)
 		{
@@ -236,7 +245,7 @@ class BlockDatabase
 		}
 		
 		//Associated Fiducial IDs
-		String[] stringAssociatedFiducials = elements[1].split(",");
+		String[] stringAssociatedFiducials = elements[index++].split(",");
 		int[] associatedFiducials = new int[stringAssociatedFiducials.length];
 		for(int x = 0; x < associatedFiducials.length; ++x)
 		{
@@ -252,13 +261,13 @@ class BlockDatabase
 		tempBlock.associatedFiducials = associatedFiducials;
 		
 		//user name
-		tempBlock.name = elements[2];
+		tempBlock.name = elements[index++];
 		
 		//user address
-		tempBlock.address = elements[3];
+		tempBlock.address = elements[index++];
 		
 		//user picture path
-		tempBlock.picturePath = elements[4];
+		tempBlock.picturePath = elements[index++];
 		
 		//add block to hash for all associated fiducials
 		for(int x = 0; x < associatedFiducials.length; ++x)
@@ -267,35 +276,213 @@ class BlockDatabase
 		}
 	}
 	
-	/*
-	private boolean saveSmartBlockData(String fileName)
+	private void saveBlockData() throws RuntimeException
 	{
-		return true;
+		ArrayList<Block> blockList = new ArrayList<>(blocks.values());
+		ArrayList<SmartBlock> smartList = new ArrayList<>();
+		ArrayList<CommandBlock> commandList = new ArrayList<>();
+		ArrayList<UserBlock> userList = new ArrayList<>();
+		
+		for(Block blockItem: blockList)
+		{
+			switch(blockItem.blockType)
+			{
+				case SMART:
+					smartList.add((SmartBlock)blockItem);
+					break;
+				case COMMAND:
+					commandList.add((CommandBlock)blockItem);
+					break;
+				case USER:
+					userList.add((UserBlock)blockItem);
+					break;
+				default:
+					throw new UnknownBlockTypeException("Found unknown block type in database save.");
+			}
+		}
+		
+		saveSmartBlockData(smartBlockPath, smartList);
+		saveCommandBlockData(commandBlockPath, commandList);
+		saveUserBlockData(userBlockPath, userList);
 	}
 	
-	private boolean saveCommandBlockData(String fileName)
+	private void saveSmartBlockData(String fileName, ArrayList<SmartBlock> list)
 	{
-		return true;
+		try 
+		{
+			PrintWriter printWriter = new PrintWriter(smartBlockPath, "UTF-8");
+			String line;
+			
+			//generate line
+			for(SmartBlock smartBlockItem: list)
+			{
+				//block ID
+				line = Integer.toString(smartBlockItem.blockId);
+				
+				//associated fiducials
+				int[] associatedFiducials = smartBlockItem.associatedFiducials;
+				line += "\t" + Integer.toString(associatedFiducials[0]);
+				for(int i = 1; i < associatedFiducials.length; ++i)
+				{
+					line += "," + Integer.toString(associatedFiducials[i]);
+				}
+				
+				//block vertices
+				float[] vertices = smartBlockItem.vertices;
+				line += "\t" + Float.toString(vertices[0]);
+				for(int i = 1; i < vertices.length; ++i)
+				{
+					line += "," + Float.toString(vertices[i]);
+				}
+				
+				//block indices
+				int[] indices = smartBlockItem.indices;
+				line += "\t" + Integer.toString(indices[0]);
+				for(int i = 1; i < indices.length; ++i)
+				{
+					line += "," + Integer.toString(indices[i]); 
+				}
+				
+				printWriter.println(line);
+				line = "";
+			}
+			
+			printWriter.close();
+		} 
+		catch (FileNotFoundException e) 
+		{
+			e.printStackTrace();
+		}
+		catch (UnsupportedEncodingException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 	
-	private boolean saveUserBlockData(String fileName)
+	private void saveCommandBlockData(String fileName, ArrayList<CommandBlock> list) throws RuntimeException
 	{
-		return true;
+		try 
+		{
+			PrintWriter printWriter = new PrintWriter(commandBlockPath, "UTF-8");
+			String line;
+			
+			//generate line
+			for(CommandBlock commandBlockItem: list)
+			{
+				//block ID
+				line = Integer.toString(commandBlockItem.blockId);
+				
+				//associated fiducials
+				int[] associatedFiducials = commandBlockItem.associatedFiducials;
+				line += "\t" + Integer.toString(associatedFiducials[0]);
+				for(int i = 1; i < associatedFiducials.length; ++i)
+				{
+					line += "," + Integer.toString(associatedFiducials[i]);
+				}
+				
+				//block command type
+				switch(commandBlockItem.type)
+				{
+					case NEW:
+						line += "\t" + "NEW";
+						break;
+					case SAVE:
+						line += "\t" + "SAVE";
+						break;
+					case LOAD:
+						line += "\t" + "LOAD";
+						break;
+					case EXPORT:
+						line += "\t" + "EXPORT";
+						break;
+					case SPECTATE:
+						line += "\t" + "SPECTATE";
+						break;
+					default:
+						throw new UnkownCommandBlockTypeException("Unkown command block type in data base save.");	
+				}
+				
+				printWriter.println(line);
+				line = "";
+			}
+			
+			printWriter.close();
+		} 
+		catch (FileNotFoundException e) 
+		{
+			e.printStackTrace();
+		}
+		catch (UnsupportedEncodingException e) 
+		{
+			e.printStackTrace();
+		}
 	}
-	*/
+	
+	private void saveUserBlockData(String fileName, ArrayList<UserBlock> list)
+	{
+		try 
+		{
+			PrintWriter printWriter = new PrintWriter(userBlockPath, "UTF-8");
+			String line;
+			
+			//generate line
+			for(UserBlock userBlockItem: list)
+			{
+				//block ID
+				line = Integer.toString(userBlockItem.blockId);
+				
+				//associated fiducials
+				int[] associatedFiducials = userBlockItem.associatedFiducials;
+				line += "\t" + Integer.toString(associatedFiducials[0]);
+				for(int i = 1; i < associatedFiducials.length; ++i)
+				{
+					line += "," + Integer.toString(associatedFiducials[i]);
+				}
+				
+				//name
+				line += "\t" + userBlockItem.name;
+				
+				//address
+				line += "\t" + userBlockItem.address;
+				
+				//picture path
+				line += "\t" + userBlockItem.picturePath;
+				
+				printWriter.println(line);
+				line = "";
+			}
+			
+			printWriter.close();
+		} 
+		catch (FileNotFoundException e) 
+		{
+			e.printStackTrace();
+		}
+		catch (UnsupportedEncodingException e) 
+		{
+			e.printStackTrace();
+		}
+	}
 	
 	public void insertBlock(Block block)
 	{
+	   int[] associatedFiducials = block.associatedFiducials;
 	   
+	   for(int fiducial: associatedFiducials)
+	   {
+		   blocks.put((Integer)fiducial, block);
+	   }
 	}
 	   
 	public Block findBlock(int fiducialID)
 	{
-		return null;
+		return blocks.get((Integer)fiducialID);
 	} 
 	
 	public boolean saveDatabase()
 	{
+		saveBlockData();
+		
 		return false;
 	}
 }
