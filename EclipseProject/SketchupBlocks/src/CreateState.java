@@ -9,13 +9,13 @@ public class CreateState extends MenuState
 	public boolean handleInput(CommandBlock cBlock)
 	{
 
-		if (cBlock.type == CommandBlock.COMMAND_TYPE.OK)
+		if (cBlock.type == CommandBlock.CommandType.OK)
 		{
 			sessMan.newProject();
 			return true;
 			
 		}
-		else if (cBlock.type == CommandBlock.COMMAND_TYPE.CANCEL)
+		else if (cBlock.type == CommandBlock.CommandType.CANCEL)
 		{
 			return true;
 		}

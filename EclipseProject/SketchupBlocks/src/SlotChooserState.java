@@ -13,18 +13,18 @@ public class SlotChooserState extends MenuState
 	{
 		if (childState != null)
 		{
-			if (cBlock.type == CommandBlock.COMMAND_TYPE.ROTATE)
+			if (cBlock.type == CommandBlock.CommandType.ROTATE)
 			{
 				//Funky angle and slot stuff.
 				return false;
 			}
-			else if (cBlock.type == CommandBlock.COMMAND_TYPE.OK)
+			else if (cBlock.type == CommandBlock.CommandType.OK)
 			{
 				//If slot is already full
 				childState = new OverwriteState(sessMan);
 				return false;
 			}
-			else if (cBlock.type == CommandBlock.COMMAND_TYPE.CANCEL)
+			else if (cBlock.type == CommandBlock.CommandType.CANCEL)
 			{
 				return true;
 			}

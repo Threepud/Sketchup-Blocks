@@ -8,11 +8,13 @@ class SessionManager
 	private ModelViewer sarah;
 	private BlockDatabase blockDB;
 	private Menu menu;
+	private String[] dbPaths;
 	
 	public SessionManager(PApplet _parent)
 	{
+		dbPaths = new String[3];
 		parent = _parent;
-    	blockDB = new BlockDatabase();
+    	blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
     	menu = new Menu(this);
 	}
 	

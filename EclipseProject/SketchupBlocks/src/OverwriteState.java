@@ -11,12 +11,12 @@ public class OverwriteState extends MenuState
 	
 	public boolean handleInput(CommandBlock cBlock)
 	{
-		if (cBlock.type == CommandBlock.COMMAND_TYPE.OK)
+		if (cBlock.type == CommandBlock.CommandType.OK)
 		{
 			yesno = true;
 			return true;
 		}
-		else if (cBlock.type == CommandBlock.COMMAND_TYPE.CANCEL)
+		else if (cBlock.type == CommandBlock.CommandType.CANCEL)
 		{
 			yesno = false;
 			return true;
