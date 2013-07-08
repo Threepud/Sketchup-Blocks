@@ -192,28 +192,7 @@ class BlockDatabase
 		tempBlock.associatedFiducials = associatedFiducials;
 		
 		//command block type
-		CommandBlock.CommandType commandType;
-		switch(elements[index++])
-		{
-			case "NEW":
-				commandType = CommandBlock.CommandType.NEW;
-				break;
-			case "SAVE":
-				commandType = CommandBlock.CommandType.SAVE;
-				break;
-			case "LOAD":
-				commandType = CommandBlock.CommandType.LOAD;
-				break;
-			case "EXPORT":
-				commandType = CommandBlock.CommandType.EXPORT;
-				break;
-			case "SPECTATE":
-				commandType = CommandBlock.CommandType.SPECTATE;
-				break;
-			default:
-				throw new RecordFormatException("Command block database record command type exception.");
-		}
-		tempBlock.type = commandType;
+		tempBlock.type = CommandBlock.CommandType.valueOf(elements[index++]);
 		
 		//add block to hash for all associated fiducials
 		for(int x = 0; x < associatedFiducials.length; ++x)
@@ -391,26 +370,7 @@ class BlockDatabase
 				}
 				
 				//block command type
-				switch(commandBlockItem.type)
-				{
-					case NEW:
-						line += "\t" + "NEW";
-						break;
-					case SAVE:
-						line += "\t" + "SAVE";
-						break;
-					case LOAD:
-						line += "\t" + "LOAD";
-						break;
-					case EXPORT:
-						line += "\t" + "EXPORT";
-						break;
-					case SPECTATE:
-						line += "\t" + "SPECTATE";
-						break;
-					default:
-						throw new UnkownCommandBlockTypeException("Unkown command block type in data base save.");	
-				}
+				line += "\t" + commandBlockItem.type.toString();
 				
 				printWriter.println(line);
 				line = "";
