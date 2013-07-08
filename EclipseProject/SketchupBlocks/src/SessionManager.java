@@ -10,12 +10,19 @@ class SessionManager
 	private Menu menu;
 	private String[] dbPaths;
 	
+	public Slot[] projectSlots;
+	
 	public SessionManager(PApplet _parent)
 	{
 		dbPaths = new String[3];
 		parent = _parent;
     	blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
     	menu = new Menu(this);
+    	projectSlots = new Slot[Settings.numSlots];
+    	for (int k = 0; k < projectSlots.length; k++)
+    	{
+    		projectSlots[k] = new Slot(Settings.slotName+k);
+    	}
 	}
 	
     public void onCameraEvent(CameraEvent cameraEvent)
@@ -29,10 +36,14 @@ class SessionManager
     	}
     	else if (block instanceof CommandBlock)
     	{
-    		menu.handleInput((CommandBlock)block);
+    		if (Settings.verbose >= 3)
+    			System.out.println("--Recognized command block--");
+    		menu.handleInput((CommandBlock)block, cameraEvent);
     	}
     	else if (block instanceof SmartBlock)
     	{
+    		if (Settings.verbose >= 3)
+    			System.out.println("--Recognized smart block--");
     		ConstructionBlock cblock = new ConstructionBlock((SmartBlock)block, cameraEvent);
     		jimmy.receiveBlock(cblock);
     	}
@@ -53,7 +64,7 @@ class SessionManager
     	sarah = _sarah;
     }
     
-    public void loadProject()
+    public void loadProject(int slotNumber)
     {
       
     }
@@ -68,7 +79,7 @@ class SessionManager
       
     }
     
-    public void saveProject()
+    public void saveProject(int slotNumber)
     {
     }
     
