@@ -9,7 +9,7 @@ public class Menu
 		sessMan = _sman;
 	}
 	
-	void handleInput(CommandBlock cBlock)
+	void handleInput(CommandBlock cBlock, CameraEvent cEvent)
 	{
 		if (state == null)
 		{
@@ -18,7 +18,7 @@ public class Menu
 		}
 		else
 		{
-			state.handleInput(cBlock);
+			state.handleInput(cBlock, cEvent);
 		}
 	}
 	
