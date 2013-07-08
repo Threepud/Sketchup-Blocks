@@ -493,6 +493,6 @@ class BlockDatabase
 	{
 		saveBlockData();
 		
-		return false;
+		return true;
 	}
 }
