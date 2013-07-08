@@ -1,44 +1,96 @@
 
 public class SlotChooserState extends MenuState
 {
-	int chosenSlot = 0;
-	float x;
+	int slotNumber = 0; //This will be -1 if the user backs out of this menu state (i.e. cancels the slot choosing)
+	float rot;
+	boolean rotationSet = false;
 	protected OverwriteState childState;
 	SlotChooserState(SessionManager _sessMan)
 	{
 		super(_sessMan);
+		System.out.println("Currently selected slot: "+slotNumber);
 	}
 	
-	public boolean handleInput(CommandBlock cBlock)
+	public boolean handleInput(CommandBlock cBlock, CameraEvent cEvent)
 	{
-		if (childState != null)
+		if (Settings.verbose >= 3)
+			System.out.println("--SlotChooser is handling input--");
+		
+		//If we aren't currently forwarding input to a yes/no dialogue
+		if (childState == null)
 		{
 			if (cBlock.type == CommandBlock.CommandType.ROTATE)
 			{
-				//Funky angle and slot stuff.
+				if (!rotationSet)
+				{
+					rotationSet = true;
+					rot = cEvent.rotation;
+					if (Settings.verbose >= 3)
+						System.out.println("--SlotChooser has set initial rotation--");
+				}
+				else
+				{
+					float diff = cEvent.rotation - rot;
+					//This may need refining.
+					int moveNum = (int)(diff/Settings.scrollTrigger);
+					
+					if (moveNum != 0)
+					{
+						slotNumber = (slotNumber+moveNum)%Settings.numSlots;
+						rot = cEvent.rotation;
+						System.out.println("Currently selected slot: "+slotNumber);
+					}
+					else if (Settings.verbose >= 3)
+						System.out.println("--SlotChooser has not moved slots --");
+				}
+				
 				return false;
 			}
 			else if (cBlock.type == CommandBlock.CommandType.OK)
 			{
-				//If slot is already full
-				childState = new OverwriteState(sessMan);
-				return false;
+				if (sessMan.projectSlots[slotNumber].slot.exists())
+				{
+					if (Settings.verbose >= 3)
+						System.out.println("--Existing file detected. Now entering overwrite dialogue--");
+					childState = new OverwriteState(sessMan);
+					return false; //Not done
+				}
+				else 
+				{
+					if (Settings.verbose >= 1)
+						System.out.println("Final chosen slot: "+slotNumber);
+					return true; //Done!
+				}
 			}
 			else if (cBlock.type == CommandBlock.CommandType.CANCEL)
 			{
+				slotNumber = -1;
+				if (Settings.verbose >= 1)
+					System.out.println("Slot choosing has been cancelled");
 				return true;
 			}
-			else return false;
+			else
+			{
+				if (Settings.verbose >= 3)
+					System.out.println("--SlotChooser received garbage input: "+cBlock.type.name()+"--");
+				return false;
+			}
 		}
 		else
 		{
-			boolean childDone = childState.handleInput(cBlock);
-			if (childDone && !childState.yesno)
-			{
+			if (Settings.verbose >= 3)
+				System.out.println("--SlotChooser has forwarded input to overwrite dialogue--");
+			
+			boolean childDone = childState.handleInput(cBlock, cEvent);
+			if (childDone && !childState.yesno) //If the dialogue exited with "no" continue waiting for slot chooser input.
+			{			
 				childState = null;
+				if (Settings.verbose >= 3)
+					System.out.println("--SlotChooser recognizes that overwrite dialogue refused overwrite--");
 				return false;
 			}
-			return childDone;
+			
+			return childDone;	//Else return true.
 		}
 	}
 }
