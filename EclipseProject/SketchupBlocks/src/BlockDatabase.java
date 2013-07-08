@@ -283,22 +283,32 @@ class BlockDatabase
 		ArrayList<CommandBlock> commandList = new ArrayList<>();
 		ArrayList<UserBlock> userList = new ArrayList<>();
 		
+		//Create dummy object for initial comparison
+		Block prevBlock = new Block();
+		prevBlock.blockId = -1;
+		
 		for(Block blockItem: blockList)
 		{
-			switch(blockItem.blockType)
+			
+			if(prevBlock.blockId != blockItem.blockId)
 			{
-				case SMART:
-					smartList.add((SmartBlock)blockItem);
-					break;
-				case COMMAND:
-					commandList.add((CommandBlock)blockItem);
-					break;
-				case USER:
-					userList.add((UserBlock)blockItem);
-					break;
-				default:
-					throw new UnknownBlockTypeException("Found unknown block type in database save.");
+				switch(blockItem.blockType)
+				{
+					case SMART:
+						smartList.add((SmartBlock)blockItem);
+						break;
+					case COMMAND:
+						commandList.add((CommandBlock)blockItem);
+						break;
+					case USER:
+						userList.add((UserBlock)blockItem);
+						break;
+					default:
+						throw new UnknownBlockTypeException("Found unknown block type in database save.");
+				}
 			}
+			
+			prevBlock = blockItem;
 		}
 		
 		saveSmartBlockData(smartBlockPath, smartList);
@@ -483,6 +493,6 @@ class BlockDatabase
 	{
 		saveBlockData();
 		
-		return false;
+		return true;
 	}
 }
