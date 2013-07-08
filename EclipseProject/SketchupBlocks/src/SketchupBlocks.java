@@ -14,8 +14,13 @@ public class SketchupBlocks extends PApplet
 	
 	public void setup()
 	{
+		
 		sessMan = new SessionManager(this);
-	    wimpie = new Interpreter(3333, sessMan, this);
+		for (int k = 0;  k < Settings.numCameras; k++)
+		{
+			wimpie = new Interpreter(Settings.cameraPorts[k], sessMan, this);
+			
+		}
 	}
 
 	public void draw() 
