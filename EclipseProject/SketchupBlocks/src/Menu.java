@@ -22,4 +22,8 @@ public class Menu
 		}
 	}
 	
+	public void drawMenuOverlay()
+	{
+		
+	}
 }
