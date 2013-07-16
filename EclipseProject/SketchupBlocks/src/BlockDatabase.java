@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -39,9 +40,9 @@ class BlockDatabase
 		if(!smartBlockDatabaseFound)
 			throw new DataBaseNotFoundException("Smart block database not found.");
 		if(!commandBlockDatabaseFound)
-			throw new DataBaseNotFoundException("");
+			throw new DataBaseNotFoundException("Command block database not found.");
 		if(!userBlockDatabaseFound)
-			throw new DataBaseNotFoundException("");
+			throw new DataBaseNotFoundException("User block database not found.");
 	}
 	
 	private boolean loadBlockData(String fileName)
@@ -50,7 +51,7 @@ class BlockDatabase
 		String line;
 		try 
 		{
-			bufferedReader = new BufferedReader(new FileReader(fileName));
+			bufferedReader = new BufferedReader(new FileReader(new File(fileName)));
 			
 			while((line = bufferedReader.readLine()) != null)
 			{
