@@ -7,6 +7,7 @@ class SessionManager
 	private PApplet parent;
 	private ModelConstructor jimmy;
 	private Exporter kreshnik;
+	private Lobby lobby;
 	private ModelViewer sarah;
 	private BlockDatabase blockDB;
 	private Menu menu;
@@ -22,6 +23,13 @@ class SessionManager
 		dbPaths[2] = "../UserBlock.dat";
 		
 		parent = _parent;
+		
+		lobby = new LocalLobby();
+		
+		sarah = new ModelViewer();
+		sarah.setLobby(lobby);
+		sarah.setWindow(parent);
+		
     	blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
     	menu = new Menu(this);
     	projectSlots = new Slot[Settings.numSlots];
@@ -92,5 +100,10 @@ class SessionManager
     public void spectate()
     {
       
+    }
+    
+    public void drawGUI()
+    {
+    	sarah.drawModel();
     }
 }
