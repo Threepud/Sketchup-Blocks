@@ -1,3 +1,4 @@
+import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -49,7 +50,26 @@ class NetworkedLobby extends Thread implements Lobby
   @Override
   public void run()
   {
-	  
+	 while(true)
+	 {
+		 try
+		 {
+		 ObjectInputStream inp = new ObjectInputStream(connection.getInputStream());
+		 ModelBlock modelBlock = (ModelBlock) inp.readObject();
+		 	model.addModelBlock(modelBlock);
+		 	
+			modelChangeListeners.trimToSize();
+			for (int k = 0; k < modelChangeListeners.size(); k++)
+			{
+				modelChangeListeners.get(k).fireModelChangeEvent(modelBlock);
+			}
+		 }
+		 catch(Exception e)
+		 {
+			 
+		 }
+		 
+	 }
 	  
   }
   
