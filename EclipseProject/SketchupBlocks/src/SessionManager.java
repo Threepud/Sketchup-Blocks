@@ -1,4 +1,6 @@
 import processing.core.PApplet;
+import java.io.File;
+import java.io.IOException;
 
 class SessionManager
 {
@@ -15,6 +17,10 @@ class SessionManager
 	public SessionManager(PApplet _parent)
 	{
 		dbPaths = new String[3];
+		dbPaths[0] = "../SmartBlock.dat";
+		dbPaths[1] = "../CommandBlock.dat";
+		dbPaths[2] = "../UserBlock.dat";
+		
 		parent = _parent;
     	blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
     	menu = new Menu(this);
