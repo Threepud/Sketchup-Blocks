@@ -25,15 +25,15 @@ class ModelViewer implements ModelChangeListener
 	    
 	}
 	
-	public void draw()
+	public void drawModel()
 	{
-		window.background(0.5f);
-	    window.translate(100, 100, 0);
-	    
-	    window.lights();
-	    
-	    window.noStroke();
-	    window.fill(0.8f);
-	    window.sphere(100);
+		window.background(0);
+		window.translate(300, 300, 0);
+		    
+		window.lights();
+		    
+		window.noStroke();
+		window.fill(255);
+		window.sphere(50);
 	}
 }
