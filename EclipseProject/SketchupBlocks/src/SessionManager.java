@@ -105,5 +105,6 @@ class SessionManager
     public void drawGUI()
     {
     	sarah.drawModel();
+    	menu.drawMenuOverlay();
     }
 }
