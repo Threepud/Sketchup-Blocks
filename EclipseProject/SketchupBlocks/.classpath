@@ -6,5 +6,27 @@
 	<classpathentry kind="lib" path="libs/core.jar"/>
 	<classpathentry kind="lib" path="libs/net.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="libs/gluegen-rt-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="libs/gluegen-rt-natives-linux-armv6hf.jar"/>
+	<classpathentry kind="lib" path="libs/gluegen-rt-natives-linux-i586.jar"/>
+	<classpathentry kind="lib" path="libs/gluegen-rt-natives-macosx-universal.jar"/>
+	<classpathentry kind="lib" path="libs/gluegen-rt-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="libs/gluegen-rt-natives-windows-i586.jar"/>
+	<classpathentry kind="lib" path="libs/gluegen-rt.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="SketchupBlocks/libs"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/jogl-all-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="libs/jogl-all-natives-linux-armv6hf.jar"/>
+	<classpathentry kind="lib" path="libs/jogl-all-natives-linux-i586.jar"/>
+	<classpathentry kind="lib" path="libs/jogl-all-natives-macosx-universal.jar"/>
+	<classpathentry kind="lib" path="libs/jogl-all-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="libs/jogl-all-natives-windows-i586.jar"/>
+	<classpathentry kind="lib" path="libs/jogl-all.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="SketchupBlocks/libs"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
