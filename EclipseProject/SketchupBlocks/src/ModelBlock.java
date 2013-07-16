@@ -1,5 +1,13 @@
 class ModelBlock
 {
-  public SmartBlock smartBlock;
-  public float[][] world;
+	enum ChangeType
+	{
+		ADD,
+		UPDATE,
+		DELETE
+	}
+	
+	public SmartBlock smartBlock;
+	public float[][] world;
+	public ChangeType type;
 }
