@@ -91,4 +91,9 @@ public class Vec3
     {
         return new double[]{x, y, z};
     }
+    
+    public double distance(Vec3 vec)
+    {
+    	return Math.sqrt((this.x - vec.x) * (this.x - vec.x) + (this.y - vec.y) * (this.y - vec.y) + (this.z - vec.z) * (this.z - vec.z)); 
+    }
 }
