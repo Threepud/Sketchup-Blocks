@@ -9,7 +9,8 @@ class CommandBlock extends Block
     	ROTATE("ROTATE"),
     	OK("OK"),
     	CANCEL("CANCEL"),
-    	SPECTATE("SPECTATE");
+    	SPECTATE("SPECTATE"),
+    	CALIBRATION("CALIBRATE");
     	
     	private final String name;
     	
