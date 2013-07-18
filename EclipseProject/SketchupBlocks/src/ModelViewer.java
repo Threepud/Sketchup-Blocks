@@ -34,6 +34,7 @@ class ModelViewer implements ModelChangeListener
 		cam = new PeasyCam(window, 1000);
 		cam.setMinimumDistance(50);
 		cam.setMaximumDistance(2000);
+		cam.setWheelScale(2.0f);
 	}
 	
 	public void setLobby(Lobby _lobby) throws RuntimeException
