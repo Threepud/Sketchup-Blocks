@@ -10,4 +10,5 @@ class CameraEvent
 	public float rotation;
 	public EVENT_TYPE type;
 	public int fiducialID;
+	public int cameraID;
 }
