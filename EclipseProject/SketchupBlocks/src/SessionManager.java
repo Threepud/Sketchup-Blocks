@@ -58,8 +58,8 @@ class SessionManager
     	{
     		if (Settings.verbose >= 3)
     			System.out.println("--Recognized smart block--");
-    		ConstructionBlock cblock = new ConstructionBlock((SmartBlock)block, cameraEvent);
-    		jimmy.receiveBlock(cblock);
+    		InputBlock iblock = new InputBlock(block, cameraEvent);
+    		jimmy.receiveBlock(iblock);
     	}
     }
     
