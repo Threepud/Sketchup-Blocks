@@ -118,12 +118,15 @@ class BlockDatabase
 		
 		//Block Vertices
 		String[] stringVertices = elements[index++].split(",");
-		float[] vertices = new float[stringVertices.length];
+		Vec3[] vertices = new Vec3[stringVertices.length / 3];
 		for(int x = 0; x < vertices.length; ++x)
 		{
 			try
 			{
-				vertices[x] = Float.parseFloat(stringVertices[x]);
+				vertices[x] = new Vec3();
+				vertices[x].x = Double.parseDouble(stringVertices[(x * 3)]);
+				vertices[x].y = Double.parseDouble(stringVertices[(x * 3) + 1]);
+				vertices[x].z = Double.parseDouble(stringVertices[(x * 3) + 2]);
 			}
 			catch(NumberFormatException e)
 			{
@@ -318,11 +321,15 @@ class BlockDatabase
 				}
 				
 				//block vertices
-				float[] vertices = smartBlockItem.vertices;
-				line += "\t" + Float.toString(vertices[0]);
+				Vec3[] vertices = smartBlockItem.vertices;
+				line += "\t" + Double.toString(vertices[0].x);
+				line += "," + Double.toString(vertices[0].y);
+				line += "," + Double.toString(vertices[0].z);
 				for(int i = 1; i < vertices.length; ++i)
 				{
-					line += "," + Float.toString(vertices[i]);
+					line += "," + Double.toString(vertices[i].x);
+					line += "," + Double.toString(vertices[i].y);
+					line += "," + Double.toString(vertices[i].z);
 				}
 				
 				//block indices
