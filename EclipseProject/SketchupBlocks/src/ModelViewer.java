@@ -93,23 +93,8 @@ class ModelViewer implements ModelChangeListener
     	return index;
 	}
 	
-	private int oldX = 0;
-	private int oldY = 0;
 	public void drawModel()
 	{
-		if(oldX == 0)
-			oldX = window.mouseX;
-		if(oldY == 0)
-			oldY = window.mouseY;
-		
-		int diffX = Math.abs(oldX - window.mouseX);
-		int diffY = Math.abs(oldY - window.mouseY);
-		/*
-		if(diffX > diffY)
-			cam.setYawRotationMode();
-		else
-			cam.setPitchRotationMode();
-		*/
 		//setup scene
 		window.lights();
 		window.background(0);
@@ -122,8 +107,5 @@ class ModelViewer implements ModelChangeListener
 		window.fill(255);
 		window.box(10);
 		//###################
-		
-		oldX = window.mouseX;
-		oldY = window.mouseY;
 	}
 }
