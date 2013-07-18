@@ -1,5 +1,5 @@
 class SmartBlock extends Block
 {
-	public float[] vertices;
+	public Vec3[] vertices;
 	public int[] indices;
 }
