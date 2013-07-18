@@ -1,31 +1,52 @@
 import java.util.ArrayList;
+
+import peasy.PeasyCam;
 import processing.core.PApplet;
+import processing.core.PConstants;
 
 class ModelViewer implements ModelChangeListener
 {
 	PApplet window;
 	Lobby lobby;
 	ArrayList<ModelBlock> blockList = null;
+	PeasyCam cam;
+	PeasyCam[] systemCameras;
 	
 	public ModelViewer()
 	{
 		
 	}
 	
+	public void setSystemCamera(int index, PeasyCam newCamera)
+	{
+		systemCameras[index] = newCamera;
+	}
+	
+	private void switchCamera(PeasyCam newCamera)
+	{
+		//TODO: Find way to switch to system camera's
+	}
+	
 	public void setWindow(PApplet _window)
 	{
 		window = _window;
+		
+		cam = new PeasyCam(window, 1000);
+		cam.setMinimumDistance(50);
+		cam.setMaximumDistance(2000);
 	}
 	
 	public void setLobby(Lobby _lobby) throws RuntimeException
 	{
 	    lobby = _lobby;
+	    /*
 	    Model model = lobby.getModel();
 	    
 	    if(model == null)
 	    	throw new ModelNotSetException("Model Viewer: Model not set.");
 	    else
 	    	blockList = new ArrayList<>(model.getBlocks());
+	    	*/
 	}
 	  
 	public void fireModelChangeEvent(ModelBlock change) throws RuntimeException
@@ -72,15 +93,37 @@ class ModelViewer implements ModelChangeListener
     	return index;
 	}
 	
+	private int oldX = 0;
+	private int oldY = 0;
 	public void drawModel()
 	{
-		window.background(0);
-		window.translate(300, 300, 0);
-		    
+		if(oldX == 0)
+			oldX = window.mouseX;
+		if(oldY == 0)
+			oldY = window.mouseY;
+		
+		int diffX = Math.abs(oldX - window.mouseX);
+		int diffY = Math.abs(oldY - window.mouseY);
+		/*
+		if(diffX > diffY)
+			cam.setYawRotationMode();
+		else
+			cam.setPitchRotationMode();
+		*/
+		//setup scene
 		window.lights();
-		    
+		window.background(0);
+		
+		//models here
+		//###################
+		window.scale(100, 1, 100);    
+		
 		window.noStroke();
 		window.fill(255);
-		window.sphere(50);
+		window.box(10);
+		//###################
+		
+		oldX = window.mouseX;
+		oldY = window.mouseY;
 	}
 }
