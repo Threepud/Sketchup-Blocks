@@ -8,12 +8,14 @@ public class Interpreter
 	private SessionManager sessionMan;
 	private PApplet parent;
 	private TuioProcessing tuioClient;
+	private int cameraID;
 	  
-	public Interpreter(int port, SessionManager _sessMan, PApplet _parent)
+	public Interpreter(int port, SessionManager _sessMan, PApplet _parent, int _id)
 	{
 		sessionMan = _sessMan;
 		parent = _parent;
 		tuioClient  = new TuioProcessing(this, port);
+		cameraID = _id;
 	}
   
 	public void addTuioObject(TuioObject tobj) 
@@ -24,6 +26,7 @@ public class Interpreter
 		came.y = tobj.getY();
 		came.type = CameraEvent.EVENT_TYPE.ADD;
 		came.fiducialID = tobj.getSymbolID();
+		came.cameraID = cameraID;
 		sessionMan.onCameraEvent(came);
 	}
 
@@ -36,6 +39,7 @@ public class Interpreter
 		came.y = tobj.getY();
 		came.type = CameraEvent.EVENT_TYPE.REMOVE;
 		came.fiducialID = tobj.getSymbolID();
+		came.cameraID = cameraID;
 		sessionMan.onCameraEvent(came);
 	}
 	
@@ -48,6 +52,7 @@ public class Interpreter
 		came.y = tobj.getY();
 		came.type = CameraEvent.EVENT_TYPE.UPDATE;
 		came.fiducialID = tobj.getSymbolID();
+		came.cameraID = cameraID;
 		sessionMan.onCameraEvent(came);
 	}
 	
