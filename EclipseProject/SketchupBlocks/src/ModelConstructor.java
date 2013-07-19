@@ -72,19 +72,19 @@ public class ModelConstructor
 	{
 		int minEvents;
 		int LIFETIME = 2000;	//ms
-		InputBlock[][] data;// = new InputBlock[Settings.numCameras];
-		Line[][] lines;// = new Line[Settings.numCameras];
+		InputBlock[] data;// = new InputBlock[Settings.numCameras];
+		Line[] lines;// = new Line[Settings.numCameras];
 		
 		Bin(InputBlock iBlock)
 		{
-			data = new InputBlock[Settings.numCameras][iBlock.block.associatedFiducials.length];
-			lines = new Line[Settings.numCameras][iBlock.block.associatedFiducials.length];
+			data = new InputBlock[Settings.numCameras];//[iBlock.block.associatedFiducials.length];
+			lines = new Line[Settings.numCameras];//[iBlock.block.associatedFiducials.length];
 			store(iBlock);
 		}
 		
 		void store(InputBlock iBlock)
 		{
-			data[iBlock.cameraEvent.cameraID][iBlock.cameraEvent. = iBlock;
+			//data[iBlock.cameraEvent.cameraID][iBlock.cameraEvent. = iBlock;
 			
 			Vec3[] landmarkToCamera = new Vec3[4];
 			double[] angles = new double[4];
