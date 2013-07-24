@@ -1,7 +1,8 @@
 class Exporter
 {
-  public void setLobby(Lobby lobby)
+	Lobby eddy;
+  public void setLobby(Lobby _lobby)
   {
-    
+    eddy = _lobby;
   }
 }
