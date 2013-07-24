@@ -30,10 +30,11 @@ class ModelViewer implements ModelChangeListener
 	{
 		window = _window;
 		
-		cam = new PeasyCam(window, 1000);
-		cam.setMinimumDistance(200);
-		cam.setMaximumDistance(2000);
+		cam = new PeasyCam(window, 200);
+		cam.setMinimumDistance(100);
+		cam.setMaximumDistance(400);
 		cam.setWheelScale(2.0f);
+		cam.setRotations(0.5, 0.0, 0.0);
 	}
 	
 	public void setLobby(Lobby _lobby) throws RuntimeException
@@ -64,7 +65,6 @@ class ModelViewer implements ModelChangeListener
 	    vertices[i++] = new Vec3(-1.000000, -1.000000, 1.000000);
 	    smartBlock.vertices = vertices;
 	    
-	    //int[] indices = {1,2,3,5,8,7,1,5,2,2,6,7,3,7,8,5,1,8,4,1,3,6,5,7,5,6,2,3,2,7,4,3,8,1,4,8};
 	    int[] indices = {4,8,7,4,7,3,  8,5,6,8,6,7,   3,7,6,3,6,2,   4,2,1,4,3,2,   4,5,8,4,1,5,   1,6,5,1,2,6};
 	    
 	    smartBlock.indices = indices;
@@ -131,7 +131,7 @@ class ModelViewer implements ModelChangeListener
 		//###################
 		window.pushMatrix();
 		
-		window.scale(100, 0.1f, 100);    
+		window.scale(30, 0.1f, 30);    
 		window.translate(0, 10, 0);
 		
 		window.noStroke();
@@ -145,7 +145,7 @@ class ModelViewer implements ModelChangeListener
 		for(ModelBlock block: blockList)
 		{
 			SmartBlock smartBlock = block.smartBlock;
-			window.scale(50, 50, 50);
+			window.scale(25, 25, 25);
 			window.beginShape(PConstants.TRIANGLES);
 			
 			for(int x = 0; x < smartBlock.indices.length; ++x)
