@@ -5,11 +5,11 @@ import processing.core.*;
 
 class ModelViewer implements ModelChangeListener
 {
-	PApplet window;
-	Lobby lobby;
-	ArrayList<ModelBlock> blockList = null;
-	PeasyCam cam;
-	PeasyCam[] systemCameras;
+	private PApplet window;
+	private Lobby lobby;
+	private ArrayList<ModelBlock> blockList = null;
+	private PeasyCam cam;
+	private PeasyCam[] systemCameras;
 	
 	public ModelViewer()
 	{

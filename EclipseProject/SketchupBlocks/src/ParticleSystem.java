@@ -2,7 +2,7 @@ import java.util.Date;
 
 public class ParticleSystem
 {
-	ParticleSystemSettings settings;
+	private ParticleSystemSettings settings;
 	
 	public ParticleSystem(ParticleSystemSettings sett)
 	{
@@ -92,37 +92,37 @@ public class ParticleSystem
 	return result;
 	}
 	
-	double highest(double [] arr)
-		{
-			double h = arr[0];
-			for(int k = 0 ; k < arr.length ; k++)
-				h = h > arr[k] ? h : arr[k] ;
-			return h;
-		}
+	private double highest(double [] arr)
+	{
+		double h = arr[0];
+		for(int k = 0 ; k < arr.length ; k++)
+			h = h > arr[k] ? h : arr[k] ;
+		return h;
+	}
 
-		double highest(EvalResults [] arr)
-		{
-			double h = arr[0].score;
-			for(int k = 0 ; k < arr.length ; k++)
-				h = h > arr[k].score ? h : arr[k].score ;
-			return h;
-		}
+	private double highest(EvalResults [] arr)
+	{
+		double h = arr[0].score;
+		for(int k = 0 ; k < arr.length ; k++)
+			h = h > arr[k].score ? h : arr[k].score ;
+		return h;
+	}
 }
 
 class ParticleSystemSettings
 {
-	Evaluator eval;
-	Evaluator tester;
-	ParticleCreator creator;
+	public Evaluator eval;
+	public Evaluator tester;
+	public ParticleCreator creator;
 	
-	int particleCount;
-	int iterationCount;
+	public int particleCount;
+	public int iterationCount;
 	
-	boolean ringTopology;
-	int ringSize;
+	public boolean ringTopology;
+	public int ringSize;
 	
-	double socialStart;
-	double cognitiveStart;
-	double momentum;
-	double MaxComponentVelocity;
+	public double socialStart;
+	public double cognitiveStart;
+	public double momentum;
+	public double MaxComponentVelocity;
 }

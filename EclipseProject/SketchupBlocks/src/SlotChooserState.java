@@ -1,11 +1,11 @@
 
 public class SlotChooserState extends MenuState
 {
-	int slotNumber = 0; //This will be -1 if the user backs out of this menu state (i.e. cancels the slot choosing)
-	float rot;
-	boolean rotationSet = false;
+	protected int slotNumber = 0; //This will be -1 if the user backs out of this menu state (i.e. cancels the slot choosing)
+	private float rot;
+	private boolean rotationSet = false;
 	protected OverwriteState childState;
-	SlotChooserState(SessionManager _sessMan)
+	public SlotChooserState(SessionManager _sessMan)
 	{
 		super(_sessMan);
 		System.out.println("Currently selected slot: "+slotNumber);

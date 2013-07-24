@@ -9,6 +9,7 @@ class SessionManager
 	private Exporter kreshnik;
 	private Lobby lobby;
 	private ModelViewer sarah;
+	private ModelLoader modelLoader;
 	private BlockDatabase blockDB;
 	private Menu menu;
 	private String[] dbPaths;
@@ -78,6 +79,11 @@ class SessionManager
     	sarah = _sarah;
     }
     
+    public void setModelLoader(ModelLoader _modelLoader)
+    {
+    	modelLoader = _modelLoader;
+    }
+    
     public void loadProject(int slotNumber)
     {
       
@@ -97,7 +103,7 @@ class SessionManager
     {
     }
     
-    public void spectate()
+    public void spectate(UserBlock  user)
     {
       
     }

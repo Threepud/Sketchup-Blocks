@@ -6,11 +6,11 @@ import java.util.GregorianCalendar;
 
 public class ParticleCreator
 {
-	double  lower;
-	double  upper;
-	int dimension;
-	Random rand;
-	Date createdAt;
+	private double  lower;
+	private double  upper;
+	private int dimension;
+	private Random rand;
+	private Date createdAt;
 	
 	public ParticleCreator(int dim,double low, double  up)
 		{
@@ -36,10 +36,10 @@ public class ParticleCreator
 		return new ParticleSaver();
 	}
 	
-	class ParticleSaver
+	private class ParticleSaver
 	{
-		File directory;
-		ParticleSaver()
+		private File directory;
+		private ParticleSaver()
 		{
 			GregorianCalendar cal = new GregorianCalendar();
 			String directoryName = cal.get(1)+"_" + cal.get(2) +"_"+ cal.get(3) +"_"+ cal.get(4) +"_"+cal.get(5)+"_"+cal.get(6)+"_"+cal.get(12)+"_"+cal.get(13)  ;
@@ -48,7 +48,7 @@ public class ParticleCreator
 				
 		}
 		
-		void SaveParticles(Particle [] par,int iteration)
+		void saveParticles(Particle [] par,int iteration)
 		{
 		try
 		{
@@ -82,11 +82,11 @@ public class ParticleCreator
 
 class ParticleCreatorLoader extends ParticleCreator
 {
-	String filename;
-	int particleIndex;
-	Particle [] LoadedParticles;
+	private String filename;
+	private int particleIndex;
+	private Particle [] LoadedParticles;
 		
-	 ParticleCreatorLoader(String FolderName,String iteration)
+	 public ParticleCreatorLoader(String FolderName,String iteration)
 	 {
 		super(0,0,0);
 		try

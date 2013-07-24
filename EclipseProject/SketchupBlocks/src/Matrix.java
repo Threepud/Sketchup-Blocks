@@ -2,8 +2,8 @@
 public class Matrix 
 {
     public double[][] data;
-    int rows;
-    int cols;
+    public int rows;
+    public int cols;
 
     public Matrix(int _rows, int _cols)
     {

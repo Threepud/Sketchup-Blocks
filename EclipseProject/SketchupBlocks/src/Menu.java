@@ -1,15 +1,15 @@
 
 public class Menu 
 {
-	MenuState state;
-	SessionManager sessMan;
+	private MenuState state;
+	private SessionManager sessMan;
 	
-	Menu(SessionManager _sman)
+	public Menu(SessionManager _sessMan)
 	{
-		sessMan = _sman;
+		sessMan = _sessMan;
 	}
 	
-	void handleInput(CommandBlock cBlock, CameraEvent cEvent)
+	public void handleInput(CommandBlock cBlock, CameraEvent cEvent)
 	{
 		if (state == null)
 		{

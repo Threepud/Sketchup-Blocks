@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 class NetworkedLobby extends Thread implements Lobby
 {
-	Socket connection;
+	private Socket connection;
 	private Model model;
 	private ArrayList<ModelChangeListener> modelChangeListeners = new ArrayList<ModelChangeListener>();
 	  	

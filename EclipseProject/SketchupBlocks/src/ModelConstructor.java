@@ -5,26 +5,26 @@ import java.util.Iterator;
 
 public class ModelConstructor
 {
-	Lobby eddy;
-	HashMap<Integer,Bin> binList;
+	private Lobby eddy;
+	private HashMap<Integer,Bin> binList;
 	
-	Calibrator cally;
+	private Calibrator cally;
 	
-	boolean calibrated = false;
+	private boolean calibrated = false;
 	
-	ModelConstructor()
+	public ModelConstructor()
 	{
 		binList = new HashMap<Integer,Bin>();
 		cally = new Calibrator();
 	}
 	  
-	void setLobby(Lobby lobby)
+	public void setLobby(Lobby lobby)
 	{
 		eddy = lobby;
 	}
 
 	  
-	void receiveBlock(InputBlock iBlock)
+	public void receiveBlock(InputBlock iBlock)
 	{
 		Bin currentBin;
 		if(binList.containsKey(iBlock.block.blockId))

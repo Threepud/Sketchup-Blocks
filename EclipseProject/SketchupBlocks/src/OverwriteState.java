@@ -3,7 +3,7 @@ public class OverwriteState extends MenuState
 {
 	boolean yesno;
 	
-	OverwriteState(SessionManager _sessMan)
+	public OverwriteState(SessionManager _sessMan)
 	{
 		super(_sessMan);
 		yesno = false;
