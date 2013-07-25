@@ -45,7 +45,7 @@ public class CalibrationTest
 		
 		CommandBlock block = new CommandBlock();
 		block.associatedFiducials = new int[]{60};
-		block.type = CommandBlock.CommandType.CALIBRATION;
+		block.type = CommandBlock.CommandType.CALIBRATE;
 		block.blockType = Block.BlockType.COMMAND;
 		block.blockId = 60;
 		
@@ -63,7 +63,7 @@ public class CalibrationTest
 		
 		block = new CommandBlock();
 		block.associatedFiducials = new int[]{61};
-		block.type = CommandBlock.CommandType.CALIBRATION;
+		block.type = CommandBlock.CommandType.CALIBRATE;
 		block.blockType = Block.BlockType.COMMAND;
 		block.blockId = 61;
 		
@@ -80,7 +80,7 @@ public class CalibrationTest
 		
 		block = new CommandBlock();
 		block.associatedFiducials = new int[]{62};
-		block.type = CommandBlock.CommandType.CALIBRATION;
+		block.type = CommandBlock.CommandType.CALIBRATE;
 		block.blockType = Block.BlockType.COMMAND;
 		block.blockId = 62;
 		
@@ -97,7 +97,7 @@ public class CalibrationTest
 		
 		block = new CommandBlock();
 		block.associatedFiducials = new int[]{63};
-		block.type = CommandBlock.CommandType.CALIBRATION;
+		block.type = CommandBlock.CommandType.CALIBRATE;
 		block.blockType = Block.BlockType.COMMAND;
 		block.blockId = 63;
 		
