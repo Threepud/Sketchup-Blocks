@@ -37,9 +37,16 @@ public class LinearSystemSolver
         Matrix AtA = Matrix.multiply(At, A);
         
         LUDecomposer.decompose(AtA.data);
-        double[] res = LUDecomposer.solve(AtB.toVec3().toArray());
+        try
+        {
+        	double[] res = LUDecomposer.solve(AtB.toVec3().toArray());
+            return new Vec3(res);
+        }
+        catch(Exception e)
+        {
+        	e.printStackTrace();
+        }
         
-       return new Vec3(res);
-        
+        return null;
     }
 }

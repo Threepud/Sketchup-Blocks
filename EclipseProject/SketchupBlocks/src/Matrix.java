@@ -5,6 +5,7 @@ public class Matrix
     public int rows;
     public int cols;
 
+    //Constructor 1
     public Matrix(int _rows, int _cols)
     {
         rows = _rows;
@@ -12,6 +13,7 @@ public class Matrix
         data = new double[rows][cols];
     }
 
+    //Constructor 2
     public Matrix(int _rows, int _cols, double[][] d)
     {
         rows = _rows;
@@ -20,9 +22,13 @@ public class Matrix
         if (d.length != _rows || d[0].length != _cols)
         {
             System.out.println("Mismatch netween specified row x col numbers and actual data");
+            rows = -1;
+            cols = -1;
+            data= null;
         }
     }
 
+    //Constructor 3
     public Matrix(Vec3[] vecs, boolean colVecs)
     {
         if (colVecs)
@@ -56,34 +62,7 @@ public class Matrix
         }
     }
 
-     public Vec3 toVec3()
-     {
-         if (cols != 1 && rows != 3)
-         {
-             System.out.println("Cannot convert matrix to vec3");
-         }
-         else
-         {
-             Vec3 result = new Vec3(data[0][0], data[1][0], data[2][0]);
-             return result;
-         }
-         return null;
-     }
-
-     public Vec4 toVec4()
-     {
-         if (cols != 1 && rows != 4)
-         {
-             System.out.println("Cannot convert matrix to vec4");
-         }
-         else
-         {
-             Vec4 result = new Vec4(data[0][0], data[1][0], data[2][0], data[3][0]);
-             return result;
-         }
-         return null;
-     }
-
+    //Constructor 4
     public Matrix(Vec3 v)
     {
         rows = 3;
@@ -107,47 +86,73 @@ public class Matrix
         data[2] = new double[]{v.z};
         data[3] = new double[]{v.w};
     }
-
-    public static Matrix multiply(Matrix m1, Matrix m2)
-    {
-        if (m1.cols != m2.rows)
-        {
-            System.out.println("Invalid multiplication\nm1.cols: "+m1.cols+"\tm2.rows: "+m2.rows);
-            return null;
-        }
-        Matrix res = new Matrix(m1.rows, m2.cols);
-
-        for (int r1 = 0; r1 < m1.rows; r1++)
-        {
-            for (int c2 = 0; c2 < m2.cols; c2++)
-            {
-                for (int c1r2 = 0; c1r2 < m1.cols; c1r2++)
-                {
-                    res.data[r1][c2] += m1.data[r1][c1r2]*m2.data[c1r2][c2];
-                }
-            }
-        }
-
-        return res;
-    }
-
-    public Matrix transpose()
-    {
-        Matrix res = new Matrix(cols, rows);
-        for (int row = 0; row < cols; row++)
-        {
-            for (int col = 0; col < rows; col++)
-            {
-                    res.data[row][col] = data[col][row];
-            }
-        }
-        //System.out.println(this.toString());
-        //System.out.println(res.toString());
-        return res;
-    }
-
-    @Override
-    public String toString()
+	
+    public Vec3 toVec3() throws UnexpectedVectorConversionException
+	 {
+	     if (cols != 1 || rows != 3)
+	     {
+	    	
+	    	 throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3");
+	     }
+	     else
+	     {
+	         Vec3 result = new Vec3(data[0][0], data[1][0], data[2][0]);
+	         return result;
+	     }
+	 }
+	
+	public Vec4 toVec4() throws UnexpectedVectorConversionException
+	 {
+	     if (cols != 1 || rows != 4)
+	     {
+	         throw new UnexpectedVectorConversionException("Cannot convert matrix to vec4");
+         }
+         else
+         {
+             Vec4 result = new Vec4(data[0][0], data[1][0], data[2][0], data[3][0]);
+             return result;
+         }
+	 }
+	
+	public static Matrix multiply(Matrix m1, Matrix m2)
+	    {
+	        if (m1.cols != m2.rows)
+	        {
+	            System.out.println("Invalid multiplication\nm1.cols: "+m1.cols+"\tm2.rows: "+m2.rows);
+	        return null;
+		    }
+		    Matrix res = new Matrix(m1.rows, m2.cols);
+		
+		    for (int r1 = 0; r1 < m1.rows; r1++)
+		    {
+		        for (int c2 = 0; c2 < m2.cols; c2++)
+		        {
+		            for (int c1r2 = 0; c1r2 < m1.cols; c1r2++)
+		            {
+		                res.data[r1][c2] += m1.data[r1][c1r2]*m2.data[c1r2][c2];
+		            }
+		        }
+		    }
+	
+	    return res;
+	}
+	
+	public Matrix transpose()
+	{
+	    Matrix res = new Matrix(cols, rows);
+	    for (int row = 0; row < cols; row++)
+	    {
+	        for (int col = 0; col < rows; col++)
+	        {
+	                res.data[row][col] = data[col][row];
+	        }
+	    }
+	    
+	    return res;
+	}
+	
+	@Override
+	public String toString()
     {
         String res = "";
         for (int r = 0; r < rows; r++)
