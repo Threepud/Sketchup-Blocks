@@ -9,13 +9,15 @@ public class ModelConstructor
 	private HashMap<Integer,Bin> binList;
 	
 	private Calibrator cally;
+	private SessionManager sessMan;
 	
 	private boolean calibrated = false;
 	
-	public ModelConstructor()
+	public ModelConstructor(SessionManager _sessMan)
 	{
 		binList = new HashMap<Integer,Bin>();
 		cally = new Calibrator();
+		sessMan = _sessMan;
 	}
 	  
 	public void setLobby(Lobby lobby)
@@ -46,10 +48,17 @@ public class ModelConstructor
 		}
 		else if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATION)
 		{
+			
 			cally.processBlock(iBlock);
 			calibrated = cally.isCalibrated();
 			if (calibrated)
 			{
+				if(Settings.verbose >= 3 )
+					System.out.println("==Cameras are calibrated==");
+				for(int k = 0 ; k < cally.cameraPositions.length ; k++)
+				{
+					sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
+				}
 				Iterator<java.util.Map.Entry<Integer, Bin>> iter = binList.entrySet().iterator();
 				while(iter.hasNext())
 				{
