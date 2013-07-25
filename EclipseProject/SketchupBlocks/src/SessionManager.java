@@ -66,6 +66,11 @@ class SessionManager
     		if(jimmy != null)
     		jimmy.receiveBlock(iblock);
     	}
+    	else
+    	{
+    		if (Settings.verbose >= 1)
+    			System.out.println("--Unrecognized block!!--");
+    	}
     }
     
     public void updateCameraPosition(int cameraID, Vec3 camPosition)
