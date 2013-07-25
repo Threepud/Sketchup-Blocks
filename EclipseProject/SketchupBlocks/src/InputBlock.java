@@ -6,7 +6,7 @@ class InputBlock
     public CameraEvent cameraEvent;
     public Date timestamp;
     
-    InputBlock(Block _block, CameraEvent cevent)
+    public InputBlock(Block _block, CameraEvent cevent)
     {
     	block = _block;
     	cameraEvent = cevent;
