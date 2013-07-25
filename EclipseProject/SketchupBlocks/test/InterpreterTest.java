@@ -5,6 +5,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runners.*;
 import org.junit.runner.RunWith;
 
+import processing.core.PApplet;
+
 /*
 Run with:
 java -cp .;junit.jar;hamcrest-core-1.3.jar org.junit.runner.JUnitCore Matrix
@@ -26,7 +28,8 @@ public class InterpreterTest
 	@Test
 	public void testConstructor()
 	{
-		
+		Interpreter i = new Interpreter(5, null, null, 10);
+		assertTrue("CameraID incorrectly set", 10 == i.getCameraID());
 	}
 
 } 
