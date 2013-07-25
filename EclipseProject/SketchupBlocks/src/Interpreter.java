@@ -18,6 +18,12 @@ public class Interpreter
 		cameraID = _id;
 	}
   
+	public int getCameraID()
+	{
+		return cameraID;
+	}
+
+	
 	public void addTuioObject(TuioObject tobj) 
 	{
 		CameraEvent came = new CameraEvent();
