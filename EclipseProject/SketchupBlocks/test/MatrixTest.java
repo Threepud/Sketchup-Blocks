@@ -117,7 +117,7 @@ public class MatrixTest
 			Vec3 v = square.toVec3();
 		    fail("Didn't throw vec3 conversion exception: ("+v.x+", "+v.y+", "+v.z+")");
 		}
-		catch(UnexpectedVectorConversionException e)
+		catch(Exception e)
 		{
 		    assertEquals("Cannot convert matrix to vec3", e.getMessage());
 		}
@@ -127,7 +127,7 @@ public class MatrixTest
 			m.toVec3();
 		    fail("Didn't throw vec3 conversion exception");
 		}
-		catch(UnexpectedVectorConversionException e)
+		catch(Exception e)
 		{
 		    assertEquals("Cannot convert matrix to vec3", e.getMessage());
 		}
@@ -138,7 +138,7 @@ public class MatrixTest
 			Vec3 vec = m.toVec3();
 			assertTrue("Incorrect conversion to vec3", vec.x == 1 && vec.y == 2 && vec.z == 3);
 		}
-		catch(UnexpectedVectorConversionException e)
+		catch(Exception e)
 		{
 		   fail("Unexpected exception");
 		}
@@ -155,7 +155,7 @@ public class MatrixTest
 			square.toVec4();
 		    fail("Didn't throw vec4 conversion exception");
 		}
-		catch(UnexpectedVectorConversionException e)
+		catch(Exception e)
 		{
 		    assertEquals("Cannot convert matrix to vec4", e.getMessage());
 		}
@@ -165,7 +165,7 @@ public class MatrixTest
 			m.toVec4();
 		    fail("Didn't throw vec4 conversion exception");
 		}
-		catch(UnexpectedVectorConversionException e)
+		catch(Exception e)
 		{
 		    assertEquals("Cannot convert matrix to vec4", e.getMessage());
 		}
@@ -176,12 +176,11 @@ public class MatrixTest
 			Vec4 vec = m.toVec4();
 			assertTrue("Incorrect conversion to vec4", vec.x == 1 && vec.y == 2 && vec.z == 3 && vec.w == 4);
 		}
-		catch(UnexpectedVectorConversionException e)
+		catch(Exception e)
 		{
 		   fail("Unexpected exception");
 		}
 	}
-	
 
 	@Test
 	public void testMatrixMultiplication()
