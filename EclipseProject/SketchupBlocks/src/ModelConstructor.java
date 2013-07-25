@@ -28,25 +28,13 @@ public class ModelConstructor
 	  
 	public void receiveBlock(InputBlock iBlock)
 	{
-		Bin currentBin;
+		Bin currentBin = null;
 		if(binList.containsKey(iBlock.block.blockId))
 		{
 			currentBin = binList.get(iBlock.block.blockId);
 			currentBin.store(iBlock);
 		}
-		else
-		{
-			currentBin = new Bin(iBlock);
-			currentBin.minEvents = (iBlock.block.blockType == Block.BlockType.SMART) ? 2 : 1 ;
-			//currentBin.store(iBlock);
-			binList.put(iBlock.block.blockId, currentBin);
-		}
-		
-		if(currentBin.ready() && calibrated)
-		{
-			processBin(currentBin);
-		}
-		else if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATION)
+		if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE)
 		{
 			
 			cally.processBlock(iBlock);
@@ -58,7 +46,9 @@ public class ModelConstructor
 				for(int k = 0 ; k < cally.cameraPositions.length ; k++)
 				{
 					sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
+					System.out.println(cally.cameraPositions[k].x+":"+cally.cameraPositions[k].y+":"+cally.cameraPositions[k].z);
 				}
+				
 				Iterator<java.util.Map.Entry<Integer, Bin>> iter = binList.entrySet().iterator();
 				while(iter.hasNext())
 				{
@@ -68,7 +58,18 @@ public class ModelConstructor
 				}
 			}
 		}
+		else 
+		{
+			currentBin = new Bin(iBlock);
+			currentBin.minEvents = (iBlock.block.blockType == Block.BlockType.SMART) ? 2 : 1 ;
+			//currentBin.store(iBlock);
+			binList.put(iBlock.block.blockId, currentBin);
+		}
 		
+		if(currentBin != null && currentBin.ready() && calibrated)
+		{
+			processBin(currentBin);
+		}		
 		
 	}
 	
