@@ -48,7 +48,7 @@ public class Calibrator
 		lengths[0] = Settings.landmarks[0].distance(Settings.landmarks[1]);
 		lengths[1] = Settings.landmarks[1].distance(Settings.landmarks[2]);
 		lengths[2] = Settings.landmarks[2].distance(Settings.landmarks[3]);
-		lengths[3] = Settings.landmarks[4].distance(Settings.landmarks[0]);
+		lengths[3] = Settings.landmarks[3].distance(Settings.landmarks[0]);
 		lengths[4] = Settings.landmarks[0].distance(Settings.landmarks[2]);
 		lengths[5] = Settings.landmarks[1].distance(Settings.landmarks[3]);
 		
