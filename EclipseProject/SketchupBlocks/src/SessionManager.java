@@ -32,7 +32,15 @@ class SessionManager
 		sarah.setLobby(lobby);
 		sarah.setWindow(parent);
 		
-    	blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
+    	try 
+    	{
+			blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
+		} 
+    	catch (Exception e) 
+    	{
+			e.printStackTrace();
+		}
+    	
     	menu = new Menu(this);
     	projectSlots = new Slot[Settings.numSlots];
     	for (int k = 0; k < projectSlots.length; k++)
