@@ -4,11 +4,15 @@ public class LUDecomposer
  {
 	
 	
-    
-  //  public static double d = 1;
-
     public static DecompositionResult decompose(double[][] a)
     {
+    	if (a == null)
+    		throw new NullPointerException();
+    	if (a.length != a[0].length)
+    	{
+    		System.out.println("Cannot decompose nonsquare matrix.");
+    		return null;
+    	}
         int n = a.length;
         double[][] lu = a;
         double[] indx = new double[n];
@@ -44,8 +48,7 @@ public class LUDecomposer
                     imax = i;
                 }
             }
-            if (imax == -100)
-                System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+            
             if (k != imax)
             {
                 for (j = 0; j < n; j++)
@@ -66,19 +69,28 @@ public class LUDecomposer
                     lu[i][j] -= temp *lu[k][j];
             }
         }
-        DecompositionResult res = new DecompositionResult(n, lu, indx);
+        DecompositionResult res = new DecompositionResult(n, lu, indx, a);
         return res;
     }
     public static double[] solve(double[] b, DecompositionResult res)
     {
+    	if (b.length != res.n)
+        {
+            System.out.println("Size problem in solver");
+            return null;
+        }
+    	if (multiplesFound(b, res.a))
+    	{
+    		System.out.println("Infinitely many solutions");
+    		return null;
+    	}
         double[] x = new double[b.length];
         int i;
         int ii = 0;
         int ip;
         int j;
         double sum;
-        if (b.length != res.n)
-            System.out.println("Size problem in solver");
+        
         for (i = 0; i < res.n; i++)
             x[i] = b[i];
         for (i = 0; i < res.n; i++)
@@ -102,6 +114,29 @@ public class LUDecomposer
         }
         return x;
     }
+    
+    //This should only be called after checking b && a's lengths
+    public static boolean multiplesFound(double[] b, double[][] a)
+    {
+    	System.out.println((new Matrix(2, 2, a)).toString()+"  "+b.length);
+    	for (int k = 0; k < b.length-1; k++)
+    	{
+    		for (int i = k+1; i < b.length; i++)
+    		{
+    			System.out.println("k: "+k+" i: "+i);
+    			System.out.println(a[k].length);
+    			int sum = 0;
+    			for (int c = 0; c < a[k].length; c++)
+    			{
+    				sum += a[k][c] % a[i][c];
+    			}
+    			sum += b[k] % b[i];
+    			if (sum == 0)
+    				return true;
+    		}
+    	}
+    	return false;
+    }
 }
 
 class DecompositionResult
@@ -109,7 +144,8 @@ class DecompositionResult
 	protected int n;
 	protected double[][] lu;
 	protected double[] indx;
-	DecompositionResult(int _n, double[][] _lu, double[] _indx)
+	protected double[][] a;
+	DecompositionResult(int _n, double[][] _lu, double[] _indx, double[][] a)
 	{
 		n = _n;
 		lu = _lu;
