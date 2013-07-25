@@ -16,6 +16,11 @@ class ModelViewer implements ModelChangeListener
 		
 	}
 	
+	public void updateCameraPosition(int cameraId, Vec3 pos)
+	{
+				
+	}
+	
 	public void setSystemCamera(int index, PeasyCam newCamera)
 	{
 		systemCameras[index] = newCamera;

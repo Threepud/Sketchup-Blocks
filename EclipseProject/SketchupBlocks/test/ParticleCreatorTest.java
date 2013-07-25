@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 public class ParticleCreatorTest
 {
 	@Test
-	public void limitTest()
+	public void testLimitgetParticle()
 	{
 	ParticleCreator pc = new ParticleCreator(3,0,1);
 	

@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 public class EvaluaterTest
 {
 	@Test
-	public void triangle()
+	public void testTriangleEval()
 	{
 	double [] length = new double[6];
 	length[0] = 1;
@@ -63,7 +63,7 @@ public class EvaluaterTest
 	}
 
 	@Test
-	public void sphere()
+	public void testSphereEval()
 	{
 	SphereEval eval = new SphereEval(2,2,2,2
 								,new Vec3(0,0,0)

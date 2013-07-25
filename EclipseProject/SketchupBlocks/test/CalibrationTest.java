@@ -24,14 +24,14 @@ public class CalibrationTest
 	}
 	
 	@Test
-	public void initialNotCalibratedTest() // Test to see if square works
+	public void testInitialNotCalibrated()
 	{
 		assertTrue(!cally.isCalibrated());
 	}
 	
 	
 	@Test
-	public void cameraPostition()
+	public void testCameraPostition()
 	{
 	//So. Find 4 sets of inputs. Measure the actual position. Get The difference. Is greater than well.....
 	//60
@@ -105,9 +105,9 @@ public class CalibrationTest
 		cally.processBlock(input);
 		assertTrue("Is not calibrated",cally.isCalibrated());
 	    Vec3 camPosition = cally.cameraPositions[0];
-	    assertTrue("X component differs",Math.abs(camPosition.x - 22.5) < 5);
-	    assertTrue("Y component differs",Math.abs(camPosition.y - 25) < 5);
-	    assertTrue("Z component differs",Math.abs(camPosition.z - 32) < 5);
+	    assertTrue("X component differs by "+Math.abs(camPosition.x - 22.5) ,Math.abs(camPosition.x - 22.5) < 5);
+	    assertTrue("Y component differs by "+Math.abs(camPosition.y - 25)   ,Math.abs(camPosition.y - 25) < 5);
+	    assertTrue("Z component differs by "+Math.abs(camPosition.z - 32)   ,Math.abs(camPosition.z - 32) < 5);
 	}
 
 }

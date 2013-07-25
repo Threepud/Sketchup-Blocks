@@ -13,6 +13,7 @@ class SessionManager
 	private BlockDatabase blockDB;
 	private Menu menu;
 	private String[] dbPaths;
+	private Vec3 [] cameraPositions;
 	
 	public Slot[] projectSlots;
 	
@@ -38,6 +39,8 @@ class SessionManager
     	{
     		projectSlots[k] = new Slot(Settings.slotName+k);
     	}
+    	
+    	cameraPositions = new Vec3[Settings.numCameras];
 	}
 	
     public void onCameraEvent(CameraEvent cameraEvent)
@@ -60,28 +63,47 @@ class SessionManager
     		if (Settings.verbose >= 3)
     			System.out.println("--Recognized smart block--");
     		InputBlock iblock = new InputBlock(block, cameraEvent);
+    		if(jimmy != null)
     		jimmy.receiveBlock(iblock);
     	}
+    }
+    
+    public void updateCameraPosition(int cameraID, Vec3 camPosition)
+    {
+    	cameraPositions[cameraID] = camPosition;
+    	if(sarah != null)
+    		sarah.updateCameraPosition(cameraID, camPosition);
+    	
     }
     
     public void setModelConstructor(ModelConstructor _jimmy)
     {
     	jimmy = _jimmy;
+    	jimmy.setLobby(lobby);
     }
     
     public void setExporter(Exporter _kreshnik)
     {
     	kreshnik = _kreshnik;
+    	kreshnik.setLobby(lobby);
     }
     
     public void setModelViewer(ModelViewer _sarah)
     {
     	sarah = _sarah;
+    	sarah.setLobby(lobby);
+    	for(int k = 0 ; k < cameraPositions.length ; k++)
+    	{
+    	if(cameraPositions[k] != null)
+    		sarah.updateCameraPosition(k, cameraPositions[k]);
+    	}
+    	
     }
     
     public void setModelLoader(ModelLoader _modelLoader)
     {
     	modelLoader = _modelLoader;
+    	modelLoader.setLobby(lobby);
     }
     
     public void loadProject(int slotNumber)
