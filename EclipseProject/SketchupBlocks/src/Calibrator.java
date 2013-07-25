@@ -42,12 +42,20 @@ public class Calibrator
 				numDetails++;
 		
 		if(numDetails == 4)
+		{
+			//Only calibrate once all 4 blocks change
+			for(int k = 0 ; k < 4 ; k++)
+				haveBlockDetails[iBlock.cameraEvent.cameraID][k] = false;
 			calculateCameraPosition(iBlock.cameraEvent.cameraID);
+			
+		}
 			
 	}
 	
 	private void calculateCameraPosition(int cameraID)
 	{
+		if(Settings.verbose >= 3)
+			System.out.println("Camera busy calibrating");
 		ParticleSystemSettings settings = new ParticleSystemSettings();
 		double [] lengths = new double[6];
 		
