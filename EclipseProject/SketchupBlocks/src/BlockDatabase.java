@@ -15,7 +15,7 @@ class BlockDatabase
 	private String commandBlockPath;
 	private String userBlockPath;
 	
-	BlockDatabase(String _smartBlockPath, String _commandBlockPath, String _userBlockPath)
+	BlockDatabase(String _smartBlockPath, String _commandBlockPath, String _userBlockPath) throws Exception
 	{
 		smartBlockPath = _smartBlockPath;
 		commandBlockPath = _commandBlockPath;
@@ -25,7 +25,7 @@ class BlockDatabase
 		loadBlockDatabases();
 	}
 	  
-	private void loadBlockDatabases() throws RuntimeException
+	private void loadBlockDatabases() throws Exception
 	{
 		boolean smartBlockDatabaseFound = false;
 		boolean commandBlockDatabaseFound = false;
@@ -45,7 +45,7 @@ class BlockDatabase
 			throw new DataBaseNotFoundException("User block database not found.");
 	}
 	
-	private boolean loadBlockData(String fileName)
+	private boolean loadBlockData(String fileName) throws Exception
 	{
 		BufferedReader bufferedReader;
 		String line;
@@ -79,7 +79,7 @@ class BlockDatabase
 		return true;
 	}
 	
-	private void loadSmartBlockLine(String line) throws RuntimeException
+	private void loadSmartBlockLine(String line) throws Exception
 	{
 		int index = 0;
 		String[] elements = line.split("\t");
@@ -158,7 +158,7 @@ class BlockDatabase
 		}
 	}
 	
-	private void loadCommandBlockLine(String line) throws RuntimeException
+	private void loadCommandBlockLine(String line) throws Exception
 	{
 		int index = 0;
 		String[] elements = line.split("\t");
@@ -206,7 +206,7 @@ class BlockDatabase
 	}
 	
 	//TODO: validate user information
-	private void loadUserBlockLine(String line) throws RuntimeException
+	private void loadUserBlockLine(String line) throws Exception
 	{
 		int index = 0;
 		String[] elements = line.split("\t");
@@ -259,7 +259,7 @@ class BlockDatabase
 		}
 	}
 	
-	private void saveBlockData() throws RuntimeException
+	private void saveBlockData() throws Exception
 	{
 		ArrayList<Block> blockList = new ArrayList<>(blocks.values());
 		ArrayList<SmartBlock> smartList = new ArrayList<>();
@@ -356,7 +356,7 @@ class BlockDatabase
 		}
 	}
 	
-	private void saveCommandBlockData(String fileName, ArrayList<CommandBlock> list) throws RuntimeException
+	private void saveCommandBlockData(String fileName, ArrayList<CommandBlock> list)
 	{
 		try 
 		{
@@ -457,7 +457,7 @@ class BlockDatabase
 		return blocks.get((Integer)fiducialID);
 	} 
 	
-	public boolean saveDatabase()
+	public boolean saveDatabase() throws Exception
 	{
 		saveBlockData();
 		
