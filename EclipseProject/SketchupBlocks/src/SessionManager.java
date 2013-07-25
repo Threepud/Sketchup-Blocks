@@ -13,6 +13,7 @@ class SessionManager
 	private BlockDatabase blockDB;
 	private Menu menu;
 	private String[] dbPaths;
+	private Vec3 [] cameraPositions;
 	
 	public Slot[] projectSlots;
 	
@@ -38,6 +39,8 @@ class SessionManager
     	{
     		projectSlots[k] = new Slot(Settings.slotName+k);
     	}
+    	
+    	cameraPositions = new Vec3[Settings.numCameras];
 	}
 	
     public void onCameraEvent(CameraEvent cameraEvent)
@@ -65,6 +68,14 @@ class SessionManager
     	}
     }
     
+    public void updateCameraPosition(int cameraID, Vec3 camPosition)
+    {
+    	cameraPositions[cameraID] = camPosition;
+    	if(sarah != null)
+    		sarah.updateCameraPosition(cameraID, camPosition);
+    	
+    }
+    
     public void setModelConstructor(ModelConstructor _jimmy)
     {
     	jimmy = _jimmy;
@@ -81,6 +92,12 @@ class SessionManager
     {
     	sarah = _sarah;
     	sarah.setLobby(lobby);
+    	for(int k = 0 ; k < cameraPositions.length ; k++)
+    	{
+    	if(cameraPositions[k] != null)
+    		sarah.updateCameraPosition(k, cameraPositions[k]);
+    	}
+    	
     }
     
     public void setModelLoader(ModelLoader _modelLoader)
