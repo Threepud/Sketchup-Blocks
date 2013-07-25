@@ -24,14 +24,14 @@ public class CalibrationTest
 	}
 	
 	@Test
-	public void initialNotCalibratedTest() // Test to see if square works
+	public void testInitialNotCalibrated() // Test to see if square works
 	{
 		assertTrue(!cally.isCalibrated());
 	}
 	
 	
 	@Test
-	public void cameraPostition()
+	public void testCameraPostition()
 	{
 	//So. Find 4 sets of inputs. Measure the actual position. Get The difference. Is greater than well.....
 	//60
