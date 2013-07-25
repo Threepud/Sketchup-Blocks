@@ -10,7 +10,7 @@ class CommandBlock extends Block
     	OK("OK"),
     	CANCEL("CANCEL"),
     	SPECTATE("SPECTATE"),
-    	CALIBRATION("CALIBRATE");
+    	CALIBRATE("CALIBRATE");
     	
     	private final String name;
     	

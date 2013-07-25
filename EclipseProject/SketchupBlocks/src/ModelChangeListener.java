@@ -1,4 +1,4 @@
 interface ModelChangeListener
 {
-	void fireModelChangeEvent(ModelBlock change);
+	void fireModelChangeEvent(ModelBlock change) throws Exception;
 }

@@ -36,7 +36,8 @@ public class Vec4Test
 	@Test
 	public void testLength() 
 	{
-		
+		double result = testOne.length();
+		assertTrue("Vec4: Length failed.", Math.sqrt(30) == result);
 	}
 
 	@Ignore

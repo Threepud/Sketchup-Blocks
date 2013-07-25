@@ -87,7 +87,7 @@ public class Matrix
         data[3] = new double[]{v.w};
     }
 	
-    public Vec3 toVec3() throws UnexpectedVectorConversionException
+    public Vec3 toVec3() throws Exception
 	 {
 	     if (cols != 1 || rows != 3)
 	     {
@@ -101,7 +101,7 @@ public class Matrix
 	     }
 	 }
 	
-	public Vec4 toVec4() throws UnexpectedVectorConversionException
+	public Vec4 toVec4() throws Exception
 	 {
 	     if (cols != 1 || rows != 4)
 	     {

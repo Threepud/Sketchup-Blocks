@@ -1,4 +1,4 @@
-public class RecordFormatException extends RuntimeException 
+public class RecordFormatException extends Exception 
 {
 	private static final long serialVersionUID = 1L;
 

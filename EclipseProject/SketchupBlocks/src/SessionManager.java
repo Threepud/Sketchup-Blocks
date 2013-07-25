@@ -32,7 +32,15 @@ class SessionManager
 		sarah.setLobby(lobby);
 		sarah.setWindow(parent);
 		
-    	blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
+    	try 
+    	{
+			blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
+		} 
+    	catch (Exception e) 
+    	{
+			e.printStackTrace();
+		}
+    	
     	menu = new Menu(this);
     	projectSlots = new Slot[Settings.numSlots];
     	for (int k = 0; k < projectSlots.length; k++)
@@ -56,7 +64,9 @@ class SessionManager
     	{
     		if (Settings.verbose >= 3)
     			System.out.println("--Recognized command block--");
-    		menu.handleInput((CommandBlock)block, cameraEvent);
+    		InputBlock iblock = new InputBlock(block, cameraEvent);
+    		if(jimmy != null)
+        		jimmy.receiveBlock(iblock);
     	}
     	else if (block instanceof SmartBlock)
     	{
@@ -69,7 +79,7 @@ class SessionManager
     	else
     	{
     		if (Settings.verbose >= 1)
-    			System.out.println("--Unrecognized block!!--");
+    			System.out.println("--Unrecognized block!!--"+ cameraEvent.fiducialID);
     	}
     }
     

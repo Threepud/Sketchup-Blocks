@@ -1,5 +1,5 @@
 
-public class BlockNoTypeException extends RuntimeException
+public class BlockNoTypeException extends Exception
 {
 	private static final long serialVersionUID = -6975572899865810978L;
 
