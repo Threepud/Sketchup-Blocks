@@ -3,21 +3,16 @@ import processing.core.*;
 
 public class SketchupBlocks extends PApplet 
 {
-
-	/*public static void main(String args[]) 
-	{
-		    PApplet.main(new String[] { "--present", "SketchupBlocks" });
-	}*/
-	
 	Interpreter wimpie;
 	SessionManager sessMan;
 	
 	public void setup()
 	{
-		size(displayWidth - 15, displayHeight - 110, P3D);
+		size(displayWidth, displayHeight, P3D);
 		frameRate(60);
 		
-		if (frame != null) {
+		if (frame != null) 
+		{
 			frame.setResizable(false);
 		}
 		
@@ -32,5 +27,16 @@ public class SketchupBlocks extends PApplet
 	public void draw() 
 	{
 		sessMan.drawGUI();
+	}
+	
+	public static void main(String args[]) 
+	{
+		String[] arguments = {"--present"};
+		PApplet.main("SketchupBlocks", arguments);
+	}
+	
+	public boolean sketchFullScreen() 
+	{
+		return true;
 	}
 }
