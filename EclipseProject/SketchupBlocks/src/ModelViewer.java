@@ -35,7 +35,7 @@ class ModelViewer implements ModelChangeListener
 	{
 		window = _window;
 		
-		cam = new PeasyCam(window, 200);
+		cam = new PeasyCam(window, 400);
 		cam.setMinimumDistance(100);
 		cam.setMaximumDistance(400);
 		cam.setWheelScale(2.0f);
