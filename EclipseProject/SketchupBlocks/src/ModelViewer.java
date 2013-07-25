@@ -35,9 +35,9 @@ class ModelViewer implements ModelChangeListener
 	{
 		window = _window;
 		
-		cam = new PeasyCam(window, 400);
-		cam.setMinimumDistance(100);
-		cam.setMaximumDistance(400);
+		cam = new PeasyCam(window, 500);
+		cam.setMinimumDistance(200);
+		cam.setMaximumDistance(500);
 		cam.setWheelScale(2.0f);
 		cam.setRotations(0.5, 0.0, 0.0);
 	}
@@ -128,7 +128,7 @@ class ModelViewer implements ModelChangeListener
 	{
 		//setup scene
 		//window.lights();
-		window.pointLight(135, 196, 250, 100, -100, 100);
+		window.pointLight(135, 196, 250, 100, -100, -100);
 		window.pointLight(200, 200, 200, -500, -1000, 1000);
 		window.background(0);
 		
@@ -136,7 +136,7 @@ class ModelViewer implements ModelChangeListener
 		//###################
 		window.pushMatrix();
 		
-		window.scale(30, 0.1f, 30);    
+		window.scale(50, 0.1f, 50);    
 		window.translate(0, 10, 0);
 		
 		window.noStroke();
