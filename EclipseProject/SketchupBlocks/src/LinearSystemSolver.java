@@ -19,7 +19,12 @@ public class LinearSystemSolver
      */
     public static Vec3 solve(Vec3[] input, double[] angles) 
     {
-        
+    	if (angles.length != 3)
+    	{
+    		System.out.println("Invalid solve attemped");
+    		return null;
+    	}
+    	
         Matrix A = new Matrix(input, false);
         
         double [] bVecData = new double[4];
@@ -36,10 +41,10 @@ public class LinearSystemSolver
         Matrix AtB = Matrix.multiply(At, BMat);
         Matrix AtA = Matrix.multiply(At, A);
         
-        LUDecomposer.decompose(AtA.data);
+        DecompositionResult dcres = LUDecomposer.decompose(AtA.data);
         try
         {
-        	double[] res = LUDecomposer.solve(AtB.toVec3().toArray());
+        	double[] res = LUDecomposer.solve(AtB.toVec3().toArray(), dcres);
             return new Vec3(res);
         }
         catch(Exception e)

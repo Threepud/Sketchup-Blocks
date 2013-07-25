@@ -2,17 +2,16 @@
 
 public class LUDecomposer 
  {
-    public static int n;
-    public static double[][] lu;
-    public static double[] indx;
-    public static double d = 1;
+	
+	
+    
+  //  public static double d = 1;
 
-    public static void decompose(double[][] a)
+    public static DecompositionResult decompose(double[][] a)
     {
-        n = a.length;
-        lu = a;
-        //aref = a.argvalue;
-        indx = new double[n];
+        int n = a.length;
+        double[][] lu = a;
+        double[] indx = new double[n];
         final double TINY = 1.0e-40;
         int i;
         int imax;
@@ -21,7 +20,6 @@ public class LUDecomposer
         double big;
         double temp;
         double[] vv = new double[n];
-        d = 1.0;
 
         for (i = 0; i < n; i++)
         {
@@ -56,7 +54,6 @@ public class LUDecomposer
                     lu[imax][j]=lu[k][j];
                     lu[k][j]=temp;
                 }
-                d = -d;
                 vv[imax]=vv[k];
             }
             indx[k]=imax;
@@ -69,8 +66,10 @@ public class LUDecomposer
                     lu[i][j] -= temp *lu[k][j];
             }
         }
+        DecompositionResult res = new DecompositionResult(n, lu, indx);
+        return res;
     }
-    public static double[] solve(double[] b)
+    public static double[] solve(double[] b, DecompositionResult res)
     {
         double[] x = new double[b.length];
         int i;
@@ -78,29 +77,42 @@ public class LUDecomposer
         int ip;
         int j;
         double sum;
-        if (b.length != n)
+        if (b.length != res.n)
             System.out.println("Size problem in solver");
-        for (i = 0; i < n; i++)
+        for (i = 0; i < res.n; i++)
             x[i] = b[i];
-        for (i = 0; i < n; i++)
+        for (i = 0; i < res.n; i++)
         {
-            ip = (int)indx[i];
+            ip = (int)res.indx[i];
             sum = x[ip];
             x[ip]=x[i];
             if (ii != 0)
             for (j = ii-1;j<i;j++)
-                sum -= lu[i][j]*x[j];
+                sum -= res.lu[i][j]*x[j];
             else if (sum != 0.0)
                 ii = i+1;
             x[i]=sum;
         }
-        for (i = n-1; i >= 0; i--)
+        for (i = res.n-1; i >= 0; i--)
         {
             sum = x[i];
-            for (j = i+1;j<n;j++)
-                sum -= lu[i][j]*x[j];
-            x[i]=sum/lu[i][i];
+            for (j = i+1; j < res.n; j++)
+                sum -= res.lu[i][j]*x[j];
+            x[i]=sum/res.lu[i][i];
         }
         return x;
     }
+}
+
+class DecompositionResult
+{
+	protected int n;
+	protected double[][] lu;
+	protected double[] indx;
+	DecompositionResult(int _n, double[][] _lu, double[] _indx)
+	{
+		n = _n;
+		lu = _lu;
+		indx = _indx;
+	}
 }
