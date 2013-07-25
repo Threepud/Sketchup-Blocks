@@ -22,7 +22,7 @@ public class SketchupBlocks extends PApplet
 		}
 		
 		sessMan = new SessionManager(this);
-		sessMan.setModelConstructor(new ModelConstructor());
+		sessMan.setModelConstructor(new ModelConstructor(sessMan));
 		for (int k = 0;  k < Settings.numCameras; k++)
 		{
 			wimpie = new Interpreter(Settings.cameraSettings[k].port, sessMan, this,k);
