@@ -20,9 +20,9 @@ class SessionManager
 	public SessionManager(PApplet _parent)
 	{
 		dbPaths = new String[3];
-		dbPaths[0] = "../SmartBlock.dat";
-		dbPaths[1] = "../CommandBlock.dat";
-		dbPaths[2] = "../UserBlock.dat";
+		dbPaths[0] = "SmartBlock.dat";
+		dbPaths[1] = "CommandBlock.dat";
+		dbPaths[2] = "UserBlock.dat";
 		
 		parent = _parent;
 		
