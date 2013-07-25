@@ -80,7 +80,7 @@ class ModelViewer implements ModelChangeListener
 	    blockList.add(modelBlock);
 	}
 	  
-	public void fireModelChangeEvent(ModelBlock change) throws RuntimeException
+	public void fireModelChangeEvent(ModelBlock change) throws Exception
 	{
 		int index;
 		
@@ -102,7 +102,7 @@ class ModelViewer implements ModelChangeListener
 	    }
 	}
 	
-	private int findBlockIndex(int blockID)
+	private int findBlockIndex(int blockID) throws Exception
 	{
     	int index = -1;
     	for(ModelBlock tempBlock: blockList)
