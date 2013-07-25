@@ -24,9 +24,23 @@ public class LinearSolverTest
 	
 	
 	@Test
-	public void testConstructor()
+	public void testSolve()
 	{
+		double[] a = new double[]{1, 2};
+		Vec3 v = LinearSystemSolver.solve(null, a);
+		assertTrue("Invalid angle list", v == null);
 		
+		double[][] t = new double[2][2];
+		t[0] = new double[]{2, 4};
+		t[1] = new double[]{1, 2};
+		double[] b = new double[]{10, 5};
+		
+		
+		System.out.println(LUDecomposer.multiplesFound(b, t));
+		
+		/*DecompositionResult  res = LUDecomposer.decompose(t);
+		double[] bla = LUDecomposer.solve(b, res);
+		assertTrue("Matrix to solve has rows that aren't linearly independent", bla == null);*/
 	}
 
 } 
