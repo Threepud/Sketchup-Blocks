@@ -11,7 +11,14 @@ class LocalLobby implements Lobby
 		modelChangeListeners.trimToSize();
 		for (int k = 0; k < modelChangeListeners.size(); k++)
 		{
-			modelChangeListeners.get(k).fireModelChangeEvent(modelBlock);
+			try 
+			{
+				modelChangeListeners.get(k).fireModelChangeEvent(modelBlock);
+			} 
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	    
