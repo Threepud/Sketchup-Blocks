@@ -7,6 +7,7 @@ public class Menu
 	public Menu(SessionManager _sessMan)
 	{
 		sessMan = _sessMan;
+		state = null;
 	}
 	
 	public void handleInput(CommandBlock cBlock, CameraEvent cEvent)
