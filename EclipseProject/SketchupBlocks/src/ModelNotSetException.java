@@ -1,5 +1,5 @@
 
-public class ModelNotSetException extends RuntimeException 
+public class ModelNotSetException extends Exception 
 {
 	private static final long serialVersionUID = 3579876965324893510L;
 

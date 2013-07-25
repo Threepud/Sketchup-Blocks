@@ -1,5 +1,5 @@
 
-public class DataBaseNotFoundException extends RuntimeException  
+public class DataBaseNotFoundException extends Exception  
 {
 	private static final long serialVersionUID = 1L;
 
