@@ -64,7 +64,9 @@ class SessionManager
     	{
     		if (Settings.verbose >= 3)
     			System.out.println("--Recognized command block--");
-    		menu.handleInput((CommandBlock)block, cameraEvent);
+    		InputBlock iblock = new InputBlock(block, cameraEvent);
+    		if(jimmy != null)
+        		jimmy.receiveBlock(iblock);
     	}
     	else if (block instanceof SmartBlock)
     	{
@@ -77,7 +79,7 @@ class SessionManager
     	else
     	{
     		if (Settings.verbose >= 1)
-    			System.out.println("--Unrecognized block!!--");
+    			System.out.println("--Unrecognized block!!--"+ cameraEvent.fiducialID);
     	}
     }
     
