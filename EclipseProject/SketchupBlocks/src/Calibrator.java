@@ -14,6 +14,11 @@ public class Calibrator
 		{
 			calibrated[k] = false;
 		}
+		for(int l = 0 ; l < haveBlockDetails.length ; l++)
+		for(int k = 0 ; k < haveBlockDetails[l].length ; k++)
+		{
+			haveBlockDetails[l][k] = false;
+		}
 	}
 	
 	public boolean isCalibrated()
@@ -27,13 +32,14 @@ public class Calibrator
 	
 	public void processBlock(InputBlock iBlock)
 	{
-		calibrationDetails[iBlock.cameraEvent.cameraID][iBlock.block.blockId-60][0] = iBlock.cameraEvent.x;
-		calibrationDetails[iBlock.cameraEvent.cameraID][iBlock.block.blockId-60][1] = iBlock.cameraEvent.y;
+		calibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][0] = iBlock.cameraEvent.x;
+		calibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][1] = iBlock.cameraEvent.y;
 		
-		haveBlockDetails[iBlock.cameraEvent.cameraID][iBlock.block.blockId-60] = true;
+		haveBlockDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60] = true;
 		int numDetails = 0;
 		for(int k = 0 ; k < 4 ; k++)
-			if(haveBlockDetails[iBlock.cameraEvent.cameraID][iBlock.block.blockId-60]) numDetails++;
+			if(haveBlockDetails[iBlock.cameraEvent.cameraID][k])
+				numDetails++;
 		
 		if(numDetails == 4)
 			calculateCameraPosition(iBlock.cameraEvent.cameraID);
