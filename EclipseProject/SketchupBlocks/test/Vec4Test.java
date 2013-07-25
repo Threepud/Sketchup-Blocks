@@ -1,7 +1,6 @@
 import static org.junit.Assert.*;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -40,28 +39,41 @@ public class Vec4Test
 		assertTrue("Vec4: Length failed.", Math.sqrt(30) == result);
 	}
 
-	@Ignore
 	@Test
-	public void testLengthVec4() {
-		fail("Not yet implemented");
+	public void testLengthVec4() 
+	{
+		double result = Vec4.length(testOne);
+		assertTrue("Vec4: Length failed.", Math.sqrt(30) == result);
 	}
 
-	@Ignore
 	@Test
-	public void testAdd() {
-		fail("Not yet implemented");
+	public void testAdd() 
+	{
+		Vec4 result = Vec4.add(testOne, testTwo);
+		assertTrue("Vec4: Add failed.", 6 == result.x &&
+										8 == result.y &&
+										10 == result.z &&
+										12 == result.w);
 	}
 
-	@Ignore
 	@Test
-	public void testSubtract() {
-		fail("Not yet implemented");
+	public void testSubtract() 
+	{
+		Vec4 result = Vec4.subtract(testOne, testTwo);
+		assertTrue("Vec4: Subtract failed.", -4 == result.x &&
+											 -4 == result.y &&
+											 -4 == result.z &&
+											 -4 == result.w);
 	}
 
-	@Ignore
 	@Test
-	public void testScalar() {
-		fail("Not yet implemented");
+	public void testScalar() 
+	{
+		Vec4 result = Vec4.scalar(2, testOne);
+		assertTrue("Vec4: Scalar failed.", 2 == result.x &&
+											 4 == result.y &&
+											 6 == result.z &&
+											 8 == result.w);
 	}
 
 	@Test
