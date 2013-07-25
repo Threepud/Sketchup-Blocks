@@ -60,6 +60,7 @@ class SessionManager
     		if (Settings.verbose >= 3)
     			System.out.println("--Recognized smart block--");
     		InputBlock iblock = new InputBlock(block, cameraEvent);
+    		if(jimmy != null)
     		jimmy.receiveBlock(iblock);
     	}
     }
@@ -67,21 +68,25 @@ class SessionManager
     public void setModelConstructor(ModelConstructor _jimmy)
     {
     	jimmy = _jimmy;
+    	jimmy.setLobby(lobby);
     }
     
     public void setExporter(Exporter _kreshnik)
     {
     	kreshnik = _kreshnik;
+    	kreshnik.setLobby(lobby);
     }
     
     public void setModelViewer(ModelViewer _sarah)
     {
     	sarah = _sarah;
+    	sarah.setLobby(lobby);
     }
     
     public void setModelLoader(ModelLoader _modelLoader)
     {
     	modelLoader = _modelLoader;
+    	modelLoader.setLobby(lobby);
     }
     
     public void loadProject(int slotNumber)
