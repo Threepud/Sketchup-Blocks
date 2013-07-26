@@ -1,0 +1,3 @@
+class UserBlock extends Block
+{
+}
