@@ -100,6 +100,7 @@ public class Calibrator
 					Settings.landmarks[1],Settings.landmarks[2],Settings.landmarks[3]);
 		settings.tester = null;
 		settings.creator = new ParticleCreator(3,-100,100);
+		settings.ringSize = 10;
 		settings.particleCount = 20;
 		settings.iterationCount= 2000;
 		settings.socialStart = 0.72;
