@@ -30,7 +30,7 @@ public class Calibrator
 		return true;
 	}
 	
-	public void processBlock(InputBlock iBlock)
+	public boolean processBlock(InputBlock iBlock)
 	{
 		calibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][0] = iBlock.cameraEvent.x;
 		calibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][1] = iBlock.cameraEvent.y;
@@ -47,9 +47,9 @@ public class Calibrator
 			for(int k = 0 ; k < 4 ; k++)
 				haveBlockDetails[iBlock.cameraEvent.cameraID][k] = false;
 			calculateCameraPosition(iBlock.cameraEvent.cameraID);
-			
+			return true;
 		}
-			
+		return false;	
 	}
 	
 	private void calculateCameraPosition(int cameraID)

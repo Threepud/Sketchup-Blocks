@@ -37,9 +37,9 @@ public class ModelConstructor
 		if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE)
 		{
 			
-			cally.processBlock(iBlock);
+			boolean changedPosition = cally.processBlock(iBlock);
 			calibrated = cally.isCalibrated();
-			if (calibrated)
+			if (calibrated && changedPosition)
 			{
 				if(Settings.verbose >= 3 )
 					System.out.println("==Cameras are calibrated==");
