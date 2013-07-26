@@ -1,6 +1,11 @@
 import java.util.ArrayList;
 
+import peasy.CameraState;
 import peasy.PeasyCam;
+import peasy.org.apache.commons.math.geometry.CardanEulerSingularityException;
+import peasy.org.apache.commons.math.geometry.Rotation;
+import peasy.org.apache.commons.math.geometry.RotationOrder;
+import peasy.org.apache.commons.math.geometry.Vector3D;
 import processing.core.*;
 
 class ModelViewer implements ModelChangeListener
@@ -16,9 +21,27 @@ class ModelViewer implements ModelChangeListener
 		
 	}
 	
+	private double[] worldPositions = {100, -100, 100,
+									   150, -100, 100,
+									   200, -100, 100,
+									   250, -100, 100,
+									   300, -100, 100};
 	public void updateCameraPosition(int cameraId, Vec3 pos)
 	{
-				
+		float[] camPos = cam.getPosition();
+		Vector3D oldPos = new Vector3D(camPos[0], camPos[1], camPos[2]);
+		Vector3D newPos = new Vector3D(pos.x, -pos.z, -pos.y);
+		
+		if(Settings.verbose >= 3)
+		{
+			System.out.println("OLD VEC: " + oldPos.getX() + ", " + oldPos.getY() + ", " + oldPos.getZ());
+			System.out.println("NEW VEC: " + newPos.getX() + ", " + -newPos.getZ() + ", " + -newPos.getY());
+		}
+		
+		Rotation rot = new Rotation(oldPos, newPos);
+		Vector3D center = new Vector3D(0, 0, 0);
+		CameraState state = new CameraState(rot, center, pos.length() * 10);
+		cam.setState(state, 500);
 	}
 	
 	public void setSystemCamera(int index, PeasyCam newCamera)
@@ -39,7 +62,7 @@ class ModelViewer implements ModelChangeListener
 		cam.setMinimumDistance(200);
 		cam.setMaximumDistance(500);
 		cam.setWheelScale(2.0f);
-		cam.setRotations(0.5, 0.0, 0.0);
+		cam.setRotations(0.0, 0.0, 0.0);
 	}
 	
 	public void setLobby(Lobby _lobby) throws RuntimeException
