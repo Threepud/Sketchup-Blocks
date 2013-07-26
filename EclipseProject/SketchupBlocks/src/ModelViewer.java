@@ -30,12 +30,12 @@ class ModelViewer implements ModelChangeListener
 	{
 		float[] camPos = cam.getPosition();
 		Vector3D oldPos = new Vector3D(camPos[0], camPos[1], camPos[2]);
-		Vector3D newPos = new Vector3D(pos.x, -pos.z, -pos.y);
+		Vector3D newPos = new Vector3D(pos.x, pos.z, -pos.y);
 		
 		if(Settings.verbose >= 3)
 		{
 			System.out.println("OLD VEC: " + oldPos.getX() + ", " + oldPos.getY() + ", " + oldPos.getZ());
-			System.out.println("NEW VEC: " + newPos.getX() + ", " + -newPos.getZ() + ", " + -newPos.getY());
+			System.out.println("NEW VEC: " + newPos.getX() + ", " + newPos.getZ() + ", " + -newPos.getY());
 		}
 		
 		Rotation rot = new Rotation(oldPos, newPos);
