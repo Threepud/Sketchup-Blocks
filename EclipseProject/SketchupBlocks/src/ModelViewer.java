@@ -1,6 +1,11 @@
 import java.util.ArrayList;
 
+import peasy.CameraState;
 import peasy.PeasyCam;
+import peasy.org.apache.commons.math.geometry.CardanEulerSingularityException;
+import peasy.org.apache.commons.math.geometry.Rotation;
+import peasy.org.apache.commons.math.geometry.RotationOrder;
+import peasy.org.apache.commons.math.geometry.Vector3D;
 import processing.core.*;
 
 class ModelViewer implements ModelChangeListener
@@ -9,19 +14,46 @@ class ModelViewer implements ModelChangeListener
 	private Lobby lobby;
 	private ArrayList<ModelBlock> blockList = null;
 	private PeasyCam cam;
-	private PeasyCam[] systemCameras;
+	private Camera[] systemCameras;
 	
 	public ModelViewer()
 	{
-		
+		systemCameras = new Camera[Settings.numCameras];
+		for(int x = 0; x < Settings.numCameras; ++x)
+		{
+			systemCameras[x] = new Camera();
+		}
 	}
 	
+	private int counter = -100;
+	private Vector3D oldPos = null;
 	public void updateCameraPosition(int cameraId, Vec3 pos)
 	{
-				
+		systemCameras[cameraId].eye = new Vec3(pos.y * 10, -pos.z * 10, pos.x * 10);
+		systemCameras[cameraId].up = new Vec3(0, 1, 0);
+		systemCameras[cameraId].at = new Vec3(0, 0, 0);
+				/*
+		if(oldPos == null)
+		{
+			float[] camPos = cam.getPosition();
+			oldPos = new Vector3D(camPos[0], camPos[1], camPos[2]);
+		}
+		
+		Vector3D newPos = new Vector3D(pos.y, -pos.z, pos.x);
+		
+		if(Settings.verbose >= 3)
+		{
+			System.out.println("OLD VEC: " + oldPos.getX() + ", " + oldPos.getY() + ", " + oldPos.getZ());
+			System.out.println("NEW VEC: " + newPos.getX() + ", " + newPos.getY() + ", " + newPos.getZ());
+		}
+		
+		Rotation rot = new Rotation(oldPos.normalize(), newPos.normalize());
+		Vector3D center = new Vector3D(0, 0, 0);
+		CameraState state = new CameraState(rot, center, cam.getDistance());
+		cam.setState(state, 500);*/
 	}
 	
-	public void setSystemCamera(int index, PeasyCam newCamera)
+	public void setSystemCamera(int index, Camera newCamera)
 	{
 		systemCameras[index] = newCamera;
 	}
@@ -39,7 +71,8 @@ class ModelViewer implements ModelChangeListener
 		cam.setMinimumDistance(200);
 		cam.setMaximumDistance(500);
 		cam.setWheelScale(2.0f);
-		cam.setRotations(0.5, 0.0, 0.0);
+		cam.setSuppressRollRotationMode();
+		cam.setActive(false);
 	}
 	
 	public void setLobby(Lobby _lobby) throws RuntimeException
@@ -126,6 +159,10 @@ class ModelViewer implements ModelChangeListener
 	
 	public void drawModel()
 	{
+		window.camera((float)systemCameras[0].eye.x, (float)systemCameras[0].eye.y, (float)systemCameras[0].eye.z,
+			   (float)systemCameras[0].at.x, (float)systemCameras[0].at.y, (float)systemCameras[0].at.z,
+			   (float)systemCameras[0].up.x, (float)systemCameras[0].up.y, (float)systemCameras[0].up.z);
+		
 		//setup scene
 		//window.lights();
 		window.pointLight(135, 196, 250, 100, -100, -100);

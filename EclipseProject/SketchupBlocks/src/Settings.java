@@ -13,7 +13,7 @@ public class Settings
 	
 	public static int verbose = 3; //0 is default. From there, higher is more verbose. 
 	
-	public static Vec3[] landmarks = new Vec3[]{ new Vec3(0, 0, 0), new Vec3(5.6, 0, 0), new Vec3(5.6, 5.6, 0), new Vec3(0, 5.6, 0)};
+	public static Vec3[] landmarks = new Vec3[]{ new Vec3(0, 0, 0), new Vec3(0, 5.6, 0), new Vec3(5.6, 5.6, 0), new Vec3(5.6, 0, 0)};
 	
 	public static class CameraSettings
 	{
