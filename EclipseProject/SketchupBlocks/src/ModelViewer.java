@@ -165,12 +165,16 @@ class ModelViewer implements ModelChangeListener
 		
 		//setup scene
 		//window.lights();
-		window.pointLight(135, 196, 250, 100, -100, -100);
+		window.pointLight(155, 216, 250, 100, -100, -100);
 		window.pointLight(200, 200, 200, -500, -1000, 1000);
 		window.background(0);
 		
-		//construction floor
-		//###################
+		createConstructionFloor();
+		createBlocks();
+	}
+	
+	private void createConstructionFloor()
+	{
 		window.pushMatrix();
 		
 		window.scale(50, 0.1f, 50);    
@@ -181,8 +185,10 @@ class ModelViewer implements ModelChangeListener
 		window.box(10);
 		
 		window.popMatrix();
-		//###################
-		
+	}
+	
+	private void createBlocks()
+	{
 		//draw block list
 		for(ModelBlock block: blockList)
 		{
@@ -198,15 +204,5 @@ class ModelViewer implements ModelChangeListener
 			
 			window.endShape();
 		}
-	}
-	
-	private void createConstructionFloor()
-	{
-		
-	}
-	
-	private void createBlocks()
-	{
-		
 	}
 }
