@@ -44,9 +44,9 @@ public class Calibrator
 		if(numDetails == 4)
 		{
 			//Only calibrate once all 4 blocks change
+			calculateCameraPosition(iBlock.cameraEvent.cameraID);
 			for(int k = 0 ; k < 4 ; k++)
 				haveBlockDetails[iBlock.cameraEvent.cameraID][k] = false;
-			calculateCameraPosition(iBlock.cameraEvent.cameraID);
 			return true;
 		}
 		return false;	
@@ -96,8 +96,8 @@ public class Calibrator
 		bestabc = system.go(); // a b c d 
 			
 		settings.eval = new SphereEval(bestabc.bestPosition[0],bestabc.bestPosition[1],
-				bestabc.bestPosition[2],bestabc.bestPosition[3],Settings.landmarks[0],
-					Settings.landmarks[1],Settings.landmarks[2],Settings.landmarks[3]);
+									   bestabc.bestPosition[2],bestabc.bestPosition[3],Settings.landmarks[0],
+								   	   Settings.landmarks[1],Settings.landmarks[2],Settings.landmarks[3]);
 		settings.tester = null;
 		settings.creator = new ParticleCreator(3,-100,100);
 		settings.ringSize = 10;
