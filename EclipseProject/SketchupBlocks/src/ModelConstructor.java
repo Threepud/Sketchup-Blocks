@@ -6,7 +6,7 @@ import java.util.Iterator;
 public class ModelConstructor
 {
 	private Lobby eddy;
-	private HashMap<Integer,Bin> binList;
+	private HashMap<Integer,Camera> cameras;
 	
 	private Calibrator cally;
 	private SessionManager sessMan;
@@ -15,7 +15,7 @@ public class ModelConstructor
 	
 	public ModelConstructor(SessionManager _sessMan)
 	{
-		binList = new HashMap<Integer,Bin>();
+		cameras = new HashMap<Integer,Camera>();
 		cally = new Calibrator();
 		sessMan = _sessMan;
 	}
@@ -28,11 +28,12 @@ public class ModelConstructor
 	  
 	public void receiveBlock(InputBlock iBlock)
 	{
-		Bin currentBin = null;
+		store(iBlock);
+		/*Camera currentBin = null;
 		if(binList.containsKey(iBlock.block.blockId))
 		{
 			currentBin = binList.get(iBlock.block.blockId);
-			currentBin.store(iBlock);
+			store(iBlock);
 		}
 		if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE)
 		{
@@ -52,7 +53,7 @@ public class ModelConstructor
 				Iterator<java.util.Map.Entry<Integer, Bin>> iter = binList.entrySet().iterator();
 				while(iter.hasNext())
 				{
-					Bin bin = iter.next().getValue();
+					Camera bin = iter.next().getValue();
 					if (bin.ready())
 						processBin(bin);
 				}
@@ -70,32 +71,42 @@ public class ModelConstructor
 		{
 			processBin(currentBin);
 		}		
-		
+		*/
 	}
 	
-	private void processBin(Bin bin)
+	private void processBin(Camera.Block bin)
 	{
 		
 	}
 	
-	private class Bin
+	void store(InputBlock iBlock)
 	{
-		int minEvents;
-		int LIFETIME = 2000;	//ms
-		InputBlock[] data;// = new InputBlock[Settings.numCameras];
-		Line[] lines;// = new Line[Settings.numCameras];
-		
-		Bin(InputBlock iBlock)
+		if(iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
-			data = new InputBlock[Settings.numCameras];//[iBlock.block.associatedFiducials.length];
-			lines = new Line[Settings.numCameras];//[iBlock.block.associatedFiducials.length];
-			store(iBlock);
-		}
-		
-		void store(InputBlock iBlock)
-		{
-			//data[iBlock.cameraEvent.cameraID][iBlock.cameraEvent. = iBlock;
+			Camera camera = cameras.get(iBlock.cameraEvent.cameraID);
+			if(camera == null)
+			{
+				camera = new Camera(iBlock.cameraEvent.cameraID);
+				cameras.put(iBlock.cameraEvent.cameraID,camera);
+			}
 			
+			Camera.Block block = camera.blocks.get(iBlock.block.blockId);
+			
+			if(block == null)
+			{
+				block = camera.new Block(iBlock.block.blockId);
+				camera.blocks.put(iBlock.block.blockId,block);
+			}	
+			
+			Camera.Block.Fiducial fiducial = block.fiducials.get(iBlock.cameraEvent.fiducialID);
+			
+			if(fiducial == null)
+			{
+				fiducial =  block.new Fiducial(iBlock.cameraEvent.fiducialID);
+				block.fiducials.put(iBlock.cameraEvent.fiducialID,fiducial);
+			}		
+
+			//Line calculation
 			Vec3[] landmarkToCamera = new Vec3[4];
 			double[] angles = new double[4];
 			for (int k = 0; k < 4; k++)
@@ -103,44 +114,133 @@ public class ModelConstructor
 				landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[iBlock.cameraEvent.cameraID], Settings.landmarks[k]);
 				angles[k] = getAngle(iBlock.cameraEvent.cameraID, k, iBlock.cameraEvent.x, iBlock.cameraEvent.y);
 			}
-			
+			// Do calculation 
 			Vec3 mysticalLine = LinearSystemSolver.solve(landmarkToCamera, angles);
-			lines[iBlock.cameraEvent.cameraID] = new Line(cally.cameraPositions[iBlock.cameraEvent.cameraID], mysticalLine);
-		}
-		
-		boolean ready()
-		{
-			int count = 0;
-			for (int k = 0; k < data.length; k++)
+			fiducial.line = new Line(cally.cameraPositions[iBlock.cameraEvent.cameraID], mysticalLine);
+			
+			if(block.ready())
 			{
-				if (data[k] != null)
-				{
-					if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
-					{
-						count++;
-					}
-					else
-					{
-						data[k] = null;
-					}
-				}
-					
+				processBin(block);
 			}
-			if (count >= minEvents)
-				return true;
-			else return false;
+			
+		
+		}
+		else //When a remove call is recieved
+		{
+			
+			Camera camera = cameras.get(iBlock.cameraEvent.cameraID);
+			if(camera == null)
+			{
+			return; // Nothing to remove
+			}
+			
+			Camera.Block block = camera.blocks.get(iBlock.block.blockId);
+			
+			if(block == null)
+			{
+			return; // Nothing to remove
+			}	
+			
+			if( block.fiducials.containsKey(iBlock.cameraEvent.fiducialID))
+			{
+				block.fiducials.remove(iBlock.cameraEvent.fiducialID);
+			}	
+			
+			/*
+			* Cleanup -- Remove blocks if not seen
+			* No need to clean up camera. They will allways be there.
+			*/
+			
+			if(camera.blocks.isEmpty())
+			{
+				camera.blocks.remove(iBlock.block.blockId);
+			}
+			
 		}
 		
-		private double getAngle(int camID, int lm, double x, double y)
+	}
+	
+	private double getAngle(int camID, int lm, double x, double y)
+	{
+		double fov = Settings.cameraSettings[camID].fov;
+		double aspect = Settings.cameraSettings[camID].aspectRatio;
+		return Math.sqrt(sqr((cally.calibrationDetails[camID][lm][0]- x)*fov)+sqr((cally.calibrationDetails[camID][lm][1]- y)*(fov/aspect))); 
+	}
+		
+	private double sqr(double val)
+	{
+		return val*val;	
+	}
+	
+	private class Camera
+	{		
+		class Block
 		{
-			double fov = Settings.cameraSettings[camID].fov;
-			double aspect = Settings.cameraSettings[camID].aspectRatio;
-			return Math.sqrt(sqr((cally.calibrationDetails[camID][lm][0]- x)*fov)+sqr((cally.calibrationDetails[camID][lm][1]- y)*(fov/aspect))); 
+			class Fiducial
+			{
+				public Fiducial(int _fiducialsID)
+				{
+					fiducialsID = _fiducialsID;
+					timestamp = new Date();
+				}
+				
+				public Line line;
+				public int fiducialsID;
+				public Date timestamp;
+			}
+			
+			public Block(int _blockID)
+			{
+				fiducials = new HashMap<Integer,Fiducial>();
+				blockID = _blockID;
+			}
+			
+			public int blockID;
+			private HashMap<Integer,Fiducial> fiducials;
+			
+			boolean ready()
+			{
+			//	return false;
+				Camera.Block.Fiducial [] data = new Fiducial[0];
+				data = fiducials.values().toArray(data);
+				
+				int count = 0;
+				for (int k = 0; k < data.length; k++)
+				{
+					if (data[k] != null)
+					{
+						if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
+						{
+							count++;
+						}
+						else
+						{
+							data[k] = null;
+						}
+					}
+						
+				}
+				if (count >= minEvents)
+					return true;
+				else 
+					return false;
+				
+			}
 		}
 		
-		private double sqr(double val)
+		private HashMap<Integer,Block> blocks;
+		public int cameraID;
+		
+		int minEvents = 2;
+		int LIFETIME = 2000;	//ms
+		
+		public Camera(int _cameraID)
 		{
-			return val*val;	
+		cameraID = _cameraID;
 		}
+	
+		
+		
+		
 	}
 }
