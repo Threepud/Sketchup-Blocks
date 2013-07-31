@@ -172,6 +172,62 @@ class SphereEval implements Evaluator
 		}
 }
 
+class BlockPosition implements Evaluator
+{
+	double length;
+	Line line1;
+	Line line2;
+		
+		public BlockPosition(double _length, Line _line1, Line _line2)
+		{
+		length = _length;
+		line1  = _line1;
+		line2  = _line2;
+		}
+
+		public EvalResults [] evaluate(Particle [] p)
+		{
+			EvalResults [] result = new EvalResults[p.length];
+			for(int k = 0 ; k < p.length ; k++)
+				result[k] = evaluate(p[k]);
+				
+			return result;
+		}
+		
+		public EvalResults evaluate(Particle  p)
+		{
+			EvalResults result = evaluate(p.attributes);
+			p.currentScore(result.score);
+			return result;
+		}
+		
+		
+		public EvalResults [] evaluate(double [] [] p)
+		{
+			EvalResults [] result = new EvalResults[p.length];
+			for(int k = 0 ; k < p.length ; k++)
+				result[k] = evaluate(p[k]);
+			return result;		
+		}
+		
+		public EvalResults evaluate(double [] pa)
+		{
+			EvalResults result = new EvalResults();
+			result.score = 10000;
+			
+			double distance = 0;
+			distance+= Math.pow( (line1.point.x + pa[0]*line1.direction.x) - (line2.point.x + pa[1]*line2.direction.x), 2);
+			
+			distance+= Math.pow( (line1.point.y + pa[0]*line1.direction.y) - (line2.point.y + pa[1]*line2.direction.y), 2);
+			
+			distance+= Math.pow( (line1.point.z + pa[0]*line1.direction.z) - (line2.point.z + pa[1]*line2.direction.z), 2);
+			
+			result.score /= Math.abs(length*length - distance);
+			
+			return result;
+		}
+}
+
 class BlockEval implements Evaluator
 {
 		Vec3 [] vecs;
