@@ -15,7 +15,7 @@ class BlockDatabase
 	private String commandBlockPath;
 	private String userBlockPath;
 	
-	BlockDatabase(String _smartBlockPath, String _commandBlockPath, String _userBlockPath) throws Exception
+	public BlockDatabase(String _smartBlockPath, String _commandBlockPath, String _userBlockPath) throws Exception
 	{
 		smartBlockPath = _smartBlockPath;
 		commandBlockPath = _commandBlockPath;
@@ -84,11 +84,14 @@ class BlockDatabase
 		int index = 0;
 		String[] elements = line.split("\t");
 		
-		if(elements.length != 4)
+		if(elements.length != 3)
 			throw new RecordFormatException("Smart block database record length exception.");
 		
 		SmartBlock tempBlock = new SmartBlock();
 		tempBlock.blockType = Block.BlockType.SMART;
+		
+		//get model data from collada file
+		tempBlock = ColladaLoader.getSmartBlock(elements[2]);
 		
 		//block ID
 		try
@@ -115,7 +118,7 @@ class BlockDatabase
 			}
 		}
 		tempBlock.associatedFiducials = associatedFiducials;
-		
+		/*
 		//Block Vertices
 		String[] stringVertices = elements[index++].split(",");
 		Vec3[] vertices = new Vec3[stringVertices.length / 3];
@@ -150,7 +153,7 @@ class BlockDatabase
 			}
 		}
 		tempBlock.indices = indices;
-		
+		*/
 		//add block to hash for all associated fiducials
 		for(int x = 0; x < associatedFiducials.length; ++x)
 		{
