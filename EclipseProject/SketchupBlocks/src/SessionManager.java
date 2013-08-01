@@ -1,8 +1,6 @@
 import processing.core.PApplet;
-import java.io.File;
-import java.io.IOException;
 
-class SessionManager
+public class SessionManager
 {
 	private PApplet parent;
 	private ModelConstructor jimmy;
@@ -20,9 +18,9 @@ class SessionManager
 	public SessionManager(PApplet _parent)
 	{
 		dbPaths = new String[3];
-		dbPaths[0] = "SmartBlock.dat";
-		dbPaths[1] = "CommandBlock.dat";
-		dbPaths[2] = "UserBlock.dat";
+		dbPaths[0] = "./dbs/SmartBlock.dat";
+		dbPaths[1] = "./dbs/CommandBlock.dat";
+		dbPaths[2] = "./dbs/UserBlock.dat";
 		
 		parent = _parent;
 		
@@ -53,7 +51,7 @@ class SessionManager
 	
     public void onCameraEvent(CameraEvent cameraEvent)
     {
-    	parent.println("Received camera event");
+    	PApplet.println("Received camera event");
     	//We still require some sort of menu traversal scheme...
     	Block block = blockDB.findBlock(cameraEvent.fiducialID);
     	if(block instanceof UserBlock)
