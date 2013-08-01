@@ -1,8 +1,9 @@
 package sketchupblocks.calibrator;
 
 import sketchupblocks.math.Line;
+import sketchupblocks.math.Vec3;
 
-class BlockPosition implements Evaluator
+public class BlockPosition implements Evaluator
 {
 	Vec3 [] positions;
 	Line [] lines;
