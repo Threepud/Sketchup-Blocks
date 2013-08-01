@@ -6,6 +6,7 @@ import org.junit.runners.*;
 import org.junit.runner.RunWith;
 
 import processing.core.PApplet;
+import sketchupblocks.base.Interpreter;
 
 /*
 Run with:

@@ -3,6 +3,9 @@ import org.junit.*;
 import org.junit.runners.*;
 import org.junit.runner.RunWith;
 
+import sketchupblocks.calibrator.Particle;
+import sketchupblocks.calibrator.ParticleCreator;
+
 @RunWith(JUnit4.class)
 public class ParticleCreatorTest
 {

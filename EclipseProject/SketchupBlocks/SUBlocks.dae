@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <authoring_tool>Sketchup Blocks 0.5</authoring_tool>
+    </contributor>
+    <created>2013-08-01T21:08Z</created>
+    <modified>2013-08-01T21:08Z</modified>
+    <unit meter="0.02539999969303608" name="inch"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_visual_scenes/>
+  <library_geometries>
+    <geometry id="block0">
+      <mesh>
+        <source id="vertex0">
+          <float_array count="72" id="vertexData0">393.7007921595251 0.0 0.0 0.0 -393.7007921595251 0.0 0.0 0.0 0.0 393.7007921595251 -393.7007921595251 0.0 0.0 0.0 393.7007921595251 393.7007921595251 0.0 0.0 0.0 0.0 0.0 393.7007921595251 0.0 393.7007921595251 393.7007921595251 0.0 0.0 393.7007921595251 -393.7007921595251 393.7007921595251 393.7007921595251 -393.7007921595251 0.0 393.7007921595251 0.0 393.7007921595251 393.7007921595251 -393.7007921595251 393.7007921595251 0.0 -393.7007921595251 0.0 393.7007921595251 -393.7007921595251 0.0 0.0 -393.7007921595251 393.7007921595251 0.0 0.0 393.7007921595251 0.0 -393.7007921595251 0.0 0.0 -393.7007921595251 393.7007921595251 0.0 0.0 0.0 393.7007921595251 -393.7007921595251 393.7007921595251 0.0 0.0 393.7007921595251 0.0 -393.7007921595251 393.7007921595251 393.7007921595251 0.0 393.7007921595251</float_array>
+          <technique_common>
+            <accessor count="24" source="#vertexData0" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="vertices0">
+          <input semantic="POSITION" source="#vertex0"/>
+        </vertices>
+        <triangles count="12" material="Material2">
+          <input offset="0" semantic="VERTEX" source="#vertices0"/>
+          <p>0 1 2 1 0 3 4 5 6 5 4 7 8 9 10 9 8 11 12 13 14 13 12 15 16 17 18 17 16 19 20 21 22 21 20 23</p>
+        </triangles>
+      </mesh>
+    </geometry>
+    <geometry id="block1">
+      <mesh>
+        <source id="vertex1">
+          <float_array count="72" id="vertexData1">393.7007921595251 0.0 0.0 0.0 -393.7007921595251 0.0 0.0 0.0 0.0 393.7007921595251 -393.7007921595251 0.0 0.0 0.0 393.7007921595251 393.7007921595251 0.0 0.0 0.0 0.0 0.0 393.7007921595251 0.0 393.7007921595251 393.7007921595251 0.0 0.0 393.7007921595251 -393.7007921595251 393.7007921595251 393.7007921595251 -393.7007921595251 0.0 393.7007921595251 0.0 393.7007921595251 393.7007921595251 -393.7007921595251 393.7007921595251 0.0 -393.7007921595251 0.0 393.7007921595251 -393.7007921595251 0.0 0.0 -393.7007921595251 393.7007921595251 0.0 0.0 393.7007921595251 0.0 -393.7007921595251 0.0 0.0 -393.7007921595251 393.7007921595251 0.0 0.0 0.0 393.7007921595251 -393.7007921595251 393.7007921595251 0.0 0.0 393.7007921595251 0.0 -393.7007921595251 393.7007921595251 393.7007921595251 0.0 393.7007921595251</float_array>
+          <technique_common>
+            <accessor count="24" source="#vertexData1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="vertices1">
+          <input semantic="POSITION" source="#vertex1"/>
+        </vertices>
+        <triangles count="12" material="Material2">
+          <input offset="0" semantic="VERTEX" source="#vertices1"/>
+          <p>0 1 2 1 0 3 4 5 6 5 4 7 8 9 10 9 8 11 12 13 14 13 12 15 16 17 18 17 16 19 20 21 22 21 20 23</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_materials/>
+  <library_effects/>
+  <scene/>
+</COLLADA>

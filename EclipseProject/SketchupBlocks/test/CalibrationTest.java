@@ -4,6 +4,13 @@ import org.junit.*;
 import org.junit.runners.*;
 import org.junit.runner.RunWith;
 
+import sketchupblocks.base.CameraEvent;
+import sketchupblocks.base.CommandBlock;
+import sketchupblocks.base.InputBlock;
+import sketchupblocks.calibrator.Calibrator;
+import sketchupblocks.database.Block;
+import sketchupblocks.math.Vec3;
+
 
 
 /*

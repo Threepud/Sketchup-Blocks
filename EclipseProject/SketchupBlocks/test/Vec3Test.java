@@ -3,6 +3,8 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import sketchupblocks.math.Vec3;
+
 public class Vec3Test 
 {
 	Vec3 testOne;

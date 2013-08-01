@@ -3,6 +3,11 @@ import org.junit.*;
 import org.junit.runners.*;
 import org.junit.runner.RunWith;
 
+import sketchupblocks.calibrator.EvalResults;
+import sketchupblocks.calibrator.SphereEval;
+import sketchupblocks.calibrator.TriangleEval;
+import sketchupblocks.math.Vec3;
+
 @RunWith(JUnit4.class)
 public class EvaluaterTest
 {
