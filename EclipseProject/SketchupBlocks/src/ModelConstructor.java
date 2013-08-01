@@ -28,19 +28,12 @@ public class ModelConstructor
 	  
 	public void receiveBlock(InputBlock iBlock)
 	{
-		store(iBlock);
-		/*Camera currentBin = null;
-		if(binList.containsKey(iBlock.block.blockId))
-		{
-			currentBin = binList.get(iBlock.block.blockId);
-			store(iBlock);
-		}
 		if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE)
 		{
 			
 			boolean changedPosition = cally.processBlock(iBlock);
 			calibrated = cally.isCalibrated();
-			if (calibrated && changedPosition)
+			/*if (calibrated && changedPosition)
 			{
 				if(Settings.verbose >= 3 )
 					System.out.println("==Cameras are calibrated==");
@@ -57,26 +50,50 @@ public class ModelConstructor
 					if (bin.ready())
 						processBin(bin);
 				}
-			}
+			}*/
 		}
 		else 
 		{
-			currentBin = new Bin(iBlock);
-			currentBin.minEvents = (iBlock.block.blockType == Block.BlockType.SMART) ? 2 : 1 ;
-			//currentBin.store(iBlock);
-			binList.put(iBlock.block.blockId, currentBin);
+			store(iBlock);
 		}
 		
-		if(currentBin != null && currentBin.ready() && calibrated)
-		{
-			processBin(currentBin);
-		}		
-		*/
+		
 	}
 	
 	private void processBin(Camera.Block bin)
 	{
+	//	sessMan.
+		Vec3 [] positions = null; //Get from DB
 		
+		Camera.Block.Fiducial [] fids = null;
+		fids = bin.fiducials.values().toArray(fids);
+		Line [] lines = new Line[fids.length];
+		for(int k = 0 ; k < fids.length ; k++)
+			lines[k] = fids[k].line;
+		
+		//Bin should have enough information to get position.
+		ParticleSystemSettings settings = new ParticleSystemSettings();
+		settings.eval = new BlockPosition(positions,lines);
+		settings.tester = null;
+		settings.creator = new ParticleCreator(fids.length,0,100);
+		
+		settings.particleCount = 100;
+		settings.iterationCount= 2000;
+		
+		settings.ringTopology = true;
+		settings.ringSize = 1;
+		
+		settings.socialStart = 0.72;
+		settings.cognitiveStart = 0.72;
+		settings.momentum = 1.4;
+		settings.MaxComponentVelocity = 1;
+		
+		ParticleSystem system = new ParticleSystem(settings);
+		
+		Particle bestabc = null;
+		
+		bestabc = system.go();
+		//.................So nou het ek die punte.....Wat nou??????
 	}
 	
 	void store(InputBlock iBlock)

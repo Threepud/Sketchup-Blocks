@@ -174,15 +174,15 @@ class SphereEval implements Evaluator
 
 class BlockPosition implements Evaluator
 {
-	double length;
-	Line line1;
-	Line line2;
+	Vec3 [] positions;
+	Line [] lines;
 		
-		public BlockPosition(double _length, Line _line1, Line _line2)
+		public BlockPosition(Vec3 [] pos,Line [] lin )
 		{
-		length = _length;
-		line1  = _line1;
-		line2  = _line2;
+			positions = pos;
+			lines = lin;
+			if(positions.length != lines.length)
+				throw new RuntimeException("Lengths do not match");
 		}
 
 		public EvalResults [] evaluate(Particle [] p)
@@ -212,20 +212,50 @@ class BlockPosition implements Evaluator
 		
 		public EvalResults evaluate(double [] pa)
 		{
+			if(positions.length != pa.length)
+				throw new RuntimeException("Lengths do not match");
+			
+			int arrayLengths = pa.length;
+			
 			EvalResults result = new EvalResults();
 			result.score = 10000;
 			
-			double distance = 0;
-			distance+= Math.pow( (line1.point.x + pa[0]*line1.direction.x) - (line2.point.x + pa[1]*line2.direction.x), 2);
+			for(int k = 0 ; k < arrayLengths ; k++ )
+				if(pa[k] < 0)
+					result.score = 0;
 			
-			distance+= Math.pow( (line1.point.y + pa[0]*line1.direction.y) - (line2.point.y + pa[1]*line2.direction.y), 2);
+			double errors = 0 ;
 			
-			distance+= Math.pow( (line1.point.z + pa[0]*line1.direction.z) - (line2.point.z + pa[1]*line2.direction.z), 2);
+			//On lines
+			for(int k = 0 ; k < arrayLengths-1 ; k++ )
+				for(int l = k+1 ; l < arrayLengths ; l++ )
+					{
+						errors += error(positions[k],positions[l],lines[k],lines[l],pa[k],pa[l]);;
+					}
 			
-			result.score /= Math.abs(length*length - distance);
+			//Closest to camera
+			for(int k = 0 ; k < arrayLengths ; k++ )
+				errors += pa[k]*pa[k];
+			
+			
+			result.score /= errors;
 			
 			return result;
 		}
+		
+		public double error(Vec3 position1, Vec3 position2, Line lin1, Line lin2,double s1, double s2)
+		{
+			double distance = 0;
+			
+			distance+= Math.pow( (lin1.point.x + s1*lin1.direction.x) - (lin2.point.x + s2*lin2.direction.x), 2);
+			distance+= Math.pow( (lin1.point.y + s1*lin1.direction.y) - (lin2.point.y + s2*lin2.direction.y), 2);
+			distance+= Math.pow( (lin1.point.z + s1*lin1.direction.z) - (lin2.point.z + s2*lin2.direction.z), 2);	
+		
+			double length = position1.distance(position2);
+			
+			return Math.abs(length*length - distance);
+		}
+		
 }
 
 class BlockEval implements Evaluator
