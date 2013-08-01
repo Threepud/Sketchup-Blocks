@@ -1,6 +1,7 @@
 
 public class Settings 
 {
+	public static String versionNr = "0.5";
 	public static String slotDirectory = "slots";
 	public static String slotName = "Slot"; //Append a number to the end of this.
 	public static int numSlots = 5;
