@@ -1,20 +1,19 @@
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
-import peasy.CameraState;
 import peasy.PeasyCam;
-import peasy.org.apache.commons.math.geometry.CardanEulerSingularityException;
-import peasy.org.apache.commons.math.geometry.Rotation;
-import peasy.org.apache.commons.math.geometry.RotationOrder;
 import peasy.org.apache.commons.math.geometry.Vector3D;
 import processing.core.*;
 
-class ModelViewer implements ModelChangeListener
+class ModelViewer implements ModelChangeListener, KeyListener
 {
 	private PApplet window;
 	private Lobby lobby;
 	private ArrayList<ModelBlock> blockList = null;
 	private PeasyCam cam;
 	private Camera[] systemCameras;
+	private Camera currentCamera;
 	
 	public ModelViewer()
 	{
@@ -71,8 +70,7 @@ class ModelViewer implements ModelChangeListener
 		cam.setMinimumDistance(200);
 		cam.setMaximumDistance(500);
 		cam.setWheelScale(2.0f);
-		cam.setSuppressRollRotationMode();
-		cam.setActive(false);
+		//cam.setActive(false);
 	}
 	
 	public void setLobby(Lobby _lobby) throws RuntimeException
@@ -89,24 +87,7 @@ class ModelViewer implements ModelChangeListener
 	    
 	    //debug for viewer
 	    blockList = new ArrayList<>();
-	    SmartBlock smartBlock = new SmartBlock();
-	    
-	    Vec3[] vertices = new Vec3[24];
-	    int i = 0;
-	    vertices[i++] = new Vec3(-1.000000, 1.000000, -1.000000);
-	    vertices[i++] = new Vec3(1.000000, 1.000000, -1.000000);
-	    vertices[i++] = new Vec3(1.000000, 1.000000, 1.000000);
-	    vertices[i++] = new Vec3(-1.000000, 1.000000, 1.000000);
-	    vertices[i++] = new Vec3(-1.000000, -1.000000, -0.999999);
-	    vertices[i++] = new Vec3(0.999999, -1.000000, -1.000001);
-	    vertices[i++] = new Vec3(1.000000, -1.000000, 1.000000);
-	    vertices[i++] = new Vec3(-1.000000, -1.000000, 1.000000);
-	    smartBlock.vertices = vertices;
-	    
-	    int[] indices = {4,8,7,4,7,3,  8,5,6,8,6,7,   3,7,6,3,6,2,   4,2,1,4,3,2,   4,5,8,4,1,5,   1,6,5,1,2,6};
-	    
-	    smartBlock.indices = indices;
-	    
+	    SmartBlock smartBlock = ColladaLoader.getSmartBlock("./models/GoogleCube.dae");
 	    ModelBlock modelBlock = new ModelBlock();
 	    modelBlock.smartBlock = smartBlock;
 	    
@@ -159,10 +140,13 @@ class ModelViewer implements ModelChangeListener
 	
 	public void drawModel()
 	{
-		window.camera((float)systemCameras[0].eye.x, (float)systemCameras[0].eye.y, (float)systemCameras[0].eye.z,
-			   (float)systemCameras[0].at.x, (float)systemCameras[0].at.y, (float)systemCameras[0].at.z,
-			   (float)systemCameras[0].up.x, (float)systemCameras[0].up.y, (float)systemCameras[0].up.z);
-		
+		if(!cam.isActive())
+		{
+			window.camera((float)currentCamera.eye.x, (float)currentCamera.eye.y, (float)currentCamera.eye.z,
+				   (float)currentCamera.at.x, (float)currentCamera.at.y, (float)currentCamera.at.z,
+				   (float)currentCamera.up.x, (float)currentCamera.up.y, (float)currentCamera.up.z);
+		}
+			
 		//setup scene
 		//window.lights();
 		window.pointLight(155, 216, 250, 100, -100, -100);
@@ -193,16 +177,37 @@ class ModelViewer implements ModelChangeListener
 		for(ModelBlock block: blockList)
 		{
 			SmartBlock smartBlock = block.smartBlock;
-			window.scale(25, 25, 25);
+			//window.scale(25, 25, 25);
 			window.beginShape(PConstants.TRIANGLES);
 			
 			for(int x = 0; x < smartBlock.indices.length; ++x)
 			{
-				Vec3 vertex = smartBlock.vertices[smartBlock.indices[x] - 1];
+				Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
 				window.vertex((float)vertex.x, (float)vertex.y, (float)vertex.z);
 			}
 			
 			window.endShape();
 		}
+	}
+
+	@Override
+	public void keyPressed(KeyEvent event) 
+	{
+		char c = event.getKeyChar();
+		System.out.println(c);
+	}
+
+	@Override
+	public void keyReleased(KeyEvent event) 
+	{
+		char c = event.getKeyChar();
+		System.out.println(c);
+	}
+
+	@Override
+	public void keyTyped(KeyEvent event) 
+	{
+		char c = event.getKeyChar();
+		System.out.println(c);
 	}
 }
