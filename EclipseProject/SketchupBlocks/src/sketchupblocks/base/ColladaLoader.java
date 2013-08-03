@@ -2,6 +2,7 @@ package sketchupblocks.base;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,7 +54,6 @@ public class ColladaLoader
 		String[] stringVertices = sources[0].getChild("float_array").getContent().split(" ");
 		Vec3[] vertices = new Vec3[stringVertices.length / 3];
 		
-		//TODO: get unit measurement from file.
 		for(int x = 0; x < vertices.length; ++x)
 		{
 			int index = 3 * x;
@@ -99,7 +99,25 @@ public class ColladaLoader
 		return result;
 	}
 	
-	public static void makeCollada(ArrayList<ModelBlock> blocks)
+	public static void saveSmartBlock(SmartBlock block)
+	{
+		ArrayList<ModelBlock> blocks = new ArrayList<>();
+		ModelBlock mBlock = new ModelBlock();
+		mBlock.smartBlock = block;
+		blocks.add(mBlock);
+		String path = "./models/";
+		makeCollada(path + block.name, blocks);
+	}
+	
+	public static void export(ArrayList<ModelBlock> blocks)
+	{
+		String fileName = "SketchupBlocks" + new Timestamp(new Date().getTime()) + ".dae";
+		String path = "./export/";
+		fileName = fileName.replaceAll(":", "_");
+		makeCollada(path + fileName, blocks);
+	}
+	
+	private static void makeCollada(String fileName, ArrayList<ModelBlock> blocks)
 	{
 		//create file structure
 		XML root = new XML("COLLADA");
@@ -398,10 +416,6 @@ public class ColladaLoader
 		instanceVisualScene.setString("url", "#visualScene0");
 		
 		//save collada to file
-		//String fileName = "SketchupBlocks" + new Timestamp(new Date().getTime()) + ".dae";
-		String path = "./export/";
-		String fileName = path + "SUBlocks.dae";
-		fileName = fileName.replaceAll(":", "_");
 		root.save(new File(fileName), "");
 	}
 }
