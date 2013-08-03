@@ -96,7 +96,7 @@ public class ModelViewer implements ModelChangeListener, KeyListener
 	    
 	    //debug for viewer
 	    blockList = new ArrayList<>();
-	    SmartBlock smartBlock = ColladaLoader.getSmartBlock("./models/GoogleCube.dae");
+	    SmartBlock smartBlock = ColladaLoader.getSmartBlock("./models/PaperCube.dae");
 	    ModelBlock modelBlock = new ModelBlock();
 	    modelBlock.smartBlock = smartBlock;
 	    
@@ -186,7 +186,7 @@ public class ModelViewer implements ModelChangeListener, KeyListener
 		for(ModelBlock block: blockList)
 		{
 			SmartBlock smartBlock = block.smartBlock;
-			//window.scale(25, 25, 25);
+			window.scale(10, 10, 10);
 			window.beginShape(PConstants.TRIANGLES);
 			
 			for(int x = 0; x < smartBlock.indices.length; ++x)
