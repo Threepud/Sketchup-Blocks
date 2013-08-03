@@ -105,6 +105,7 @@ public class ColladaLoader
 		XML root = new XML("COLLADA");
 		root.addChild("asset");
 		root.addChild("library_visual_scenes");
+		root.addChild("library_nodes");
 		root.addChild("library_geometries");
 		root.addChild("library_materials");
 		root.addChild("library_effects");
@@ -129,7 +130,7 @@ public class ColladaLoader
 		
 		XML created = asset.getChild("created");
 		TimeZone tz = TimeZone.getTimeZone("UCT");
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 		df.setTimeZone(tz);
 		String timeStamp = df.format(new Date());
 		created.setContent(timeStamp);
@@ -144,7 +145,7 @@ public class ColladaLoader
 		XML upAxis = asset.getChild("up_axis");
 		upAxis.setContent("Z_UP");
 		
-		//library visual scenes
+		//library visual scenes setup
 		XML libraryVisualScenes = root.getChild("library_visual_scenes");
 		libraryVisualScenes.addChild("visual_scene");
 		
@@ -153,12 +154,38 @@ public class ColladaLoader
 		visualScene.addChild("node");
 		
 		XML node = visualScene.getChild("node");
-		node.setString("name", "Sketchup");
+		node.setString("name", "Sketchup Blocks");
+		
+		//library nodes setup
+		XML libraryNodes = root.getChild("library_nodes");
+		libraryNodes.addChild("node");
+		node = libraryNodes.getChild("node");
+		node.setString("id", "node0");
 		
 		XML libraryGeometries = root.getChild("library_geometries");
 		for(int x = 0; x < blocks.size(); ++x)
 		{
+			//library visual scenes
+			node = visualScene.getChild("node");
+			node.addChild("node");
+			
+			node = node.getChild(x);
+			node.addChild("matrix");
+			node.addChild("instance_node");
+			
+			node.setString("id", "sceneNode" + x);
+			node.setString("name", "instance" + x);
+			
+			XML matrix = node.getChild("matrix");
+			matrix.setContent("1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
+			
+			XML instanceNode = node.getChild("instance_node");
+			instanceNode.setString("url", "#node0");
+			
+			//library nodes
+			node = libraryNodes.getChild("node");
 			node.addChild("instance_geometry");
+			
 			XML instanceGeometry = node.getChild(x);
 			instanceGeometry.addChild("bind_material");
 			
