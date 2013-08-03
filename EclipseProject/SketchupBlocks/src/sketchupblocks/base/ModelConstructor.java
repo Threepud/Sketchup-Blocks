@@ -14,7 +14,7 @@ import sketchupblocks.network.Lobby;
 public class ModelConstructor
 {
 	private Lobby eddy;
-	private HashMap<Integer,Camera> cameras;
+	private HashMap<Integer,BlockInfo> blocks;
 	
 	private Calibrator cally;
 	private SessionManager sessMan;
@@ -23,7 +23,7 @@ public class ModelConstructor
 	
 	public ModelConstructor(SessionManager _sessMan)
 	{
-		cameras = new HashMap<Integer,Camera>();
+		blocks = new HashMap<Integer,BlockInfo>();
 		cally = new Calibrator();
 		sessMan = _sessMan;
 	}
@@ -68,16 +68,40 @@ public class ModelConstructor
 		
 	}
 	
-	private void processBin(Camera.Block bin)
+	private void processBin(BlockInfo bin)
 	{
-	//	sessMan.
-		Vec3 [] positions = null; //Get from DB
-		
-		Camera.Block.Fiducial [] fids = null;
+		BlockInfo.Fiducial [] fids = null;
 		fids = bin.fiducials.values().toArray(fids);
+		
 		Line [] lines = new Line[fids.length];
 		for(int k = 0 ; k < fids.length ; k++)
+		{
 			lines[k] = fids[k].line;
+		}
+		
+		Vec3 [] positions = new Vec3[fids.length]; //Get from DB
+		if (!(bin.smartBlock instanceof SmartBlock))
+		{
+			return;
+		}
+		
+		SmartBlock sm =(SmartBlock)(bin.smartBlock);
+		
+		for(int k = 0 ; k < fids.length ; k++)
+		{
+			int fiducialIndex = -1;
+			for(int l = 0 ;l < sm.associatedFiducials.length; l++)
+			{
+				if(sm.associatedFiducials[l] == fids[k].fiducialsID)
+					fiducialIndex = l;
+			}
+			if(fiducialIndex == -1)
+			{
+				throw new RuntimeException("Smart Block fiducials don't match");
+			}
+			positions[k] = sm.fiducialCoordinates[fiducialIndex];
+		}
+			
 		
 		//Bin should have enough information to get position.
 		ParticleSystemSettings settings = new ParticleSystemSettings();
@@ -101,34 +125,28 @@ public class ModelConstructor
 		Particle bestabc = null;
 		
 		bestabc = system.go();
-		//.................So nou het ek die punte.....Wat nou??????
+		//.................So nou het ek die punte, soortvan.....Wat nou??????
 	}
 	
 	void store(InputBlock iBlock)
 	{
 		if(iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
-			Camera camera = cameras.get(iBlock.cameraEvent.cameraID);
-			if(camera == null)
-			{
-				camera = new Camera(iBlock.cameraEvent.cameraID);
-				cameras.put(iBlock.cameraEvent.cameraID,camera);
-			}
 			
-			Camera.Block block = camera.blocks.get(iBlock.block.blockId);
+			BlockInfo block = blocks.get(iBlock.block.blockId);
 			
 			if(block == null)
 			{
-				block = camera.new Block(iBlock.block.blockId);
-				camera.blocks.put(iBlock.block.blockId,block);
+				block = new BlockInfo(iBlock.block);
+				blocks.put(iBlock.block.blockId,block);
 			}	
 			
-			Camera.Block.Fiducial fiducial = block.fiducials.get(iBlock.cameraEvent.fiducialID);
+			BlockInfo.Fiducial fiducial = block.fiducials.get(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
 			
 			if(fiducial == null)
 			{
 				fiducial =  block.new Fiducial(iBlock.cameraEvent.fiducialID);
-				block.fiducials.put(iBlock.cameraEvent.fiducialID,fiducial);
+				block.fiducials.put(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
 			}		
 
 			//Line calculation
@@ -152,23 +170,17 @@ public class ModelConstructor
 		}
 		else //When a remove call is recieved
 		{
-			
-			Camera camera = cameras.get(iBlock.cameraEvent.cameraID);
-			if(camera == null)
-			{
-			return; // Nothing to remove
-			}
-			
-			Camera.Block block = camera.blocks.get(iBlock.block.blockId);
+		
+			BlockInfo block = blocks.get(iBlock.block.blockId);
 			
 			if(block == null)
 			{
 			return; // Nothing to remove
 			}	
 			
-			if( block.fiducials.containsKey(iBlock.cameraEvent.fiducialID))
+			if( block.fiducials.containsKey(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID)))
 			{
-				block.fiducials.remove(iBlock.cameraEvent.fiducialID);
+				block.fiducials.remove(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
 			}	
 			
 			/*
@@ -176,9 +188,9 @@ public class ModelConstructor
 			* No need to clean up camera. They will allways be there.
 			*/
 			
-			if(camera.blocks.isEmpty())
+			if(block.fiducials.isEmpty())
 			{
-				camera.blocks.remove(iBlock.block.blockId);
+				blocks.remove(iBlock.block.blockId);
 			}
 			
 		}
@@ -196,11 +208,25 @@ public class ModelConstructor
 	{
 		return val*val;	
 	}
-	
-	private class Camera
-	{		
-		class Block
+		
+		class BlockInfo
 		{
+		
+		int minEvents = 2;
+		int LIFETIME = 2000;	//ms
+		
+			class CamFid
+			{
+				int cameraID;
+				int fiducialID;
+				CamFid(int c, int f)
+				{
+					cameraID = c;
+					fiducialID = f;
+				}
+			
+			}
+		
 			class Fiducial
 			{
 				public Fiducial(int _fiducialsID)
@@ -214,19 +240,20 @@ public class ModelConstructor
 				public Date timestamp;
 			}
 			
-			public Block(int _blockID)
+			public BlockInfo(Block _smartBlock)
 			{
-				fiducials = new HashMap<Integer,Fiducial>();
-				blockID = _blockID;
+				fiducials = new HashMap<CamFid,Fiducial>();
+				smartBlock = _smartBlock;
 			}
 			
 			public int blockID;
-			private HashMap<Integer,Fiducial> fiducials;
+			public Block smartBlock;
+			private HashMap<CamFid,Fiducial> fiducials;
 			
 			boolean ready()
 			{
 			//	return false;
-				Camera.Block.Fiducial [] data = new Fiducial[0];
+				BlockInfo.Fiducial [] data = new Fiducial[0];
 				data = fiducials.values().toArray(data);
 				
 				int count = 0;
@@ -253,19 +280,7 @@ public class ModelConstructor
 			}
 		}
 		
-		private HashMap<Integer,Block> blocks;
-		public int cameraID;
-		
-		int minEvents = 2;
-		int LIFETIME = 2000;	//ms
-		
-		public Camera(int _cameraID)
-		{
-		cameraID = _cameraID;
-		}
-	
 		
 		
 		
-	}
 }
