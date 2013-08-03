@@ -28,15 +28,6 @@ public class SketchupBlocks extends PApplet
 		{
 			wimpie = new Interpreter(Settings.cameraSettings[k].port, sessMan, this,k);
 		}
-		
-		//testing collada writer
-		ArrayList<ModelBlock> blocks = new ArrayList<>();
-		SmartBlock sBlock = ColladaLoader.getSmartBlock("./models/GoogleCube.dae");
-		ModelBlock mBlock = new ModelBlock();
-		mBlock.smartBlock = sBlock;
-		blocks.add(mBlock);
-		blocks.add(mBlock);
-		ColladaLoader.makeCollada(blocks);
 	}
 
 	public void draw() 
