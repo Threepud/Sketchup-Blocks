@@ -93,14 +93,11 @@ public class BlockDatabase
 		int index = 0;
 		String[] elements = line.split("\t");
 		
-		if(elements.length != 3)
-			throw new RecordFormatException("Smart block database record length exception.");
+		if(elements.length != 4)
+			throw new RecordFormatException("DB Smart Block: record length exception.");
 		
 		SmartBlock tempBlock = new SmartBlock();
 		tempBlock.blockType = Block.BlockType.SMART;
-		
-		//get model data from collada file
-		tempBlock = ColladaLoader.getSmartBlock(elements[2]);
 		
 		//block ID
 		try
@@ -109,7 +106,7 @@ public class BlockDatabase
 		}
 		catch(NumberFormatException e)
 		{
-			throw new RecordFormatException("Smart block database record block ID format exception.");
+			throw new RecordFormatException("DB Smart Block: block ID format exception.");
 		}
 		
 		//Associated Fiducial IDs
@@ -123,46 +120,38 @@ public class BlockDatabase
 			}
 			catch(NumberFormatException e)
 			{
-				throw new RecordFormatException("Smart block database record associated fiducials format exception.");
+				throw new RecordFormatException("DB Smart Block: associated fiducials format exception.");
 			}
 		}
 		tempBlock.associatedFiducials = associatedFiducials;
-		/*
-		//Block Vertices
-		String[] stringVertices = elements[index++].split(",");
-		Vec3[] vertices = new Vec3[stringVertices.length / 3];
-		for(int x = 0; x < vertices.length; ++x)
+	
+		//add fiducial center coordinates in 3D space
+		String[] stringFiducialCoords = elements[index++].split(",");
+		Vec3[] fiducialCoordinates = new Vec3[stringFiducialCoords.length / 3];
+		for(int x = 0; x < fiducialCoordinates.length; ++x)
 		{
+			int i = 3 * x;
 			try
 			{
-				vertices[x] = new Vec3();
-				vertices[x].x = Double.parseDouble(stringVertices[(x * 3)]);
-				vertices[x].y = Double.parseDouble(stringVertices[(x * 3) + 1]);
-				vertices[x].z = Double.parseDouble(stringVertices[(x * 3) + 2]);
+				fiducialCoordinates[x] = new Vec3();
+				fiducialCoordinates[x].x = Double.parseDouble(stringFiducialCoords[i]);
+				fiducialCoordinates[x].y = Double.parseDouble(stringFiducialCoords[i + 1]);
+				fiducialCoordinates[x].z = Double.parseDouble(stringFiducialCoords[i + 2]);
 			}
 			catch(NumberFormatException e)
 			{
-				throw new RecordFormatException("Smart block database record block vertices format exception.");
+				throw new RecordFormatException("DB Smart Block: fiducial coordinates format exception.");
 			}
 		}
-		tempBlock.vertices = vertices;
+		tempBlock.fiducialCoordinates = fiducialCoordinates;
 		
-		//Block indices
-		String[] stringIndices = elements[index++].split(",");
-		int[] indices = new int[stringIndices.length];
-		for(int x = 0; x < indices.length; ++x)
-		{
-			try
-			{
-				indices[x] = Integer.parseInt(stringIndices[x]);
-			}
-			catch(NumberFormatException e)
-			{
-				throw new RecordFormatException("Smart block database record block indices format exception.");
-			}
-		}
-		tempBlock.indices = indices;
-		*/
+		//get model data from collada file
+		String fileName = elements[index++];
+		SmartBlock colladaBlock = ColladaLoader.getSmartBlock(fileName);
+		tempBlock.vertices = colladaBlock.vertices;
+		tempBlock.indices = colladaBlock.indices;
+		tempBlock.name = fileName;
+		
 		//add block to hash for all associated fiducials
 		for(int x = 0; x < associatedFiducials.length; ++x)
 		{
@@ -176,7 +165,7 @@ public class BlockDatabase
 		String[] elements = line.split("\t");
 		
 		if(elements.length != 3)
-			throw new RecordFormatException("Command block database record length exception.");
+			throw new RecordFormatException("DB Command Block: record length exception.");
 		
 		CommandBlock tempBlock = new CommandBlock();
 		tempBlock.blockType = Block.BlockType.COMMAND;
@@ -188,7 +177,7 @@ public class BlockDatabase
 		}
 		catch(NumberFormatException e)
 		{
-			throw new RecordFormatException("Command block database record block ID format exception.");
+			throw new RecordFormatException("DB Command Block: block ID format exception.");
 		}
 		
 		//Associated Fiducial IDs
@@ -202,7 +191,7 @@ public class BlockDatabase
 			}
 			catch(NumberFormatException e)
 			{
-				throw new RecordFormatException("Command block database record associated fiducials format exception.");
+				throw new RecordFormatException("DB Command Block: associated fiducials format exception.");
 			}
 		}
 		tempBlock.associatedFiducials = associatedFiducials;
@@ -224,7 +213,7 @@ public class BlockDatabase
 		String[] elements = line.split("\t");
 		
 		if(elements.length != 5)
-			throw new RecordFormatException("User block database record length exception.");
+			throw new RecordFormatException("DB User Block: record length exception.");
 		
 		UserBlock tempBlock = new UserBlock();
 		tempBlock.blockType = Block.BlockType.USER;
@@ -236,7 +225,7 @@ public class BlockDatabase
 		}
 		catch(NumberFormatException e)
 		{
-			throw new RecordFormatException("User block database record block ID format exception.");
+			throw new RecordFormatException("DB User Block: block ID format exception.");
 		}
 		
 		//Associated Fiducial IDs
@@ -250,7 +239,7 @@ public class BlockDatabase
 			}
 			catch(NumberFormatException e)
 			{
-				throw new RecordFormatException("User block database record associated fiducials format exception.");
+				throw new RecordFormatException("DB User Block: associated fiducials format exception.");
 			}
 		}
 		tempBlock.associatedFiducials = associatedFiducials;
@@ -271,6 +260,7 @@ public class BlockDatabase
 		}
 	}
 	
+	//TODO: check DB save
 	private void saveBlockData() throws Exception
 	{
 		ArrayList<Block> blockList = new ArrayList<>(blocks.values());
