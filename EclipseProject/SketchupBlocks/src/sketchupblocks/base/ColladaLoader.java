@@ -59,9 +59,9 @@ public class ColladaLoader
 				 * Google Sketchup exports its Collada files with inches as its measuring unit.
 				 */
 				vertices[x] = new Vec3();
-				vertices[x].x = Double.parseDouble(stringVertices[index]) * 0.0254;
-				vertices[x].y = Double.parseDouble(stringVertices[index + 1]) * 0.0254;
-				vertices[x].z = Double.parseDouble(stringVertices[index + 2]) * 0.0254;
+				vertices[x].x = Double.parseDouble(stringVertices[index + 1]) * 0.0254;
+				vertices[x].y = -Double.parseDouble(stringVertices[index + 2]) * 0.0254;
+				vertices[x].z = Double.parseDouble(stringVertices[index]) * 0.0254;
 			}
 			catch(NumberFormatException e)
 			{
