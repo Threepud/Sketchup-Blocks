@@ -77,8 +77,9 @@ public class ModelViewer implements ModelChangeListener, KeyListener
 		
 		cam = new PeasyCam(window, 500);
 		cam.setMinimumDistance(200);
-		cam.setMaximumDistance(500);
+		cam.setMaximumDistance(700);
 		cam.setWheelScale(2.0f);
+		
 		//cam.setActive(false);
 	}
 	
@@ -158,8 +159,10 @@ public class ModelViewer implements ModelChangeListener, KeyListener
 			
 		//setup scene
 		//window.lights();
-		window.pointLight(155, 216, 250, 100, -100, -100);
-		window.pointLight(200, 200, 200, -500, -1000, 1000);
+		//window.pointLight(155, 216, 250, 100, -100, -100);
+		window.pointLight(200, 200, 200, 100, -1000, 400);
+		window.ambientLight(50, 50, 50);
+		
 		window.background(0);
 		
 		createConstructionFloor();
@@ -170,7 +173,7 @@ public class ModelViewer implements ModelChangeListener, KeyListener
 	{
 		window.pushMatrix();
 		
-		window.scale(50, 0.1f, 50);    
+		window.scale(70, 0.1f, 70);    
 		window.translate(0, 10, 0);
 		
 		window.noStroke();
