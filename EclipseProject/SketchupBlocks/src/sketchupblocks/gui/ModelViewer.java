@@ -1,12 +1,9 @@
 package sketchupblocks.gui;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
-import peasy.PeasyCam;
-import peasy.org.apache.commons.math.geometry.Vector3D;
 import processing.core.*;
+import processing.event.*;
 import sketchupblocks.base.ColladaLoader;
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
@@ -17,22 +14,41 @@ import sketchupblocks.exception.BlockNotFoundException;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
-public class ModelViewer implements ModelChangeListener, KeyListener
+public class ModelViewer implements ModelChangeListener
 {
 	private PApplet window;
 	private Lobby lobby;
 	private ArrayList<ModelBlock> blockList = null;
-	private PeasyCam cam;
+	private Camera userCamera;
 	private Camera[] systemCameras;
 	private Camera currentCamera;
+	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
+	private int selectCamera = 0;
+	
+	private double currentRotation = 0;
+	private double rotationIncrement = 0.07;
+	private double cameraHeight = -500;
+	private double cameraRadius = 500;
+	private boolean rotateLeft = false;
+	private boolean rotateRight = false;
 	
 	public ModelViewer()
 	{
+		Vec3 up = new Vec3(0, 1, 0);
+		Vec3 at = new Vec3();
+		Vec3 eye = new Vec3();
+		eye.x = cameraRadius * Math.cos(currentRotation);
+		eye.z = cameraRadius * Math.sin(currentRotation);
+		eye.y = cameraHeight;
+		userCamera = new Camera(up, at, eye);
+		
 		systemCameras = new Camera[Settings.numCameras];
 		for(int x = 0; x < Settings.numCameras; ++x)
 		{
 			systemCameras[x] = new Camera();
 		}
+		
+		currentCamera = userCamera;
 	}
 	
 	public void updateCameraPosition(int cameraId, Vec3 pos)
@@ -66,21 +82,10 @@ public class ModelViewer implements ModelChangeListener, KeyListener
 		systemCameras[index] = newCamera;
 	}
 	
-	private void switchCamera(PeasyCam newCamera)
-	{
-		//TODO: Find way to switch to system camera's
-	}
-	
 	public void setWindow(PApplet _window)
 	{
 		window = _window;
-		
-		cam = new PeasyCam(window, 500);
-		cam.setMinimumDistance(200);
-		cam.setMaximumDistance(700);
-		cam.setWheelScale(2.0f);
-		
-		//cam.setActive(false);
+		window.registerMethod("keyEvent", modelViewerEventListener);
 	}
 	
 	public void setLobby(Lobby _lobby) throws RuntimeException
@@ -150,16 +155,12 @@ public class ModelViewer implements ModelChangeListener, KeyListener
 	
 	public void drawModel()
 	{
-		if(!cam.isActive())
-		{
-			window.camera((float)currentCamera.eye.x, (float)currentCamera.eye.y, (float)currentCamera.eye.z,
-				   (float)currentCamera.at.x, (float)currentCamera.at.y, (float)currentCamera.at.z,
-				   (float)currentCamera.up.x, (float)currentCamera.up.y, (float)currentCamera.up.z);
-		}
+		rotateCamera();
+		
+		window.camera((float)currentCamera.eye.x, (float)currentCamera.eye.y, (float)currentCamera.eye.z,
+				      (float)currentCamera.at.x, (float)currentCamera.at.y, (float)currentCamera.at.z,
+				      (float)currentCamera.up.x, (float)currentCamera.up.y, (float)currentCamera.up.z);
 			
-		//setup scene
-		//window.lights();
-		//window.pointLight(155, 216, 250, 100, -100, -100);
 		window.pointLight(200, 200, 200, 100, -1000, 400);
 		window.ambientLight(50, 50, 50);
 		
@@ -202,24 +203,62 @@ public class ModelViewer implements ModelChangeListener, KeyListener
 		}
 	}
 
-	@Override
-	public void keyPressed(KeyEvent event) 
+	private void switchCamera()
 	{
-		char c = event.getKeyChar();
-		System.out.println(c);
+		if(selectCamera == 0)
+			currentCamera = userCamera;
+		else if(selectCamera <= Settings.numCameras)
+		{
+			currentCamera = systemCameras[selectCamera - 1];
+		}
 	}
-
-	@Override
-	public void keyReleased(KeyEvent event) 
+	
+	private void rotateCamera()
 	{
-		char c = event.getKeyChar();
-		System.out.println(c);
+		if(selectCamera != 0)
+			return;
+		
+		if(rotateRight)
+			currentRotation -= rotationIncrement;
+		if(rotateLeft)
+			currentRotation += rotationIncrement;
+		
+		if(rotateRight || rotateLeft)
+		{
+			userCamera.eye.x = cameraRadius * Math.cos(currentRotation);
+			userCamera.eye.z = cameraRadius * Math.sin(currentRotation);
+			userCamera.eye.y = cameraHeight;
+		}
 	}
-
-	@Override
-	public void keyTyped(KeyEvent event) 
+	
+	protected class ModelViewerEventListener
 	{
-		char c = event.getKeyChar();
-		System.out.println(c);
+		public void keyEvent(final KeyEvent e) 
+		{
+			if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() <= (49 + Settings.numCameras)))
+			{
+				if(e.getKeyCode() == 192)
+					selectCamera = 0;
+				else
+					selectCamera = e.getKeyCode() - 48;
+				switchCamera();
+			}
+			//right
+			else if(e.getKeyCode() == 39)
+			{
+				if(e.getAction() == KeyEvent.PRESS)
+					rotateRight = true;
+				else if(e.getAction() == KeyEvent.RELEASE)
+					rotateRight = false;
+			}
+			//left
+			else if(e.getKeyCode() == 37)
+			{
+				if(e.getAction() == KeyEvent.PRESS)
+					rotateLeft = true;
+				else if(e.getAction() == KeyEvent.RELEASE)
+					rotateLeft = false;
+			}
+		}
 	}
 }
