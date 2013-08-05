@@ -14,4 +14,11 @@ public class Camera
 		at = new Vec3(0, 0, 0);
 		eye = new Vec3(100, -100, 100);
 	}
+	
+	public Camera(Vec3 _up, Vec3 _at, Vec3 _eye)
+	{
+		up = _up;
+		at = _at;
+		eye = _eye;
+	}
 }
