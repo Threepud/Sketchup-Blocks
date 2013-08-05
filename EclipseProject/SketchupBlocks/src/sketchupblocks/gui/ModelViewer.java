@@ -26,7 +26,7 @@ public class ModelViewer implements ModelChangeListener
 	private int selectCamera = 0;
 	
 	private double currentRotation = 0;
-	private double rotationIncrement = 0.05;
+	private double rotationIncrement = 0.02;
 	private double cameraHeight = -500;
 	private double cameraRadius = 500;
 	private boolean rotateLeft = false;
@@ -160,19 +160,6 @@ public class ModelViewer implements ModelChangeListener
 	
 	private void createConstructionFloor()
 	{
-		/*
-		window.pushMatrix();
-		
-		window.scale(70, 0.1f, 70);    
-		window.translate(0, 10, 0);
-		
-		window.noStroke();
-		window.fill(255);
-		window.box(10);
-		
-		window.popMatrix();
-		*/
-		
 		window.pushMatrix();
 		
 		window.scale(5f, 1.0f, 5f);
