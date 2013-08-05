@@ -28,6 +28,5 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="SketchupBlocks/libs"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/peasycam.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
