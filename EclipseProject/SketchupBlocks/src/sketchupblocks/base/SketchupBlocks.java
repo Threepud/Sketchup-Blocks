@@ -15,7 +15,8 @@ public class SketchupBlocks extends PApplet
 	public void setup()
 	{
 		size(displayWidth, displayHeight, P3D);
-		frameRate(60);
+		//frameRate(60);
+		noSmooth();
 		
 		if (frame != null) 
 		{
