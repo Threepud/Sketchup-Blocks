@@ -26,20 +26,24 @@ public class ModelViewer implements ModelChangeListener
 	private int selectCamera = 0;
 	
 	private double currentRotation = 0;
-	private double rotationIncrement = 0.07;
+	private double rotationIncrement = 0.05;
 	private double cameraHeight = -500;
 	private double cameraRadius = 500;
 	private boolean rotateLeft = false;
 	private boolean rotateRight = false;
+	
+	PImage tilesTexture;
 	
 	public ModelViewer()
 	{
 		Vec3 up = new Vec3(0, 1, 0);
 		Vec3 at = new Vec3();
 		Vec3 eye = new Vec3();
+		
 		eye.x = cameraRadius * Math.cos(currentRotation);
 		eye.z = cameraRadius * Math.sin(currentRotation);
 		eye.y = cameraHeight;
+		
 		userCamera = new Camera(up, at, eye);
 		
 		systemCameras = new Camera[Settings.numCameras];
@@ -53,27 +57,9 @@ public class ModelViewer implements ModelChangeListener
 	
 	public void updateSystemCameraPosition(int cameraId, Vec3 pos)
 	{
-		systemCameras[cameraId].eye = new Vec3(pos.y * 10, -pos.z * 10, pos.x * 10);
-		
-				/*
-		if(oldPos == null)
-		{
-			float[] camPos = cam.getPosition();
-			oldPos = new Vector3D(camPos[0], camPos[1], camPos[2]);
-		}
-		
-		Vector3D newPos = new Vector3D(pos.y, -pos.z, pos.x);
-		
-		if(Settings.verbose >= 3)
-		{
-			System.out.println("OLD VEC: " + oldPos.getX() + ", " + oldPos.getY() + ", " + oldPos.getZ());
-			System.out.println("NEW VEC: " + newPos.getX() + ", " + newPos.getY() + ", " + newPos.getZ());
-		}
-		
-		Rotation rot = new Rotation(oldPos.normalize(), newPos.normalize());
-		Vector3D center = new Vector3D(0, 0, 0);
-		CameraState state = new CameraState(rot, center, cam.getDistance());
-		cam.setState(state, 500);*/
+		systemCameras[cameraId].eye.x = pos.y * 10;
+		systemCameras[cameraId].eye.y = -pos.z * 10;
+		systemCameras[cameraId].eye.z = pos.x * 10;
 	}
 	
 	public void setSystemCamera(int index, Camera newCamera)
@@ -85,11 +71,14 @@ public class ModelViewer implements ModelChangeListener
 	{
 		window = _window;
 		window.registerMethod("keyEvent", modelViewerEventListener);
+		
+		tilesTexture = window.loadImage("./images/newTile.png");
 	}
 	
 	public void setLobby(Lobby _lobby) throws RuntimeException
 	{
 	    lobby = _lobby;
+	    
 	    /*
 	    Model model = lobby.getModel();
 	    
@@ -99,11 +88,13 @@ public class ModelViewer implements ModelChangeListener
 	    	blockList = new ArrayList<>(model.getBlocks());
 	    	*/
 	    
+	    //################
 	    //debug for viewer
 	    blockList = new ArrayList<>();
 	    SmartBlock smartBlock = ColladaLoader.getSmartBlock("./models/PaperCube.dae");
 	    ModelBlock modelBlock = new ModelBlock();
 	    modelBlock.smartBlock = smartBlock;
+	    //################
 	    
 	    blockList.add(modelBlock);
 	}
@@ -141,9 +132,7 @@ public class ModelViewer implements ModelChangeListener
     			break;
     		}
     		else
-    		{
     			index++;
-    		}
     	}
     	
     	if(index == -1 || index == blockList.size())
@@ -171,6 +160,7 @@ public class ModelViewer implements ModelChangeListener
 	
 	private void createConstructionFloor()
 	{
+		/*
 		window.pushMatrix();
 		
 		window.scale(70, 0.1f, 70);    
@@ -179,6 +169,29 @@ public class ModelViewer implements ModelChangeListener
 		window.noStroke();
 		window.fill(255);
 		window.box(10);
+		
+		window.popMatrix();
+		*/
+		
+		window.pushMatrix();
+		
+		window.scale(5f, 1.0f, 5f);
+		
+		window.noStroke();
+		window.fill(255);
+		
+		window.beginShape();
+		
+		window.texture(tilesTexture);
+		window.textureMode(PConstants.NORMAL);
+		window.textureWrap(PConstants.REPEAT);
+		
+		window.vertex(-100, 0, -100, 0, 0);
+		window.vertex(100, 0, -100, 10, 0);
+		window.vertex(100, 0, 100, 10, 10);
+		window.vertex(-100, 0, 100, 0, 10);
+		
+		window.endShape(PConstants.CLOSE);
 		
 		window.popMatrix();
 	}
