@@ -51,11 +51,10 @@ public class ModelViewer implements ModelChangeListener
 		currentCamera = userCamera;
 	}
 	
-	public void updateCameraPosition(int cameraId, Vec3 pos)
+	public void updateSystemCameraPosition(int cameraId, Vec3 pos)
 	{
 		systemCameras[cameraId].eye = new Vec3(pos.y * 10, -pos.z * 10, pos.x * 10);
-		systemCameras[cameraId].up = new Vec3(0, 1, 0);
-		systemCameras[cameraId].at = new Vec3(0, 0, 0);
+		
 				/*
 		if(oldPos == null)
 		{

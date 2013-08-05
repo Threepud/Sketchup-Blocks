@@ -97,7 +97,7 @@ public class SessionManager
     {
     	cameraPositions[cameraID] = camPosition;
     	if(sarah != null)
-    		sarah.updateCameraPosition(cameraID, camPosition);
+    		sarah.updateSystemCameraPosition(cameraID, camPosition);
     	
     }
     
@@ -120,7 +120,7 @@ public class SessionManager
     	for(int k = 0 ; k < cameraPositions.length ; k++)
     	{
     	if(cameraPositions[k] != null)
-    		sarah.updateCameraPosition(k, cameraPositions[k]);
+    		sarah.updateSystemCameraPosition(k, cameraPositions[k]);
     	}
     	
     }
