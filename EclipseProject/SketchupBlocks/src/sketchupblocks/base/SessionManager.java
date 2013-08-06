@@ -84,7 +84,7 @@ public class SessionManager
     			System.out.println("--Recognized smart block--");
     		InputBlock iblock = new InputBlock(block, cameraEvent);
     		if(jimmy != null)
-    		jimmy.receiveBlock(iblock);
+    			jimmy.receiveBlock(iblock);
     	}
     	else
     	{
@@ -119,8 +119,8 @@ public class SessionManager
     	sarah.setLobby(lobby);
     	for(int k = 0 ; k < cameraPositions.length ; k++)
     	{
-    	if(cameraPositions[k] != null)
-    		sarah.updateSystemCameraPosition(k, cameraPositions[k]);
+	    	if(cameraPositions[k] != null)
+	    		sarah.updateSystemCameraPosition(k, cameraPositions[k]);
     	}
     	
     }
