@@ -1,4 +1,7 @@
 package sketchupblocks.database;
+
+import sketchupblocks.math.Vec3;
+
 public class Block
 {
 	public enum BlockType
@@ -10,5 +13,6 @@ public class Block
 	
 	public int blockId;
 	public int [] associatedFiducials;
+	public Vec3[] fiducialCoordinates;
 	public BlockType blockType;
 }  

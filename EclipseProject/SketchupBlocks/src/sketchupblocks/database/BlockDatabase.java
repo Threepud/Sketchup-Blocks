@@ -196,6 +196,9 @@ public class BlockDatabase
 		}
 		tempBlock.associatedFiducials = associatedFiducials;
 		
+		//fiducial coordinates
+		tempBlock.fiducialCoordinates = new Vec3[]{new Vec3(0, 0, 0)};
+		
 		//command block type
 		tempBlock.type = CommandBlock.CommandType.valueOf(elements[index++]);
 		
