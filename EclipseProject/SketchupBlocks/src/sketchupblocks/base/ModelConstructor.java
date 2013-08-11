@@ -132,7 +132,6 @@ public class ModelConstructor
 	{
 		if(iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
-			
 			BlockInfo block = blocks.get(iBlock.block.blockId);
 			
 			if(block == null)
@@ -165,36 +164,31 @@ public class ModelConstructor
 			{
 				processBin(block);
 			}
-			
-		
 		}
-		else //When a remove call is recieved
+		else //When a remove call is received
 		{
-		
 			BlockInfo block = blocks.get(iBlock.block.blockId);
 			
 			if(block == null)
 			{
-			return; // Nothing to remove
+				return; // Nothing to remove
 			}	
 			
-			if( block.fiducials.containsKey(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID)))
+			if(block.fiducials.containsKey(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID)))
 			{
 				block.fiducials.remove(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
 			}	
 			
 			/*
 			* Cleanup -- Remove blocks if not seen
-			* No need to clean up camera. They will allways be there.
+			* No need to clean up camera. They will always be there.
 			*/
 			
 			if(block.fiducials.isEmpty())
 			{
 				blocks.remove(iBlock.block.blockId);
 			}
-			
 		}
-		
 	}
 	
 	private double getAngle(int camID, int lm, double x, double y)
@@ -209,78 +203,71 @@ public class ModelConstructor
 		return val*val;	
 	}
 		
-		class BlockInfo
-		{
-		
+	class BlockInfo
+	{
 		int minEvents = 2;
 		int LIFETIME = 2000;	//ms
-		
-			class CamFid
-			{
-				int cameraID;
-				int fiducialID;
-				CamFid(int c, int f)
-				{
-					cameraID = c;
-					fiducialID = f;
-				}
+	
+		protected class CamFid
+		{
+			int cameraID;
+			int fiducialID;
 			
+			CamFid(int c, int f)
+			{
+				cameraID = c;
+				fiducialID = f;
 			}
-		
-			class Fiducial
-			{
-				public Fiducial(int _fiducialsID)
-				{
-					fiducialsID = _fiducialsID;
-					timestamp = new Date();
-				}
-				
-				public Line line;
-				public int fiducialsID;
-				public Date timestamp;
-			}
+		}
+	
+		protected class Fiducial
+		{
+			public Line line;
+			public int fiducialsID;
+			public Date timestamp;
 			
-			public BlockInfo(Block _smartBlock)
+			public Fiducial(int _fiducialsID)
 			{
-				fiducials = new HashMap<CamFid,Fiducial>();
-				smartBlock = _smartBlock;
-			}
-			
-			public int blockID;
-			public Block smartBlock;
-			private HashMap<CamFid,Fiducial> fiducials;
-			
-			boolean ready()
-			{
-			//	return false;
-				BlockInfo.Fiducial [] data = new Fiducial[0];
-				data = fiducials.values().toArray(data);
-				
-				int count = 0;
-				for (int k = 0; k < data.length; k++)
-				{
-					if (data[k] != null)
-					{
-						if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
-						{
-							count++;
-						}
-						else
-						{
-							data[k] = null;
-						}
-					}
-						
-				}
-				if (count >= minEvents)
-					return true;
-				else 
-					return false;
-				
+				fiducialsID = _fiducialsID;
+				timestamp = new Date();
 			}
 		}
 		
+		public BlockInfo(Block _smartBlock)
+		{
+			fiducials = new HashMap<CamFid,Fiducial>();
+			smartBlock = _smartBlock;
+		}
 		
+		public int blockID;
+		public Block smartBlock;
+		private HashMap<CamFid,Fiducial> fiducials;
 		
-		
+		public boolean ready()
+		{
+			Fiducial[] data = new Fiducial[0];
+			data = fiducials.values().toArray(data);
+			
+			int count = 0;
+			for (int k = 0; k < data.length; k++)
+			{
+				if (data[k] != null)
+				{
+					if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
+					{
+						count++;
+					}
+					else
+					{
+						data[k] = null;
+					}
+				}
+			}
+			
+			if (count >= minEvents)
+				return true;
+			else 
+				return false;
+		}
+	}	
 }

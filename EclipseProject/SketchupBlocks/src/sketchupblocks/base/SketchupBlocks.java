@@ -1,9 +1,6 @@
 package sketchupblocks.base;
 
-import java.util.ArrayList;
-
 import processing.core.*;
-import sketchupblocks.database.SmartBlock;
 
 public class SketchupBlocks extends PApplet 
 {

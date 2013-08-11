@@ -196,6 +196,9 @@ public class BlockDatabase
 		}
 		tempBlock.associatedFiducials = associatedFiducials;
 		
+		//fiducial coordinates
+		tempBlock.fiducialCoordinates = new Vec3[]{new Vec3(0, 0, 0)};
+		
 		//command block type
 		tempBlock.type = CommandBlock.CommandType.valueOf(elements[index++]);
 		
@@ -206,7 +209,6 @@ public class BlockDatabase
 		}
 	}
 	
-	//TODO: validate user information
 	private void loadUserBlockLine(String line) throws Exception
 	{
 		int index = 0;
@@ -260,7 +262,6 @@ public class BlockDatabase
 		}
 	}
 	
-	//TODO: check DB save
 	private void saveBlockData() throws Exception
 	{
 		ArrayList<Block> blockList = new ArrayList<>(blocks.values());
@@ -322,8 +323,8 @@ public class BlockDatabase
 					line += "," + Integer.toString(associatedFiducials[i]);
 				}
 				
-				//block vertices
-				Vec3[] vertices = smartBlockItem.vertices;
+				//block fiducial coordinates
+				Vec3[] vertices = smartBlockItem.fiducialCoordinates;
 				line += "\t" + Double.toString(vertices[0].x);
 				line += "," + Double.toString(vertices[0].y);
 				line += "," + Double.toString(vertices[0].z);
@@ -334,13 +335,8 @@ public class BlockDatabase
 					line += "," + Double.toString(vertices[i].z);
 				}
 				
-				//block indices
-				int[] indices = smartBlockItem.indices;
-				line += "\t" + Integer.toString(indices[0]);
-				for(int i = 1; i < indices.length; ++i)
-				{
-					line += "," + Integer.toString(indices[i]); 
-				}
+				//block collada file name
+				line += "\t" + smartBlockItem.name;
 				
 				printWriter.println(line);
 				line = "";
