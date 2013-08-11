@@ -29,6 +29,11 @@ public class Vec3
         z = xyz[2];
     }
 
+    public static Vec3 midpoint(Vec3 one, Vec3 two)
+    {
+        return new Vec3((one.x+two.x)/2.0, (one.y+two.y)/2.0, (one.z+two.z)/2.0);
+    }
+    
     public static double dot(Vec3 one, Vec3 two)
     {
         return (one.x * two.x + one.y * two.y + one.z * two.z);
