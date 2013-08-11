@@ -89,12 +89,20 @@ public class Matrix
         data[3] = new double[]{v.w};
     }
 	
-    public Vec3 toVec3() throws Exception
+    public Vec3 toVec3() 
 	 {
 	     if (cols != 1 || rows != 3)
 	     {
-	    	
-	    	 throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3");
+	    	try
+	    	{
+	    		throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3");
+	    	}
+	    	catch(UnexpectedVectorConversionException e)
+	    	{
+	    		e.printStackTrace();
+	    		return null;
+	    	}
+	    	 
 	     }
 	     else
 	     {
