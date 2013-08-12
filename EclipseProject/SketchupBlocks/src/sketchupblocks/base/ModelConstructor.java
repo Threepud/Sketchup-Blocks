@@ -126,6 +126,7 @@ public class ModelConstructor
 		
 		bestabc = system.go();
 		//.................So nou het ek die punte, soortvan.....Wat nou??????
+		//Nou het ek die positions van die fiducials in 3D space nodig, die kameras se viewvectors en die Smart blocks wat involved is.
 	}
 	
 	void store(InputBlock iBlock)
