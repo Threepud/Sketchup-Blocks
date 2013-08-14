@@ -72,14 +72,15 @@ public class ModelConstructor
 	{
 		BlockInfo.Fiducial [] fids = null;
 		fids = bin.fiducials.values().toArray(fids);
+		int numFiducials = fids.length;
 		
-		Line [] lines = new Line[fids.length];
+		Line [] lines = new Line[numFiducials];
 		for(int k = 0 ; k < fids.length ; k++)
 		{
 			lines[k] = fids[k].line;
 		}
 		
-		Vec3 [] positions = new Vec3[fids.length]; //Get from DB
+		Vec3 [] positions = new Vec3[numFiducials]; //Get from DB
 		if (!(bin.smartBlock instanceof SmartBlock))
 		{
 			return;
@@ -87,7 +88,7 @@ public class ModelConstructor
 		
 		SmartBlock sm =(SmartBlock)(bin.smartBlock);
 		
-		for(int k = 0 ; k < fids.length ; k++)
+		for(int k = 0 ; k < numFiducials ; k++)
 		{
 			int fiducialIndex = -1;
 			for(int l = 0 ;l < sm.associatedFiducials.length; l++)
@@ -127,6 +128,17 @@ public class ModelConstructor
 		bestabc = system.go();
 		//.................So nou het ek die punte, soortvan.....Wat nou??????
 		//Nou het ek die positions van die fiducials in 3D space nodig, die kameras se viewvectors en die Smart blocks wat involved is.
+		Vec3 [] fiducialWorld = new Vec3[numFiducials];
+			for(int k = 0 ; k < numFiducials ; k++)
+				{
+					fiducialWorld[k] = lines[k].point + Vec3.scalar(bestabc.bestPosition[k], lines[k].direction);
+				}
+		/*
+		* fiducialWorld -- Fiducial locations
+		* lines[k].direction -- the k'th fiducial view vector
+		* sm -- The smart block
+		*/
+		
 	}
 	
 	void store(InputBlock iBlock)
