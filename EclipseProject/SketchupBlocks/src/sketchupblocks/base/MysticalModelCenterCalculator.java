@@ -3,72 +3,99 @@ package sketchupblocks.base;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
+import sketchupblocks.math.Vec4;
 
 public class MysticalModelCenterCalculator 
 {
+
 	private static double ERROR_MARGIN = 0.5; //Of square difference
 	
 	public static Vec3 calculateModelCenter(InputBlock[] fidData, Vec3[] positions, Vec3[] cameraViewVectors)
 	{
-		//Magically craft array of fiducial id's
-		//Find max z, because it will be the top face.
-		if (fidData.length == 3)
+		try
 		{
-			//Ask the mystical SVD decomposer.
-			return null;
+				if (fidData.length == 3)
+				{
+					//Ask the mystical SVD decomposer.
+					return null;
+				}
+				
+				Vec3 m1 = Vec3.scalar(-1, ((SmartBlock)fidData[0].block).fiducialCoordinates[fidData[0].cameraEvent.fiducialID]);
+				Vec3 m2 = Vec3.scalar(-1, ((SmartBlock)fidData[1].block).fiducialCoordinates[fidData[1].cameraEvent.fiducialID]);
+				Vec3 m1m2Mid = Vec3.midpoint(m1, m2);
+				
+				//Now translate these points so that m1m2Mid is at the origin.
+				Vec3 origin = new Vec3(0, 0, 0);
+				Matrix mTranslation = getTranslationMatrix(m1m2Mid, origin);
+				Vec3 m1o = Matrix.multiply(mTranslation, new Vec4(m1)).toVec3();
+				Vec3 m2o = Matrix.multiply(mTranslation, new Vec4(m2)).toVec3();
+				
+				Vec3 w1w2Mid = Vec3.midpoint(positions[0], positions[1]);
+				Matrix wTranslation = getTranslationMatrix(w1w2Mid, origin);
+				Vec3 w1o = Matrix.multiply(wTranslation, new Vec4(positions[0])).toVec3();
+				Vec3 w2o = (Matrix.multiply(wTranslation, new Vec4(positions[1]))).toVec3();
+				
+				
+				Vec3 dm = Vec3.subtract(m1, m2);
+				Vec3 d = Vec3.subtract(positions[0], positions[1]);
+				
+				//Choose offset in some direction perpendicular to the d.
+				Vec3 offset = new Vec3(1, 1, -(d.x + d.y)/d.z);
+				offset.normalize();
+				Vec3 offsetPoint = Vec3.add(origin, offset);
+
+				Vec3 oOffset = new Vec3(1, 1, -(dm.x + dm.y)/dm.z);
+				Vec3 oOffsetPoint = Vec3.add(origin, Vec3.normalize(oOffset));
+				
+				Matrix R = SVDDecomposer.getRotationMatrix(new Vec3[]{m1o, m2o, oOffsetPoint}, new Vec3[]{w1o, w2o, offsetPoint});
+				
+				//mOffset = x
+				//basis2 = y
+				//d = z
+				Vec3 basis2 = Vec3.cross(dm, oOffset); //Right?
+				//So now we can rotate about x and y
+				
+				Matrix toDWorld = new Matrix(new Vec3[]{oOffset, basis2, dm}, true);
+				
+				Vec3[] dFidNorms = new Vec3[2];
+				for (int k = 0; k < 2; k++)
+				{
+					dFidNorms[k] = fidData[k].block.fiducialOrient[fidData[k].cameraEvent.fiducialID];
+					dFidNorms[k] = Matrix.multiply(mTranslation, new Vec4(dFidNorms[k])).toVec3();
+					dFidNorms[k] = Matrix.multiply(toDWorld, dFidNorms[k]);
+				}
+				
+				RotationMatrix rTry = new RotationMatrix(0);
+				Vec3[] tryNorms = new Vec3[2];
+				//Now we rotate them iteratively
+				for (int k = 0; k < 360; k += 2)
+				{
+					rTry.updateTheta(k);
+					
+					for (int i = 0; i < 2; i++)
+						tryNorms[i] = Matrix.multiply(rTry, dFidNorms[i]);
+					
+					//Evaluate goodness of rTry.
+				}
+				
+				
 		}
-		int topFid = 0;
-		if ((positions[1].z - positions[topFid].z)*(positions[1].z - positions[topFid].z) > ERROR_MARGIN)
+		catch(Exception e)
 		{
-			//Whoop! Simplest case. Take x,y, of top fiducial and z of any other fiducial as the center.
-			return new Vec3(positions[topFid].x, positions[topFid].y, positions[1].z);
+			System.out.println("Error");
 		}
-		
-		//If we arrive here, no fiducial was substantially higher than the other. So the observed positions are in the same x-y plane.
-		//Now we need to determine whether we have a case of two opposite fiducials or adjacent fiducials.
-		
-		//Preferably, we want 2 opposite sides:
-		if (((SmartBlock)fidData[0].block).areOppositeFidicials(fidData[0].cameraEvent.fiducialID, fidData[1].cameraEvent.fiducialID))
-		{
-			return Vec3.midpoint(positions[0], positions[1]);
-		}
-		
-		//We now have the most difficult case, with two adjacent fiducials.
-		//First we need to know which direction (w.r.t. the line between the two fiducials) is towards the inside of the block.
-		
-		Vec3 f1 = ((SmartBlock)fidData[0].block).fiducialCoordinates[fidData[0].cameraEvent.fiducialID];
-		Vec3 f2 = ((SmartBlock)fidData[1].block).fiducialCoordinates[fidData[1].cameraEvent.fiducialID];
-		Vec3 d = Vec3.subtract(f1,  f2);
-		
-		double theta = Math.acos((Vec3.dot(f1, f1) + Vec3.dot(d, d) - Vec3.dot(f2, f2))/(2*f1.length()*d.length()));
-		
-		Matrix wiggle = new Matrix(Vec3.normalize(d));
-		RotationMatrix ninety = new RotationMatrix(Math.PI/2.0);
-		if (Vec3.dot(cameraViewVectors[0], (Matrix.multiply(ninety, wiggle)).toVec3()) < 0)
-		{
-			if (Settings.verbose > 2)
-				System.out.println("Clockwise failed. Trying anticlockwise");
-			ninety.updateTheta(-1*Math.PI/2.0);
-			if (Vec3.dot(cameraViewVectors[0], (Matrix.multiply(ninety, wiggle)).toVec3()) < 0)
-			{
-				System.out.println("Eek! Neither direction is plausible. What to do!?\nReturning null like a pansy.");
-				return null;
-			}
-			else
-			{
-				theta = Math.PI*2 - theta;
-			}
-		}
-		
-		RotationMatrix R = new RotationMatrix(theta);
-		//d.normalize();
-		try 
-		{
-			d = (Matrix.multiply(R, wiggle)).toVec3();
-		} catch (Exception e) 
-		{
-			e.printStackTrace();
-		}
-		return Vec3.scalar(f1.length(), d);
+		return null;
+	}
+	
+	static Matrix getTranslationMatrix(Vec3 one, Vec3 two)
+	{
+		Matrix res = new Matrix(4, 4);
+		double[][] data = new double[4][];
+		data[0] = new double[]{1, 0, 0, two.x - one.x};
+		data[1] = new double[]{0, 1, 0, two.y - one.y};
+		data[2] = new double[]{0, 0, 1, two.z - one.z};
+		data[3] = new double[]{0, 0, 0, 1};
+		res.data = data;
+		return res;
 	}
 }
