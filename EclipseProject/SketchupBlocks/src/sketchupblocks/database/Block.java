@@ -14,5 +14,6 @@ public class Block
 	public int blockId;
 	public int [] associatedFiducials;
 	public Vec3[] fiducialCoordinates;
+	public Vec3[] fiducialOrient;
 	public BlockType blockType;
 }  
