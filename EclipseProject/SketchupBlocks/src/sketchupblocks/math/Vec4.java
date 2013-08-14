@@ -31,6 +31,14 @@ public class Vec4
         w = xyzw[3];
     }
 
+    public Vec4(Vec3 v)
+    {
+    	x = v.x;
+    	y = v.y;
+    	z = v.z;
+    	w = 0;
+    }
+    
     public static double dot(Vec4 one, Vec4 two)
     {
         return (one.x * two.x + one.y * two.y + one.z * two.z + one.w*two.w);
@@ -86,5 +94,10 @@ public class Vec4
     public double[] toArray()
     {
         return new double[]{x, y, z, w};
+    }
+    
+    public Vec3 toVec3()
+    {
+        return new Vec3(x, y, z);
     }
 }
