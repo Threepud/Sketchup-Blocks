@@ -89,19 +89,11 @@ public class Matrix
         data[3] = new double[]{v.w};
     }
 	
-    public Vec3 toVec3() 
+    public Vec3 toVec3() throws UnexpectedVectorConversionException 
 	 {
-	     if (cols != 1 || rows != 3)
+	     if (cols != 1 || rows < 3)
 	     {
-	    	try
-	    	{
-	    		throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3");
-	    	}
-	    	catch(UnexpectedVectorConversionException e)
-	    	{
-	    		e.printStackTrace();
-	    		return null;
-	    	}
+    		throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3");
 	    	 
 	     }
 	     else
@@ -111,7 +103,7 @@ public class Matrix
 	     }
 	 }
 	
-	public Vec4 toVec4() throws Exception
+	public Vec4 toVec4() throws UnexpectedVectorConversionException
 	 {
 	     if (cols != 1 || rows != 4)
 	     {
@@ -123,6 +115,54 @@ public class Matrix
              return result;
          }
 	 }
+	
+	public static Vec3 multiply(Matrix m1, Vec3 v)
+	{
+		if (m1.cols != 3)
+		{
+			System.out.println("Error!! Cannot multiply with vec3");
+			return null;
+		}
+		
+		double[] vdata = v.toArray();
+		double[] resData = new double[3];
+		
+		for (int row = 0; row < m1.rows; row++)
+		{
+			resData[row] = 0;
+			for (int mcol = 0; mcol < m1.cols; mcol++)
+			{
+				resData[row] += m1.data[row][mcol]*vdata[mcol];
+			}
+			
+		}
+		
+		return new Vec3(resData[0], resData[1], resData[2]);
+	}
+	
+	public static Vec4 multiply(Matrix m1, Vec4 v)
+	{
+		if (m1.cols != 4)
+		{
+			System.out.println("Error!! Cannot multiply with vec3");
+			return null;
+		}
+		
+		double[] vdata = v.toArray();
+		double[] resData = new double[4];
+		
+		for (int row = 0; row < m1.rows; row++)
+		{
+			resData[row] = 0;
+			for (int mcol = 0; mcol < m1.cols; mcol++)
+			{
+				resData[row] += m1.data[row][mcol]*vdata[mcol];
+			}
+			
+		}
+		
+		return new Vec4(resData[0], resData[1], resData[2], resData[3]);
+	}
 	
 	public static Matrix multiply(Matrix m1, Matrix m2)
 	    {
