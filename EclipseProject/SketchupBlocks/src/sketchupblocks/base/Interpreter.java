@@ -7,14 +7,14 @@ public class Interpreter
 {
 	private SessionManager sessionMan;
 	private PApplet parent;
-	//private TuioProcessing tuioClient;
+	private TuioProcessing tuioClient;
 	private int cameraID;
 	  
 	public Interpreter(int port, SessionManager _sessMan, PApplet _parent, int _id)
 	{
 		sessionMan = _sessMan;
 		parent = _parent;
-		//tuioClient  = new TuioProcessing(this, port);
+		tuioClient  = new TuioProcessing(this, port);
 		cameraID = _id;
 	}
   
