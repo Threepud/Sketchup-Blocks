@@ -13,11 +13,14 @@ public class SVDecomposer
     //Return U, W, V
     static Matrix[] decompose(Matrix A)
     {
+        
         A = prep(A);
         
         //Now A can be treated as a Matrix with 1-based indexing.
         int n = A.cols-1;
         int m = A.rows-1;
+        
+        
         int i, its, j, jj, k, l = 0, nm = 0, flag;
         double g = 0;
         double scale = 0;
@@ -31,7 +34,9 @@ public class SVDecomposer
 	{
             l = i+1;
             rv1[i] = scale*g;
-            g = s = scale = 0.0;
+            g = 0.0;
+            s = 0.0;
+            scale = 0.0;
             if (i <= m) 
             {
                 for (k = i; k <= m; k++) 
@@ -44,10 +49,10 @@ public class SVDecomposer
                         s += A.data[k][i]*A.data[k][i];
                     }
                     f = A.data[i][i];
-                    g = f > 0 ? Math.sqrt(s) : -1*Math.sqrt(s);//Unicorn! -SIGN(Math.sqrt(s),f);
+                    g = (-1)*(f > 0 ? Math.sqrt(s) : -1*Math.sqrt(s));//Unicorn! -SIGN(Math.sqrt(s),f);
                     h = f*g - s;
                     A.data[i][i] = f - g;
-                    for (j=l;j<=n;j++) 
+                    for (j = l; j <= n; j++) 
                     {
                         for (s = 0.0, k = i; k <= m; k++) 
                             s += A.data[k][i]*A.data[k][j];
@@ -60,7 +65,9 @@ public class SVDecomposer
                 }
             }
             w[i] = scale*g;
-            g = s = scale =0.0;
+            g = 0.0;
+            s = 0.0;
+            scale =0.0;
             if (i <= m && i != n) 
             {
                 for (k = l; k <= n; k++) 
@@ -73,7 +80,7 @@ public class SVDecomposer
                         s += A.data[i][k]*A.data[i][k];
                     }
                     f = A.data[i][l];
-                    g = f > 0 ? Math.sqrt(s) : Math.sqrt(s)*-1;
+                    g = (-1)*(f > 0 ? Math.sqrt(s) : Math.sqrt(s)*-1);
                     h = f*g - s;
                     A.data[i][l] = f - g;
                     for (k = l; k <= n; k++) 
@@ -108,7 +115,10 @@ public class SVDecomposer
                     }
                 }
                 for (j = l; j <= n; j++) 
-                v[i][j] = v[j][i] = 0.0;
+                {
+                    v[i][j] = 0.0;
+                    v[j][i] = 0.0;
+                }
             }
             v[i][i] = 1.0;
             g = rv1[i];
@@ -203,7 +213,7 @@ public class SVDecomposer
                 h = rv1[k];
                 f = ((y-z)*(y+z)+(g-h)*(g+h))/(2.0*h*y);
                 g = pythag(f,1.0);
-                f = ((x-z)*(x+z)+h*((y/(f+f > 0 ? Math.abs(g) : -1*Math.abs(g)))-h))/x;
+                f = ((x-z)*(x+z)+h*( (y/( f+ (f > 0 ? Math.abs(g) : -1*Math.abs(g)) )) -h))/x;
                 c = s = 1.0;// Next QR transformation:
                 for (j = l; j <= nm; j++) 
                 {
@@ -259,7 +269,7 @@ public class SVDecomposer
         }
         W.data = d1;
         
-        Matrix V = new Matrix(n+1, n+1);
+        Matrix V = new Matrix(v);
         V = unprep(V);
         A = unprep(A);
         
