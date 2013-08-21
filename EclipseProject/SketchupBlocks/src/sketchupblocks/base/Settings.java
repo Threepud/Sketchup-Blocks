@@ -10,8 +10,12 @@ public class Settings
 	public static int numSlots = 5;
 	public static int scrollTrigger = 15;
 	
-	public static int numCameras = 1;
-	public static CameraSettings [] cameraSettings = new CameraSettings[]{new CameraSettings(51.2, 640.0/480.0, 3333)};
+	public static int numCameras = 2;
+	public static CameraSettings [] cameraSettings = new CameraSettings[]
+	{
+		new CameraSettings(51.2, 640.0/480.0, 3333),
+		new CameraSettings(51.2, 640.0/480.0, 3334)
+	};
 	//cameraSettings[0] = ;
 	//public static int[] cameraPorts = {3333};
 	
