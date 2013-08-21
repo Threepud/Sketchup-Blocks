@@ -86,4 +86,10 @@ public class Vec4
     {
         return new double[]{x, y, z, w};
     }
+    
+    @Override
+    public String toString()
+    {
+        return "["+x+"; "+y+"; "+z+"; "+w+"]";
+    }
 }
