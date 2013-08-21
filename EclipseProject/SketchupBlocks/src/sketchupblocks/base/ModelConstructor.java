@@ -131,7 +131,7 @@ public class ModelConstructor
 		Vec3 [] fiducialWorld = new Vec3[numFiducials];
 			for(int k = 0 ; k < numFiducials ; k++)
 				{
-					fiducialWorld[k] = lines[k].point + Vec3.scalar(bestabc.bestPosition[k], lines[k].direction);
+					fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
 				}
 		/*
 		* fiducialWorld -- Fiducial locations
