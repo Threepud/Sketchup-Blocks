@@ -30,6 +30,8 @@ public class MysticalModelCenterCalculator
 				Vec3 m1o = Matrix.multiply(mTranslation, new Vec4(m1)).toVec3();
 				Vec3 m2o = Matrix.multiply(mTranslation, new Vec4(m2)).toVec3();
 				
+				//Translate the fiducials' midpoint to the origin.
+				//Multiply the fiducial positions by the same translation matrix.
 				Vec3 w1w2Mid = Vec3.midpoint(positions[0], positions[1]);
 				Matrix wTranslation = getTranslationMatrix(w1w2Mid, origin);
 				Vec3 w1o = Matrix.multiply(wTranslation, new Vec4(positions[0])).toVec3();
@@ -43,10 +45,12 @@ public class MysticalModelCenterCalculator
 				Vec3 offset = new Vec3(1, 1, -(d.x + d.y)/d.z);
 				offset.normalize();
 				Vec3 offsetPoint = Vec3.add(origin, offset);
-
+				//Choose a similar offset,  perpendicular to dm.
 				Vec3 oOffset = new Vec3(1, 1, -(dm.x + dm.y)/dm.z);
 				Vec3 oOffsetPoint = Vec3.add(origin, Vec3.normalize(oOffset));
 				
+				//Now we have 3 points, so we can continue from there....
+				//Get the rotation between the model points and fiducial points
 				Matrix R = SVDDecomposer.getRotationMatrix(new Vec3[]{m1o, m2o, oOffsetPoint}, new Vec3[]{w1o, w2o, offsetPoint});
 				
 				//mOffset = x
@@ -60,6 +64,7 @@ public class MysticalModelCenterCalculator
 				Vec3[] dFidNorms = new Vec3[2];
 				for (int k = 0; k < 2; k++)
 				{
+					//Transform our fiducial normals from model space to D world.
 					dFidNorms[k] = fidData[k].block.fiducialOrient[fidData[k].cameraEvent.fiducialID];
 					dFidNorms[k] = Matrix.multiply(mTranslation, new Vec4(dFidNorms[k])).toVec3();
 					dFidNorms[k] = Matrix.multiply(toDWorld, dFidNorms[k]);
@@ -72,8 +77,11 @@ public class MysticalModelCenterCalculator
 				{
 					rTry.updateTheta(k);
 					
+					//Rotate the fiducial normals through the proposed angle and see whether that matches the observed norms.
+					//For this, we need the observed norms.
 					for (int i = 0; i < 2; i++)
 						tryNorms[i] = Matrix.multiply(rTry, dFidNorms[i]);
+					
 					
 					//Evaluate goodness of rTry.
 				}
