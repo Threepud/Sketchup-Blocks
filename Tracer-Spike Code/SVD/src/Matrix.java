@@ -14,18 +14,11 @@ public class Matrix
     }
 
     //Constructor 2
-    public Matrix(int _rows, int _cols, double[][] d)
+    public Matrix(double[][] d)
     {
-        rows = _rows;
-        cols = _cols;
+        rows = d.length;
+        cols = d[0].length;
         data = d;
-        if (d.length != _rows || d[0].length != _cols)
-        {
-            System.out.println("Mismatch netween specified row x col numbers and actual data");
-            rows = -1;
-            cols = -1;
-            data= null;
-        }
     }
 
     //Constructor 3
@@ -62,33 +55,6 @@ public class Matrix
         }
     }
 
-    public void repeatAsRows(Vec3 v)
-    {
-        if (cols != 3 || rows != 3)
-        {
-            System.out.println("Cannot set as repeat vector");
-        }
-        for (int k = 0; k < 3; k++)
-        {
-            data[k][0] = v.x;
-            data[k][1] = v.y;
-            data[k][2] = v.z;
-        }
-    }
-    
-    public void repeatAsCols(Vec3 v)
-    {
-        if (cols != 3 || rows != 3)
-        {
-            System.out.println("Cannot set as repeat vector");
-        }
-        for (int k = 0; k < 3; k++)
-        {
-            data[0][k] = v.x;
-            data[1][k] = v.y;
-            data[2][k] = v.z;
-        }
-    }
     
     //Constructor 4
     public Matrix(Vec3 v)
@@ -116,6 +82,54 @@ public class Matrix
     }
 	
     
+    public Matrix(double[] d)
+    {
+        cols = 1;
+        rows = d.length;
+        data = new double[rows][cols];
+        for (int k = 0; k < rows; k++)
+        {
+            data[k][0] = d[k];
+        }
+    }
+    
+    public void repeatAsRows(Vec3 v)
+    {
+        if (cols != 3 || rows != 3)
+        {
+            System.out.println("Cannot set as repeat vector");
+        }
+        for (int k = 0; k < 3; k++)
+        {
+            data[k][0] = v.x;
+            data[k][1] = v.y;
+            data[k][2] = v.z;
+        }
+    }
+    
+    
+    
+    public void repeatAsCols(Vec3 v)
+    {
+        if (cols != 3 || rows != 3)
+        {
+            System.out.println("Cannot set as repeat vector");
+        }
+        for (int k = 0; k < 3; k++)
+        {
+            data[0][k] = v.x;
+            data[1][k] = v.y;
+            data[2][k] = v.z;
+        }
+    }
+    
+    public boolean isSquare()
+    {
+        if (rows == cols)
+                return true;
+        else return false;
+    }
+    
     public static Matrix subtract(Matrix A, Matrix B)
     {
         if (A.cols != B.cols || A.rows != B.rows)
@@ -133,32 +147,40 @@ public class Matrix
                 data[k][i] = A.data[k][i] - B.data[k][i];
             }
         }
-        return new Matrix(A.rows, A.cols, data);
+        return new Matrix(data);
     }
     
-    //This should, preferably replace toVec3, but that would involve refactoring that I'm not currently about to do.
-    public Vec3[] toVec3Array()
+    public double[] toArray() throws UnexpectedArrayConversionException
     {
-        try
+        if (cols != 1)
         {
-            if (rows != 3)
-            {
-                throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3Array");
-            }
-
-            Vec3[] res = new Vec3[cols];
-
-            for (int k = 0; k < cols; k++)
-            {
-                res[k] = new Vec3(data[0][k], data[1][k], data[2][k]);
-            }
-            return res;
+             throw new UnexpectedArrayConversionException("Cannot convert matrix to Array");
         }
-        catch(Exception e)
+        double[] res = new double[rows];
+        for (int k = 0; k < rows; k++)
         {
-            e.printStackTrace();
+            res[k] = data[k][0];
         }
-        return null;
+        return res;
+    }
+    
+    
+    //This should, preferably replace toVec3, but that would involve refactoring that I'm not currently about to do.
+    public Vec3[] toVec3Array() throws UnexpectedVectorConversionException
+    {
+        if (rows != 3)
+        {
+            throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3Array");
+        }
+
+        Vec3[] res = new Vec3[cols];
+
+        for (int k = 0; k < cols; k++)
+        {
+            res[k] = new Vec3(data[0][k], data[1][k], data[2][k]);
+        }
+        return res;
+        
     }
     
     
