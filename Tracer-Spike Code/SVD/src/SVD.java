@@ -15,40 +15,75 @@ public class SVD {
      */
     public static void main(String[] args) 
     {
-        double anglez = Math.PI/3.0;
-        Vec3[] pointsA = new Vec3[]{new Vec3(2,1,3), new Vec3(2,2,-2), new Vec3(5,0,2)};
-        Vec3 centroidA = calculateCentroid(pointsA);
-        Matrix setA = new Matrix(pointsA, true);
-        System.out.println("A = "+setA);
+        try
+        {
+            double anglez = Math.PI/3.0;
+            Vec3[] pointsA = new Vec3[]{new Vec3(2,1,3), new Vec3(2,2,-2), new Vec3(5,0,2)};
+            Vec3 centroidA = calculateCentroid(pointsA);
+            Matrix setA = new Matrix(pointsA, true);
+            System.out.println("A = "+setA);
+
+            RotationMatrix3D Rknown = new RotationMatrix3D(anglez);
+            System.out.println("Rknown = "+Rknown);
+            Matrix setB = Matrix.multiply(Rknown, setA.transpose());
+            setB = setB.transpose();
+            System.out.println("B = "+setB);
+
+            Vec3[] pointsB = setB.toVec3Array();
+            Vec3 centroidB = calculateCentroid(pointsB);
+            System.out.println("CentroidA: "+centroidA);
+            System.out.println("CentroidB: "+centroidB);
+
+            Matrix H = calculateCovariance(setA, setB, centroidA.toArray(), centroidB.toArray());
+            System.out.println("H = "+H);
+
+            //So now we need only do the actual svd decomposition...
+            //R = V*U.'
+            //Check for reflection case.
+
+            Matrix [] usv = SVDecomposer.decompose(H); //U, S, V
+            System.out.println("U: "+usv[0]);
+            System.out.println("S: "+usv[1]);
+            System.out.println("V: "+usv[2]);
+            Matrix proposedR = Matrix.multiply(usv[2], usv[0].transpose());
+            
+            System.out.println("Proposed R "+proposedR);
+            
+            if(calculateDeterminant(proposedR) < 0)
+            {
+                int COLUMN_THREE = 2;
+                for (int k = 0; k < proposedR.rows; k++)
+                {
+                    usv[2].data[COLUMN_THREE][k] *= -1;
+                }
+                proposedR = Matrix.multiply(usv[2], usv[0].transpose());
+            }
+            System.out.println("Proposed R "+proposedR);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
         
-        RotationMatrix3D Rknown = new RotationMatrix3D(anglez);
-        System.out.println(Rknown);
-        Matrix setB = Matrix.multiply(Rknown, setA.transpose());
-        setB = setB.transpose();
-        System.out.println("B = "+setB);
+    }
+    
+    public static double calculateDeterminant(Matrix R)
+    {
+        Matrix[] lup = LUDecomposer.decompose(R);
         
-        Vec3[] pointsB = setB.toVec3Array();
-        Vec3 centroidB = calculateCentroid(pointsB);
-        System.out.println("CentroidA: "+centroidA);
-        System.out.println("CentroidB: "+centroidB);
         
-        Matrix H = calculateCovariance(setA, setB, centroidA.toArray(), centroidB.toArray());
-        System.out.println("H = "+H);
+        double res= 1;
+        for (int k = 0; k < lup[2].rows; k++)
+        {
+            res *= lup[1].data[k][k];
+        }
         
-        /*Vec3[] A = new Vec3[]{new Vec3(1, 2, 3), new Vec3(-1, -2, -3), new Vec3(3, 2, 1)};
-        Vec3[] B = new Vec3[]{new Vec3(4, 5, 6), new Vec3(6, 4, 5), new Vec3(5, 4, 6)};
-        double[] centerA = new double[]{1, 1, 1};
-        double[] centerB = new double[]{2, 1, 3};
-        calculateCovariance(A, B, centerA, centerB);*/
-       
-        
+        int numInversions = lup[3].cols;
+        return numInversions % 2 != 0 ? -1*res : res;
     }
     
     public static Matrix calculateCovariance(Matrix A, Matrix B, double[] midA, double[] midB)
     {
-        Matrix H = new Matrix(3, 3);
-        //double[][] d = new double[3][3];
-        
         Matrix centroidA = new Matrix(3, 3);
         centroidA.repeatAsRows(new Vec3(midA));
         Matrix centroidB = new Matrix(3, 3);
@@ -59,44 +94,10 @@ public class SVD {
             System.out.println("Error. Nonmatching datasets");
             return null;
         }
+        Matrix H = Matrix.multiply((Matrix.subtract(A, centroidA)).transpose(), Matrix.subtract(B, centroidB));
         
-        /*for (int k = 0; k < A.cols; k++)
-        {
-            for (int i = 0; i < A.rows; i++)
-            {
-                d[k][i] = (A.data[i][k] - midA[i])*(B.data[i][k] - midB[i]);
-            }
-        }*/
-        System.out.println(Matrix.subtract(A, centroidA));
-        System.out.println(Matrix.subtract(B, centroidB));
-        H = Matrix.multiply((Matrix.subtract(A, centroidA)).transpose(), Matrix.subtract(B, centroidB));
-        
-        //H.data = d;
-        System.out.println("H: "+H);
         return H;
     }
-    
-    /*public static Matrix calculateCovariance(Vec3[] A, Vec3[] B, double[] midA, double[] midB)
-    {
-        Matrix H = new Matrix(3, 3);
-        double[][] d = new double[3][3];
-        
-        for (int j = 0; j < A.length; j++)
-        {
-            double[] vecA = A[j].toArray();
-            double [] vecB = B[j].toArray();
-            for (int k = 0; k < 3; k++)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    d[k][i] += (vecA[i] - midA[i])*(vecB[k] - midB[k]);
-                }
-            }
-        }
-        
-        H.data = d;
-        return H;
-    }*/
     
     public static Vec3 calculateCentroid(Vec3[] points)
     {
