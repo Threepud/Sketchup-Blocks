@@ -1,6 +1,8 @@
 package sketchupblocks.base;
 
 import sketchupblocks.database.SmartBlock;
+import sketchupblocks.math.Line;
+import sketchupblocks.math.LinearSystemSolver;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Vec4;
@@ -10,7 +12,7 @@ public class MysticalModelCenterCalculator
 
 	private static double ERROR_MARGIN = 0.5; //Of square difference
 	
-	public static Vec3 calculateModelCenter(InputBlock[] fidData, Vec3[] positions, Vec3[] cameraViewVectors)
+	public static Vec3 calculateModelCenter(Vec3 [] rotation, InputBlock[] fidData, Vec3[] positions, Vec3[] cameraViewVectors)
 	{
 		try
 		{
@@ -61,17 +63,22 @@ public class MysticalModelCenterCalculator
 				
 				Matrix toDWorld = new Matrix(new Vec3[]{oOffset, basis2, dm}, true);
 				
-				Vec3[] dFidNorms = new Vec3[2];
+				Vec3[] dFidUp = new Vec3[2];
 				for (int k = 0; k < 2; k++)
 				{
 					//Transform our fiducial normals from model space to D world.
-					dFidNorms[k] = fidData[k].block.fiducialOrient[fidData[k].cameraEvent.fiducialID];
-					dFidNorms[k] = Matrix.multiply(mTranslation, new Vec4(dFidNorms[k])).toVec3();
-					dFidNorms[k] = Matrix.multiply(toDWorld, dFidNorms[k]);
+					dFidUp[k] = fidData[k].block.fiducialOrient[fidData[k].cameraEvent.fiducialID];
+					dFidUp[k] = Matrix.multiply(mTranslation, new Vec4(dFidUp[k])).toVec3();
+					dFidUp[k] = Matrix.multiply(toDWorld, dFidUp[k]);
 				}
 				
+				
+				for (int i = 0; i < 2; i++)
+					rotation[i] = Matrix.multiply(toDWorld, new Vec4(rotation[i])).toVec3();
+				
 				RotationMatrix rTry = new RotationMatrix(0);
-				Vec3[] tryNorms = new Vec3[2];
+				Vec3[] tryUps = new Vec3[2];
+				double [] scores = new double[360];
 				//Now we rotate them iteratively
 				for (int k = 0; k < 360; k += 2)
 				{
@@ -79,18 +86,29 @@ public class MysticalModelCenterCalculator
 					
 					//Rotate the fiducial normals through the proposed angle and see whether that matches the observed norms.
 					//For this, we need the observed norms.
+					double error = 0;
 					for (int i = 0; i < 2; i++)
-						tryNorms[i] = Matrix.multiply(rTry, dFidNorms[i]);
-					
-					
-					//Evaluate goodness of rTry.
+					{
+						tryUps[i] = Matrix.multiply(rTry, dFidUp[i]);
+						
+						error += Math.acos(Vec3.dot(tryUps[i], rotation[i]));
+						
+					}
+					scores[k] = error;
 				}
 				
+				int highest = 0;
+				for (int k = 0; k < 360; k += 2)
+					if(scores[k] > scores[highest])
+						highest = k;
+				
+				
+				//so highest is the best rotation
 				
 		}
 		catch(Exception e)
 		{
-			System.out.println("Error");
+			System.out.println("Error:"+e);
 		}
 		return null;
 	}

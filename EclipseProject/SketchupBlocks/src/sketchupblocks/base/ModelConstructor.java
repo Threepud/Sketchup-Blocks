@@ -8,7 +8,9 @@ import sketchupblocks.database.*;
 import sketchupblocks.calibrator.*;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.LinearSystemSolver;
+import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
+import sketchupblocks.math.Vec4;
 import sketchupblocks.network.Lobby;
 
 public class ModelConstructor
@@ -41,24 +43,6 @@ public class ModelConstructor
 			
 			boolean changedPosition = cally.processBlock(iBlock);
 			calibrated = cally.isCalibrated();
-			/*if (calibrated && changedPosition)
-			{
-				if(Settings.verbose >= 3 )
-					System.out.println("==Cameras are calibrated==");
-				for(int k = 0 ; k < cally.cameraPositions.length ; k++)
-				{
-					sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
-					System.out.println(cally.cameraPositions[k].x+":"+cally.cameraPositions[k].y+":"+cally.cameraPositions[k].z);
-				}
-				
-				Iterator<java.util.Map.Entry<Integer, Bin>> iter = binList.entrySet().iterator();
-				while(iter.hasNext())
-				{
-					Camera bin = iter.next().getValue();
-					if (bin.ready())
-						processBin(bin);
-				}
-			}*/
 		}
 		else 
 		{
@@ -72,6 +56,10 @@ public class ModelConstructor
 	{
 		BlockInfo.Fiducial [] fids = null;
 		fids = bin.fiducials.values().toArray(fids);
+		
+		BlockInfo.CamFid [] camIDs = null;
+		camIDs = bin.fiducials.keySet().toArray(camIDs);
+		
 		int numFiducials = fids.length;
 		
 		Line [] lines = new Line[numFiducials];
@@ -129,16 +117,59 @@ public class ModelConstructor
 		//.................So nou het ek die punte, soortvan.....Wat nou??????
 		//Nou het ek die positions van die fiducials in 3D space nodig, die kameras se viewvectors en die Smart blocks wat involved is.
 		Vec3 [] fiducialWorld = new Vec3[numFiducials];
+		Vec3 [] rotations = new Vec3[numFiducials];
 			for(int k = 0 ; k < numFiducials ; k++)
 				{
+<<<<<<< HEAD
 					fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+=======
+					fiducialWorld[k] = Vec3.add(lines[k].point,Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+					
+					RotationMatrix rTry = new RotationMatrix(fids[k].rotation);
+					rotations[k] = getUpVector(camIDs[k].cameraID);
+					rotations[k] =  Matrix.multiply(rTry, new Vec4(rotations[k])).toVec3();
+>>>>>>> Added code to add get rotation
 				}
+			
+		
+			
 		/*
+		* rotations -- the rotations as viewed by the camera
 		* fiducialWorld -- Fiducial locations
 		* lines[k].direction -- the k'th fiducial view vector
 		* sm -- The smart block
 		*/
 		
+	}
+	
+	Vec3 getUpVector(int CamID)
+	{
+		Vec3[] landmarkToCamera = new Vec3[4];
+		double[] angles = new double[4];
+		for (int k = 0; k < 4; k++)
+		{
+			landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[CamID], Settings.landmarks[k]);
+			angles[k] = getAngle(CamID, k, 0.5, 0.5+0.01);
+		}
+		// Do calculation 
+		Vec3 mysticalLine = LinearSystemSolver.solve(landmarkToCamera, angles);
+		Line top = new Line(cally.cameraPositions[CamID], mysticalLine);
+		
+		landmarkToCamera = new Vec3[4];
+		angles = new double[4];
+		for (int k = 0; k < 4; k++)
+		{
+			landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[CamID], Settings.landmarks[k]);
+			angles[k] = getAngle(CamID, k, 0.5, 0.5-0.01);
+		}
+		// Do calculation 
+		mysticalLine = LinearSystemSolver.solve(landmarkToCamera, angles);
+		Line bottom = new Line(cally.cameraPositions[CamID], mysticalLine);
+		
+		top.direction.normalize();
+		bottom.direction.normalize();
+		
+		return Vec3.subtract(top.direction, bottom.direction);
 	}
 	
 	void store(InputBlock iBlock)
@@ -157,7 +188,7 @@ public class ModelConstructor
 			
 			if(fiducial == null)
 			{
-				fiducial =  block.new Fiducial(iBlock.cameraEvent.fiducialID);
+				fiducial =  block.new Fiducial(iBlock.cameraEvent.fiducialID,iBlock.cameraEvent.rotation);
 				block.fiducials.put(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
 			}		
 
@@ -236,12 +267,14 @@ public class ModelConstructor
 		protected class Fiducial
 		{
 			public Line line;
+			public double rotation;
 			public int fiducialsID;
 			public Date timestamp;
 			
-			public Fiducial(int _fiducialsID)
+			public Fiducial(int _fiducialsID, double rot)
 			{
 				fiducialsID = _fiducialsID;
+				rotation = rot;
 				timestamp = new Date();
 			}
 		}
