@@ -81,7 +81,10 @@ public class SessionManager
     	else if (block instanceof SmartBlock)
     	{
     		if (Settings.verbose >= 3)
+    		{
     			System.out.println("--Recognized smart block--");
+    			System.out.println("Camera ID: " + cameraEvent.cameraID);
+    		}
     		InputBlock iblock = new InputBlock(block, cameraEvent);
     		if(jimmy != null)
     			jimmy.receiveBlock(iblock);
