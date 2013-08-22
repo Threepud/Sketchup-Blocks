@@ -64,9 +64,9 @@ public class ColladaLoader
 				 * Google Sketchup exports its Collada files with inches as its measuring unit.
 				 */
 				vertices[x] = new Vec3();
-				vertices[x].x = Double.parseDouble(stringVertices[index + 1]) * unitMeter;
-				vertices[x].y = -Double.parseDouble(stringVertices[index + 2]) * unitMeter;
-				vertices[x].z = Double.parseDouble(stringVertices[index]) * unitMeter;
+				vertices[x].x = Double.parseDouble(stringVertices[index]) * unitMeter;
+				vertices[x].y = -Double.parseDouble(stringVertices[index + 1]) * unitMeter;
+				vertices[x].z = Double.parseDouble(stringVertices[index + 2]) * unitMeter;
 			}
 			catch(NumberFormatException e)
 			{
@@ -251,9 +251,9 @@ public class ColladaLoader
 			String vectorString = "";
 			for(Vec3 vector: blocks.get(x).smartBlock.vertices)
 			{
-				vectorString += vector.z / 0.02539999969303608 + " ";
 				vectorString += vector.x / 0.02539999969303608 + " ";
-				vectorString += (-vector.y / 0.02539999969303608) + " ";
+				vectorString += vector.y / 0.02539999969303608 + " ";
+				vectorString += vector.z / 0.02539999969303608 + " ";
 			}
 			floatArray.setContent(vectorString.substring(0, vectorString.length() - 1));
 			
@@ -303,9 +303,9 @@ public class ColladaLoader
 
 				for(int k = 0; k < 3; ++k)
 				{
-					normalString += normal.z + " ";
 					normalString += normal.x + " ";
-					normalString += -normal.y + " ";
+					normalString += normal.y + " ";
+					normalString += -normal.z + " ";
 				}
 			}
 			floatArray.setContent(normalString.substring(0, normalString.length() - 1));
