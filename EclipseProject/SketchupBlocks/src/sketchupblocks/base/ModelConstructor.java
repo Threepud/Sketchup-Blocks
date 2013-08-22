@@ -124,7 +124,7 @@ public class ModelConstructor
 				
 				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation);	
 				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
-				upRotWorld[k] =  Matrix.multiply(rot, new Vec4(upRotWorld[k])).toVec3();
+				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
 			}
 			
 			
@@ -134,8 +134,8 @@ public class ModelConstructor
 			* lines[k].direction -- the k'th fiducial view vector
 			* sBlock -- The smart block
 			*/
-			
-			Matrix transform = ModelCenterCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, (Integer[])fiducialIndices.toArray());
+			Integer[] temp = new Integer[0];
+			Matrix transform = ModelCenterCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(temp));
 			
 			eddy.updateModel(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
 		}
@@ -185,7 +185,7 @@ public class ModelConstructor
 
 			//Get line used to be here
 			
-			if(block.ready())
+			if(block.ready() && calibrated)
 			{
 				processBin(block);
 			}
@@ -325,7 +325,6 @@ public class ModelConstructor
 			public Date timestamp;
 			public double camViewX;
 			public double camViewY;
-			public Line line;
 			
 			public Fiducial(CameraEvent camE)
 			{
