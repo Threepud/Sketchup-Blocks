@@ -116,11 +116,11 @@ public class ModelConstructor
 		for(int k = 0 ; k < numFiducials ; k++)
 		{
 			fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-			fiducialWorld[k] = Vec3.add(lines[k].point,Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+			fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
 			
-			RotationMatrix3D rTry = new RotationMatrix3D(fids[k].rotation);	
+			RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation);	
 			upRotWorld[k] = getUpVector(camIDs[k].cameraID);
-			upRotWorld[k] =  Matrix.multiply(rTry, new Vec4(upRotWorld[k])).toVec3();
+			upRotWorld[k] =  Matrix.multiply(rot, new Vec4(upRotWorld[k])).toVec3();
 		}
 		
 		

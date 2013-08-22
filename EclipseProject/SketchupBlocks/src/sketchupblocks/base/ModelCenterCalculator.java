@@ -54,7 +54,8 @@ public class ModelCenterCalculator
 				
 				//Now we have 3 points, so we can continue from there....
 				//Get the rotation between the model points and fiducial points
-				Matrix R = RotationMatrixCalculator.calculateRotationMatrix(new Vec3[]{m1o, m2o, oOffsetPoint}, new Vec3[]{w1o, w2o, offsetPoint});
+				//Rotates world fiducials positions to fit model positions
+				Matrix R = RotationMatrixCalculator.calculateRotationMatrix(new Vec3[]{w1o, w2o, offsetPoint},new Vec3[]{m1o, m2o, oOffsetPoint});
 				
 				//oOffset = x
 				//basis2 = y
@@ -108,6 +109,11 @@ public class ModelCenterCalculator
 						highest = k;
 				
 				//so highest is the best rotation
+				rTry.updateTheta(highest);
+				Matrix modelToDSpace = Matrix.multiply(cobDSpace,mTranslation);
+				Matrix DSpaceToWorld = Matrix.multiply(toDWorld.inverse(),rTry);
+				Matrix modelToWorld = Matrix.multiply(DSpaceToWorld,modelToDSpace);
+				
 				
 				
 		}
