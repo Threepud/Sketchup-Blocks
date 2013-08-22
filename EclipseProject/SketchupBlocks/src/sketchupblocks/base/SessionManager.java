@@ -29,18 +29,22 @@ public class SessionManager
 	
 	public SessionManager(PApplet _parent)
 	{
-		dbPaths = new String[3];
-		dbPaths[0] = "./dbs/SmartBlock.dat";
-		dbPaths[1] = "./dbs/CommandBlock.dat";
-		dbPaths[2] = "./dbs/UserBlock.dat";
-		
 		parent = _parent;
 		
 		lobby = new LocalLobby();
+		lobby.setModel(new Model());
 		
 		sarah = new ModelViewer();
 		sarah.setLobby(lobby);
 		sarah.setWindow(parent);
+		
+		jimmy = new ModelConstructor(this);
+		jimmy.setLobby(lobby);
+		
+		dbPaths = new String[3];
+		dbPaths[0] = "./dbs/SmartBlock.dat";
+		dbPaths[1] = "./dbs/CommandBlock.dat";
+		dbPaths[2] = "./dbs/UserBlock.dat";
 		
     	try 
     	{
@@ -63,7 +67,6 @@ public class SessionManager
 	
     public void onCameraEvent(CameraEvent cameraEvent)
     {
-    	PApplet.println("Received camera event");
     	//We still require some sort of menu traversal scheme...
     	Block block = blockDB.findBlock(cameraEvent.fiducialID);
     	if(block instanceof UserBlock)
@@ -75,8 +78,7 @@ public class SessionManager
     		if (Settings.verbose >= 3)
     			System.out.println("--Recognized command block--");
     		InputBlock iblock = new InputBlock(block, cameraEvent);
-    		if(jimmy != null)
-        		jimmy.receiveBlock(iblock);
+    		jimmy.receiveBlock(iblock);
     	}
     	else if (block instanceof SmartBlock)
     	{
@@ -86,8 +88,7 @@ public class SessionManager
     			System.out.println("Camera ID: " + cameraEvent.cameraID);
     		}
     		InputBlock iblock = new InputBlock(block, cameraEvent);
-    		if(jimmy != null)
-    			jimmy.receiveBlock(iblock);
+			jimmy.receiveBlock(iblock);
     	}
     	else
     	{
