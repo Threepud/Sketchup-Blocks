@@ -13,7 +13,7 @@ public class ModelCenterCalculator
 
 	private static double ERROR_MARGIN = 0.5; //Of square difference
 	
-	public static Vec3 calculateModelCenter(Vec3 [] rotation, SmartBlock sBlock, Vec3[] positions, Integer[] fidIDs)
+	public static Matrix getModelTransformationMatrix(Vec3 [] rotation, SmartBlock sBlock, Vec3[] positions, Integer[] fidIDs)
 	{
 		try
 		{
@@ -111,10 +111,10 @@ public class ModelCenterCalculator
 				//so highest is the best rotation
 				rTry.updateTheta(highest);
 				Matrix modelToDSpace = Matrix.multiply(cobDSpace,mTranslation);
-				Matrix DSpaceToWorld = Matrix.multiply(toDWorld.inverse(),rTry);
+				Matrix DSpaceToWorld = Matrix.multiply(toDWorld.getInverse(),rTry);
 				Matrix modelToWorld = Matrix.multiply(DSpaceToWorld,modelToDSpace);
 				
-				
+				return modelToWorld;
 				
 		}
 		catch(Exception e)
