@@ -4,6 +4,8 @@
  */
 package sketchupblocks.math;
 
+import sketchupblocks.exception.NoConvergenceException;
+
 /**
  *
  * @author cravingoxygen
@@ -11,9 +13,9 @@ package sketchupblocks.math;
 public class SVDecomposer 
 {
     //Return U, W, V
-    public static Matrix[] decompose(Matrix A)
+    public static Matrix[] decompose(Matrix A) throws NoConvergenceException
     {
-        
+        Matrix oldA = new Matrix(A.data.clone());
         A = prep(A);
         
         //Now A can be treated as a Matrix with 1-based indexing.
@@ -205,7 +207,11 @@ public class SVDecomposer
                         break;
                 }
                 if (its == 30) 
+                {
                     System.out.println("no convergence in 30 svdcmp iterations");
+                    System.out.println(oldA);
+                    throw new NoConvergenceException("No Convergence in 30 svdcmp Iterations");
+                }
                 x = w[l];// Shift from bottom 2-by-2 minor.
                 nm = k-1;
                 y = w[nm];

@@ -34,7 +34,18 @@ public class LUDecomposer
                 if ((temp = Math.abs(lu[i][j])) > big)
                     big = temp;
             if (big == 0.0)
+            {
                 System.out.println("Singular matrix");
+                System.out.println(a);
+                try
+                {
+                	throw new Exception("Singular matrix");
+                }
+                catch(Exception e)
+                {
+                	e.printStackTrace();
+                }
+            }
             vv[i]=1.0/big;
         }
         for (k = 0; k < n; k++)
