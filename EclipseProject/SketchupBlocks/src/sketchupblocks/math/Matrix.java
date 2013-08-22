@@ -1,4 +1,5 @@
 package sketchupblocks.math;
+import sketchupblocks.exception.UnexpectedNonSquareMatrixException;
 import sketchupblocks.exception.UnexpectedVectorConversionException;
 import sketchupblocks.exception.UnexpectedArrayConversionException;
 
@@ -134,6 +135,27 @@ public class Matrix
         else return false;
     }
     
+    
+    public Matrix getInverse() throws UnexpectedNonSquareMatrixException, UnexpectedArrayConversionException
+    {
+    	if (!isSquare())
+    		throw new UnexpectedNonSquareMatrixException("Cannot invert a nonsquare matrix");
+    	
+    	double[][] d = new double[rows][rows];
+    	Matrix[] lup = LUDecomposer.decompose(this);
+    	for (int i = 0; i < rows; i++)
+    	{
+    		double[] col = new double[rows];
+    		col[i] = 1;
+    		double[] x = LUDecomposer.solve(col, lup);
+    		for (int j = 0; j < rows; j++)
+    		{
+    			d[j][i] = x[j];
+    		}
+    	}
+    	
+    	return new Matrix(d);
+    }
     
     public static Matrix subtract(Matrix A, Matrix B)
     {
