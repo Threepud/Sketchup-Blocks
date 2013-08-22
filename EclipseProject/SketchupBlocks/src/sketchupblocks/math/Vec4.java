@@ -100,4 +100,10 @@ public class Vec4
     {
         return new Vec3(x, y, z);
     }
+    
+    @Override
+    public String toString()
+    {
+        return "["+x+"; "+y+"; "+z+"; "+w+"]";
+    }
 }
