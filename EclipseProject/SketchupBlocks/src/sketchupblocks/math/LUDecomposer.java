@@ -1,24 +1,23 @@
 package sketchupblocks.math;
 
-
-
+import sketchupblocks.exception.UnexpectedArrayConversionException;
 
 public class LUDecomposer 
  {
 	
-	
-    public static DecompositionResult decompose(double[][] a)
+    public static Matrix[] decompose(Matrix a)
     {
     	if (a == null)
     		throw new NullPointerException();
-    	if (a.length != a[0].length)
+    	if (!a.isSquare())
     	{
     		System.out.println("Cannot decompose nonsquare matrix.");
     		return null;
     	}
-        int n = a.length;
-        double[][] lu = a;
-        double[] indx = new double[n];
+        int count = 0;
+        int n = a.cols;
+        double[][] lu = a.data;
+        int[] indx = new int[n];
         final double TINY = 1.0e-40;
         int i;
         int imax;
@@ -54,6 +53,7 @@ public class LUDecomposer
             
             if (k != imax)
             {
+                count++;
                 for (j = 0; j < n; j++)
                 {
                     temp = lu[imax][j];
@@ -72,86 +72,107 @@ public class LUDecomposer
                     lu[i][j] -= temp *lu[k][j];
             }
         }
-        DecompositionResult res = new DecompositionResult(n, lu, indx, a);
-        return res;
+        return new Matrix[]{getL(lu), getU(lu), getP(indx), new Matrix(count, count)};
     }
-    public static double[] solve(double[] b, DecompositionResult res)
+    
+    private static Matrix getP(int[] indx)
     {
-    	if (b.length != res.n)
+        double[][] d = new double[indx.length][indx.length];
+        for (int k = 0; k < indx.length; k++)
         {
-            System.out.println("Size problem in solver");
+            d[k][k] = 1;
+        }
+        
+        for (int k = 0; k < indx.length; k++)
+        {
+            double t;
+            for (int j = 0; j < indx.length; j++)
+            {
+                t = d[indx[k]][j];
+                d[indx[k]][j] = d[k][j];
+                d[k][j] = t;
+            }
+        }
+        Matrix P = new Matrix(d);
+        return P;
+        
+    }
+    
+    private static Matrix getL(double[][] lu)
+    {
+        double[][] ldata = new double[lu.length][lu.length];
+        for (int row = 1; row < lu.length; row++)
+        {
+            ldata[row][row] = 1;
+            for (int col = 0; col < row; col++)
+            {
+                ldata[row][col] = lu[row][col];
+            }
+        }
+        ldata[0][0] = 1;
+        return new Matrix(ldata);
+    }
+    
+    private static Matrix getU(double[][] lu)
+    {
+        double[][] udata = new double[lu.length][lu.length];
+        for (int row = 0; row < lu.length; row++)
+        {
+            for (int col = row; col < lu.length; col++)
+            {
+                udata[row][col] = lu[row][col];
+            }
+        }
+        return new Matrix(udata);
+    }
+    
+    public static double[] solve(double[] b, Matrix[] LUP) throws UnexpectedArrayConversionException
+    {
+        if (!LUP[0].isSquare() || !LUP[1].isSquare() || !LUP[2].isSquare() || b.length != LUP[0].rows)
+        {
+            System.out.println("Error with dimensions in LU solver");
             return null;
         }
-    	if (multiplesFound(b, res.a))
-    	{
-    		System.out.println("Infinitely many solutions");
-    		return null;
-    	}
-        double[] x = new double[b.length];
-        int i;
-        int ii = 0;
-        int ip;
-        int j;
-        double sum;
         
-        for (i = 0; i < res.n; i++)
-            x[i] = b[i];
-        for (i = 0; i < res.n; i++)
+        double[] y = forwardSub(b, LUP[0], LUP[2]);
+        return backwardSub(y, LUP[1]);
+    }
+    
+    
+    private static double[] forwardSub(double[] b, Matrix L, Matrix P) throws UnexpectedArrayConversionException
+    {
+        int n = b.length;
+        
+        b = Matrix.multiply(P, new Matrix(b)).toArray();
+        double[] y = new double[b.length];
+        
+        for (int i = 0; i < n; i++)
         {
-            ip = (int)res.indx[i];
-            sum = x[ip];
-            x[ip]=x[i];
-            if (ii != 0)
-            for (j = ii-1;j<i;j++)
-                sum -= res.lu[i][j]*x[j];
-            else if (sum != 0.0)
-                ii = i+1;
-            x[i]=sum;
+            double sum = 0;
+            for (int j = 0; j < i; j++)
+            {
+                sum += L.data[i][j]*y[j];
+            }
+            y[i] = b[i] - sum;
         }
-        for (i = res.n-1; i >= 0; i--)
+        return y;
+    }
+    
+    private static double[] backwardSub(double[] y, Matrix U)
+    {
+        int n = y.length;
+        
+        double[] x = new double[n];
+        x[n-1] = y[n-1]/U.data[n-1][n-1];
+        
+        for (int i = n-2; i >= 0; i--)
         {
-            sum = x[i];
-            for (j = i+1; j < res.n; j++)
-                sum -= res.lu[i][j]*x[j];
-            x[i]=sum/res.lu[i][i];
+            double sum = 0;
+            for (int j = i+1; j < n; j++)
+                sum += U.data[i][j]*x[j];
+            x[i] = (y[i] - sum)/U.data[i][i];
         }
         return x;
     }
     
-    //This should only be called after checking b && a's lengths
-    public static boolean multiplesFound(double[] b, double[][] a)
-    {
-    	System.out.println((new Matrix(2, 2, a)).toString()+"  "+b.length);
-    	for (int k = 0; k < b.length-1; k++)
-    	{
-    		for (int i = k+1; i < b.length; i++)
-    		{
-    			System.out.println("k: "+k+" i: "+i);
-    			System.out.println(a[k].length);
-    			int sum = 0;
-    			for (int c = 0; c < a[k].length; c++)
-    			{
-    				sum += a[k][c] % a[i][c];
-    			}
-    			sum += b[k] % b[i];
-    			if (sum == 0)
-    				return true;
-    		}
-    	}
-    	return false;
-    }
-}
-
-class DecompositionResult
-{
-	protected int n;
-	protected double[][] lu;
-	protected double[] indx;
-	protected double[][] a;
-	DecompositionResult(int _n, double[][] _lu, double[] _indx, double[][] a)
-	{
-		n = _n;
-		lu = _lu;
-		indx = _indx;
-	}
 }
