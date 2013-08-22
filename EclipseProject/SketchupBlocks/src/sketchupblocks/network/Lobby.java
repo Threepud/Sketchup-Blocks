@@ -6,7 +6,7 @@ import sketchupblocks.base.ModelChangeListener;
 public interface Lobby
 {
     public void updateModel(ModelBlock modelBlock);
-    public Model getModel();
+    public Model getModel() throws Exception;
     public void setModel(Model model);
     public void registerChangeListener(ModelChangeListener listener);
 }

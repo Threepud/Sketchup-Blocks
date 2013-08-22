@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import sketchupblocks.base.Model;
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
+import sketchupblocks.exception.ModelNotSetException;
 
 public class LocalLobby implements Lobby
 {
@@ -28,8 +29,10 @@ public class LocalLobby implements Lobby
 		}
 	}
 	    
-	public Model getModel()
+	public Model getModel() throws Exception
 	{
+		if(model == null)
+			throw new ModelNotSetException("Local Lobby: Model not set.");
 		return model;
 	}
 	    

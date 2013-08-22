@@ -80,12 +80,15 @@ public class ModelViewer implements ModelChangeListener
 	public void setLobby(Lobby _lobby) throws Exception
 	{
 	    lobby = _lobby;
-	    Model model = lobby.getModel();
-	    if(model == null)
-	    	throw new ModelNotSetException("Model Viewer: Model not set.");
-	    else
+	    try
+	    {
+		    Model model = lobby.getModel();
 	    	blockList = new ArrayList<>(model.getBlocks());
-	    
+	    }
+	    catch(Exception e)
+	    {
+	    	throw e;
+	    }
 	    /*
 	    //################
 	    //debug for viewer
