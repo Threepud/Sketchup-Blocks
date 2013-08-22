@@ -1,4 +1,5 @@
 package sketchupblocks.base;
+import sketchupblocks.exception.UnexpectedNonSquareMatrixException;
 import sketchupblocks.math.LUDecomposer;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.SVDecomposer;
@@ -9,26 +10,34 @@ public class RotationMatrixCalculator
 {
 	public static Matrix calculateRotationMatrix(Vec3[] pointsA, Vec3[] pointsB)
 	{
-		Vec3 centroidA = calculateCentroid(pointsA);
-        Matrix setA = new Matrix(pointsA, true);
-        Vec3 centroidB = calculateCentroid(pointsB);
-        Matrix setB = new Matrix(pointsB, true);
-        
-        Matrix H = calculateCovariance(setA, setB, centroidA.toArray(), centroidB.toArray());
-        Matrix [] usv = SVDecomposer.decompose(H); //U, S, V
-        
-        Matrix proposedR = Matrix.multiply(usv[2], usv[0].transpose());
-        
-        if(calculateDeterminant(proposedR) < 0)
-        {
-            int COLUMN_THREE = 2;
-            for (int k = 0; k < proposedR.rows; k++)
-            {
-                usv[2].data[COLUMN_THREE][k] *= -1;
-            }
-            proposedR = Matrix.multiply(usv[2], usv[0].transpose());
-        }
-        return proposedR;
+		try
+		{
+			Vec3 centroidA = calculateCentroid(pointsA);
+	        Matrix setA = new Matrix(pointsA, true);
+	        Vec3 centroidB = calculateCentroid(pointsB);
+	        Matrix setB = new Matrix(pointsB, true);
+	        
+	        Matrix H = calculateCovariance(setA, setB, centroidA.toArray(), centroidB.toArray());
+	        Matrix [] usv = SVDecomposer.decompose(H); //U, S, V
+	        
+	        Matrix proposedR = Matrix.multiply(usv[2], usv[0].transpose());
+	        
+	        if(calculateDeterminant(proposedR) < 0)
+	        {
+	            int COLUMN_THREE = 2;
+	            for (int k = 0; k < proposedR.rows; k++)
+	            {
+	                usv[2].data[COLUMN_THREE][k] *= -1;
+	            }
+	            proposedR = Matrix.multiply(usv[2], usv[0].transpose());
+	        }
+	        return proposedR;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	private static double calculateDeterminant(Matrix R)
@@ -46,7 +55,7 @@ public class RotationMatrixCalculator
         return numInversions % 2 != 0 ? -1*res : res;
     }
     
-	private static Matrix calculateCovariance(Matrix A, Matrix B, double[] midA, double[] midB)
+	private static Matrix calculateCovariance(Matrix A, Matrix B, double[] midA, double[] midB) throws Exception
     {
         Matrix centroidA = new Matrix(3, 3);
         centroidA.repeatAsRows(new Vec3(midA));
@@ -56,7 +65,28 @@ public class RotationMatrixCalculator
         if (A.cols != B.cols || A.rows != 3 || A.rows != B.rows)
         {
             System.out.println("Error. Nonmatching datasets");
-            return null;
+            throw new Exception();
+        }
+        
+        if (!A.isSquare() )
+        {
+        	System.out.println(A);
+        	throw new UnexpectedNonSquareMatrixException("Cannot calculate covariance of nonsquare matrices");
+        }
+        else if (!B.isSquare() )
+        {
+        	System.out.println(B);
+        	throw new UnexpectedNonSquareMatrixException("Cannot calculate covariance of nonsquare matrices");
+        }
+        else if (!centroidA.isSquare() )
+        {
+        	System.out.println(centroidA);
+        	throw new UnexpectedNonSquareMatrixException("Cannot calculate covariance of nonsquare matrices");
+        }
+        else if (!centroidB.isSquare())
+        {
+        	System.out.println(centroidB);
+        	throw new UnexpectedNonSquareMatrixException("Cannot calculate covariance of nonsquare matrices");
         }
         Matrix H = Matrix.multiply((Matrix.subtract(A, centroidA)).transpose(), Matrix.subtract(B, centroidB));
         
@@ -65,16 +95,21 @@ public class RotationMatrixCalculator
     
 	private static Vec3 calculateCentroid(Vec3[] points)
     {
+		
         double[] center = new double[3];
+        System.out.println("-----------------------------");
         for (int k = 0; k < points.length; k++)
         {
+        	System.out.println("Received point; "+points[k]);
             center[k] += points[k].x;
             center[k] += points[k].y;
             center[k] += points[k].z;
             center[k] /= 3.0;
         }
         
-        
-        return new Vec3(center);
+        Vec3 res = new Vec3(center);
+        System.out.println("Calculated centroid: "+res);
+        System.out.println("-----------------------------");
+        return res;
     }
 }
