@@ -34,7 +34,7 @@ public class LinearSolverTest
 		Vec3 v = LinearSystemSolver.solve(null, a);
 		assertTrue("Invalid angle list", v == null);
 		
-		double[][] t = new double[2][2];
+		/*double[][] t = new double[2][2];
 		t[0] = new double[]{2, 4};
 		t[1] = new double[]{1, 2};
 		double[] b = new double[]{10, 5};
