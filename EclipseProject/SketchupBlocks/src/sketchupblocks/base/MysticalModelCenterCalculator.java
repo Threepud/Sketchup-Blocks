@@ -4,6 +4,7 @@ import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.LinearSystemSolver;
 import sketchupblocks.math.Matrix;
+import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Vec4;
 
@@ -53,7 +54,7 @@ public class MysticalModelCenterCalculator
 				
 				//Now we have 3 points, so we can continue from there....
 				//Get the rotation between the model points and fiducial points
-				Matrix R = SVDDecomposer.getRotationMatrix(new Vec3[]{m1o, m2o, oOffsetPoint}, new Vec3[]{w1o, w2o, offsetPoint});
+				Matrix R = RotationMatrixCalculator.calculateRotationMatrix(new Vec3[]{m1o, m2o, oOffsetPoint}, new Vec3[]{w1o, w2o, offsetPoint});
 				
 				//mOffset = x
 				//basis2 = y
@@ -76,7 +77,7 @@ public class MysticalModelCenterCalculator
 				for (int i = 0; i < 2; i++)
 					rotation[i] = Matrix.multiply(toDWorld, new Vec4(rotation[i])).toVec3();
 				
-				RotationMatrix rTry = new RotationMatrix(0);
+				RotationMatrix3D rTry = new RotationMatrix3D(0);
 				Vec3[] tryUps = new Vec3[2];
 				double [] scores = new double[360];
 				//Now we rotate them iteratively

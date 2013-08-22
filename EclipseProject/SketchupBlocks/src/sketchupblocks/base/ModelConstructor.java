@@ -9,6 +9,7 @@ import sketchupblocks.calibrator.*;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.LinearSystemSolver;
 import sketchupblocks.math.Matrix;
+import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Vec4;
 import sketchupblocks.network.Lobby;
@@ -120,15 +121,12 @@ public class ModelConstructor
 		Vec3 [] rotations = new Vec3[numFiducials];
 			for(int k = 0 ; k < numFiducials ; k++)
 				{
-<<<<<<< HEAD
 					fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-=======
 					fiducialWorld[k] = Vec3.add(lines[k].point,Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
 					
-					RotationMatrix rTry = new RotationMatrix(fids[k].rotation);
+					RotationMatrix3D rTry = new RotationMatrix3D(fids[k].rotation);			//We need to check that this is actually correct.
 					rotations[k] = getUpVector(camIDs[k].cameraID);
 					rotations[k] =  Matrix.multiply(rTry, new Vec4(rotations[k])).toVec3();
->>>>>>> Added code to add get rotation
 				}
 			
 		
