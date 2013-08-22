@@ -161,6 +161,8 @@ public class ModelViewer implements ModelChangeListener
 		//draw block list
 		for(ModelBlock block: new ArrayList<ModelBlock>(blockMap.values()))
 		{
+			if(block.type == ModelBlock.ChangeType.REMOVE)
+				System.out.println("AAAAAAAAJJJJJJJJJJHASLFKHJ");
 			SmartBlock smartBlock = block.smartBlock;
 			window.scale(10, 10, 10);
 			window.beginShape(PConstants.TRIANGLES);
@@ -168,7 +170,7 @@ public class ModelViewer implements ModelChangeListener
 			for(int x = 0; x < smartBlock.indices.length; ++x)
 			{
 				Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
-				vertex = Matrix.multiply(block.transformationMatrix, vertex);
+				vertex = Matrix.multiply(block.transformationMatrix, vertex.padVec3()).toVec3();
 				window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
 			}
 			
