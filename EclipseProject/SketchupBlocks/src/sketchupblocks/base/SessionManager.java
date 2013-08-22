@@ -47,6 +47,8 @@ public class SessionManager
 		}
 		sarah.setWindow(parent);
 		
+		lobby.registerChangeListener(sarah);
+		
 		jimmy = new ModelConstructor(this);
 		jimmy.setLobby(lobby);
 		
