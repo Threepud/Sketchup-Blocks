@@ -19,6 +19,11 @@ public class Model
 	{
 		blockMap.put(new Integer(modelBlock.smartBlock.blockId),modelBlock);
 	}
+	
+	public void removeModelBlock(ModelBlock modelBlock)
+	{
+		blockMap.remove(new Integer(modelBlock.smartBlock.blockId));
+	}
 	  
 	public String getId()
 	{
