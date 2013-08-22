@@ -102,4 +102,15 @@ public class Vec3
     {
     	return Math.sqrt((this.x - vec.x) * (this.x - vec.x) + (this.y - vec.y) * (this.y - vec.y) + (this.z - vec.z) * (this.z - vec.z)); 
     }
+    
+    public Vec4 padVec3()
+    {
+    	return new Vec4(x, y, z, 1);
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "["+x+"; "+y+"; "+z+"]";
+    }
 }
