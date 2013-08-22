@@ -1,6 +1,7 @@
 package sketchupblocks.gui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import processing.core.*;
 import processing.event.*;
@@ -20,7 +21,7 @@ public class ModelViewer implements ModelChangeListener
 {
 	private PApplet window;
 	private Lobby lobby;
-	private ArrayList<ModelBlock> blockList = null;
+	private HashMap<Integer,ModelBlock> blockMap;
 	private Camera userCamera;
 	private Camera[] systemCameras;
 	private Camera currentCamera;
@@ -83,7 +84,10 @@ public class ModelViewer implements ModelChangeListener
 	    try
 	    {
 		    Model model = lobby.getModel();
-	    	blockList = new ArrayList<>(model.getBlocks());
+	    	ArrayList<ModelBlock> blockList = new ArrayList<>(model.getBlocks());
+	    	blockMap = new HashMap<>();
+	    	for(ModelBlock mBlock: blockList)
+	    		blockMap.put(new Integer(mBlock.smartBlock.blockId), mBlock);
 	    }
 	    catch(Exception e)
 	    {
@@ -101,46 +105,12 @@ public class ModelViewer implements ModelChangeListener
 	    blockList.add(modelBlock);*/
 	}
 	  
-	public void fireModelChangeEvent(ModelBlock change) throws Exception
+	public void fireModelChangeEvent(ModelBlock change) throws BlockNoTypeException
 	{
-		int index;
-		
-	    switch(change.type)
-	    {
-		    case ADD:
-		    	blockList.add(change);
-		    	break;
-		    case UPDATE:
-		    	index = findBlockIndex(change.smartBlock.blockId);
-		    	blockList.set(index, change);
-		    	break;
-		    case DELETE:
-		    	index = findBlockIndex(change.smartBlock.blockId);
-		    	blockList.remove(index);
-		    	break;
-	    	default:
-	    		throw new BlockNoTypeException("Model Viewer: No Model Block Type.");
-	    }
-	}
-	
-	private int findBlockIndex(int blockID) throws Exception
-	{
-    	int index = -1;
-    	for(ModelBlock tempBlock: blockList)
-    	{
-    		if(tempBlock.smartBlock.blockId == blockID)
-    		{
-    			index++;
-    			break;
-    		}
-    		else
-    			index++;
-    	}
-    	
-    	if(index == -1 || index == blockList.size())
-    		throw new BlockNotFoundException("Model Viewer: Update block not found.");
-    	
-    	return index;
+		if(change.type == ModelBlock.ChangeType.UPDATE)
+			blockMap.put(new Integer(change.smartBlock.blockId), change);
+		else
+			blockMap.remove(new Integer(change.smartBlock.blockId));
 	}
 	
 	public void drawModel()
@@ -188,7 +158,7 @@ public class ModelViewer implements ModelChangeListener
 	private void drawBlocks()
 	{
 		//draw block list
-		for(ModelBlock block: blockList)
+		for(ModelBlock block: new ArrayList<ModelBlock>(blockMap.values()))
 		{
 			SmartBlock smartBlock = block.smartBlock;
 			window.scale(10, 10, 10);

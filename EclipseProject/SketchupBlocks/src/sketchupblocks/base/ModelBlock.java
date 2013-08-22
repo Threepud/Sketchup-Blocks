@@ -15,6 +15,11 @@ public class ModelBlock
 	public Matrix transformationMatrix;
 	public ChangeType type;
 	
+	public ModelBlock()
+	{
+		
+	}
+	
 	public ModelBlock(SmartBlock _smartBlock, Matrix _transformMatrix, ChangeType _type)
 	{
 		smartBlock = _smartBlock;

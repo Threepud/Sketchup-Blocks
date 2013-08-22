@@ -35,7 +35,16 @@ public class SessionManager
 		lobby.setModel(new Model());
 		
 		sarah = new ModelViewer();
-		sarah.setLobby(lobby);
+		try 
+		{
+			sarah.setLobby(lobby);
+		} 
+		catch (Exception e1) 
+		{
+			System.out.println("The catz of the universe hate our programmer guts. (Just the programmer guts)");
+			e1.printStackTrace();
+			System.exit(-1);
+		}
 		sarah.setWindow(parent);
 		
 		jimmy = new ModelConstructor(this);
@@ -120,7 +129,15 @@ public class SessionManager
     public void setModelViewer(ModelViewer _sarah)
     {
     	sarah = _sarah;
-    	sarah.setLobby(lobby);
+    	try
+    	{
+			sarah.setLobby(lobby);
+		} 
+    	catch (Exception e) 
+    	{
+			e.printStackTrace();
+			System.exit(-1);
+		}
     	for(int k = 0 ; k < cameraPositions.length ; k++)
     	{
 	    	if(cameraPositions[k] != null)
