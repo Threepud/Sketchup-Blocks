@@ -1,5 +1,6 @@
 package sketchupblocks.base;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,13 +9,16 @@ import sketchupblocks.database.*;
 import sketchupblocks.calibrator.*;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.LinearSystemSolver;
+import sketchupblocks.math.Matrix;
+import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.Vec3;
+import sketchupblocks.math.Vec4;
 import sketchupblocks.network.Lobby;
 
 public class ModelConstructor
 {
 	private Lobby eddy;
-	private HashMap<Integer,BlockInfo> blocks;
+	private HashMap<Integer,BlockInfo> blockMap;
 	
 	private Calibrator cally;
 	private SessionManager sessMan;
@@ -23,7 +27,7 @@ public class ModelConstructor
 	
 	public ModelConstructor(SessionManager _sessMan)
 	{
-		blocks = new HashMap<Integer,BlockInfo>();
+		blockMap = new HashMap<Integer,BlockInfo>();
 		cally = new Calibrator();
 		sessMan = _sessMan;
 	}
@@ -41,24 +45,14 @@ public class ModelConstructor
 			
 			boolean changedPosition = cally.processBlock(iBlock);
 			calibrated = cally.isCalibrated();
-			/*if (calibrated && changedPosition)
+			//Propagate updated camera positions to the appropriate parties.
+			if (changedPosition && calibrated)
 			{
-				if(Settings.verbose >= 3 )
-					System.out.println("==Cameras are calibrated==");
-				for(int k = 0 ; k < cally.cameraPositions.length ; k++)
+				for (int k = 0; k < Settings.numCameras; k++)
 				{
 					sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
-					System.out.println(cally.cameraPositions[k].x+":"+cally.cameraPositions[k].y+":"+cally.cameraPositions[k].z);
 				}
-				
-				Iterator<java.util.Map.Entry<Integer, Bin>> iter = binList.entrySet().iterator();
-				while(iter.hasNext())
-				{
-					Camera bin = iter.next().getValue();
-					if (bin.ready())
-						processBin(bin);
-				}
-			}*/
+			}
 		}
 		else 
 		{
@@ -71,44 +65,83 @@ public class ModelConstructor
 	private void processBin(BlockInfo bin)
 	{
 		BlockInfo.Fiducial [] fids = null;
-		fids = bin.fiducials.values().toArray(fids);
+		fids = bin.fiducialMap.values().toArray(fids);
+		
+		BlockInfo.CamFidIdentifier [] camIDs = null;
+		camIDs = bin.fiducialMap.keySet().toArray(camIDs);
+		
 		int numFiducials = fids.length;
 		
-		Line [] lines = new Line[numFiducials];
+		Line[] lines = new Line[numFiducials];
 		for(int k = 0 ; k < fids.length ; k++)
 		{
-			lines[k] = fids[k].line;
+			lines[k] = fids[k].getLine(); 
 		}
 		
-		Vec3 [] positions = new Vec3[numFiducials]; //Get from DB
+		Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
 		if (!(bin.smartBlock instanceof SmartBlock))
 		{
+			System.out.println("Attempting to process command block, but this feature is not yet supported");
 			return;
 		}
 		
-		SmartBlock sm =(SmartBlock)(bin.smartBlock);
+		SmartBlock sBlock =(SmartBlock)(bin.smartBlock);
+		ArrayList<Integer> fiducialIndices = new ArrayList<Integer>();
 		
-		for(int k = 0 ; k < numFiducials ; k++)
+		for (int k = 0 ; k < numFiducials ; k++)
 		{
 			int fiducialIndex = -1;
-			for(int l = 0 ;l < sm.associatedFiducials.length; l++)
+			for (int i = 0 ; i < sBlock.associatedFiducials.length; i++)
 			{
-				if(sm.associatedFiducials[l] == fids[k].fiducialsID)
-					fiducialIndex = l;
+				if (sBlock.associatedFiducials[i] == fids[k].fiducialsID)
+				{
+					fiducialIndex = i;
+					fiducialIndices.add(i);
+					break;
+				}
 			}
 			if(fiducialIndex == -1)
 			{
 				throw new RuntimeException("Smart Block fiducials don't match");
 			}
-			positions[k] = sm.fiducialCoordinates[fiducialIndex];
+			fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
 		}
 			
-		
 		//Bin should have enough information to get position.
+		ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
+		Particle bestabc = system.go();
+		
+		Vec3 [] fiducialWorld = new Vec3[numFiducials];
+		Vec3 [] upRotWorld = new Vec3[numFiducials];
+		for(int k = 0 ; k < numFiducials ; k++)
+		{
+			fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+			fiducialWorld[k] = Vec3.add(lines[k].point,Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+			
+			RotationMatrix3D rTry = new RotationMatrix3D(fids[k].rotation);	
+			upRotWorld[k] = getUpVector(camIDs[k].cameraID);
+			upRotWorld[k] =  Matrix.multiply(rTry, new Vec4(upRotWorld[k])).toVec3();
+		}
+		
+		
+		/*
+		* upRotWorld -- the rotations as viewed by the camera
+		* fiducialWorld -- Fiducial locations
+		* lines[k].direction -- the k'th fiducial view vector
+		* sBlock -- The smart block
+		*/
+		
+		ModelCenterCalculator.calculateModelCenter(upRotWorld, sBlock, fiducialWorld, (Integer[])fiducialIndices.toArray());
+		
+		
+	}
+	
+	private ParticleSystemSettings getPSOConfiguration(Vec3[] fidCoordsM, Line[] lines, int numFids)
+	{
 		ParticleSystemSettings settings = new ParticleSystemSettings();
-		settings.eval = new BlockPosition(positions,lines);
+		settings.eval = new BlockPosition(fidCoordsM,lines);
 		settings.tester = null;
-		settings.creator = new ParticleCreator(fids.length,0,100);
+		settings.creator = new ParticleCreator(numFids,0,100);
 		
 		settings.particleCount = 100;
 		settings.iterationCount= 2000;
@@ -120,58 +153,27 @@ public class ModelConstructor
 		settings.cognitiveStart = 0.72;
 		settings.momentum = 1.4;
 		settings.MaxComponentVelocity = 1;
-		
-		ParticleSystem system = new ParticleSystem(settings);
-		
-		Particle bestabc = null;
-		
-		bestabc = system.go();
-		//.................So nou het ek die punte, soortvan.....Wat nou??????
-		//Nou het ek die positions van die fiducials in 3D space nodig, die kameras se viewvectors en die Smart blocks wat involved is.
-		Vec3 [] fiducialWorld = new Vec3[numFiducials];
-			for(int k = 0 ; k < numFiducials ; k++)
-				{
-					fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-				}
-		/*
-		* fiducialWorld -- Fiducial locations
-		* lines[k].direction -- the k'th fiducial view vector
-		* sm -- The smart block
-		*/
-		
+		return settings;
 	}
 	
-	void store(InputBlock iBlock)
+	private void store(InputBlock iBlock)
 	{
-		if(iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
+		if (iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
-			BlockInfo block = blocks.get(iBlock.block.blockId);
+			BlockInfo block = blockMap.get(iBlock.block.blockId);
 			
-			if(block == null)
+			if (block == null)
 			{
 				block = new BlockInfo(iBlock.block);
-				blocks.put(iBlock.block.blockId,block);
+				blockMap.put(iBlock.block.blockId,block);
 			}	
 			
-			BlockInfo.Fiducial fiducial = block.fiducials.get(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
+			//BlockInfo.Fiducial fiducial = block.fiducialMap.get(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID, iBlock.cameraEvent.fiducialID));
 			
-			if(fiducial == null)
-			{
-				fiducial =  block.new Fiducial(iBlock.cameraEvent.fiducialID);
-				block.fiducials.put(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
-			}		
+			BlockInfo.Fiducial fiducial =  block.new Fiducial(iBlock.cameraEvent);
+			block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
 
-			//Line calculation
-			Vec3[] landmarkToCamera = new Vec3[4];
-			double[] angles = new double[4];
-			for (int k = 0; k < 4; k++)
-			{
-				landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[iBlock.cameraEvent.cameraID], Settings.landmarks[k]);
-				angles[k] = getAngle(iBlock.cameraEvent.cameraID, k, iBlock.cameraEvent.x, iBlock.cameraEvent.y);
-			}
-			// Do calculation 
-			Vec3 mysticalLine = LinearSystemSolver.solve(landmarkToCamera, angles);
-			fiducial.line = new Line(cally.cameraPositions[iBlock.cameraEvent.cameraID], mysticalLine);
+			//Get line used to be here
 			
 			if(block.ready())
 			{
@@ -180,16 +182,17 @@ public class ModelConstructor
 		}
 		else //When a remove call is received
 		{
-			BlockInfo block = blocks.get(iBlock.block.blockId);
+			BlockInfo block = blockMap.get(iBlock.block.blockId);
 			
-			if(block == null)
+			if (block == null)
 			{
+				System.out.println("Proposed removal of block that has not been added!?");
 				return; // Nothing to remove
 			}	
 			
-			if(block.fiducials.containsKey(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID)))
+			if (block.fiducialMap.containsKey(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID)))
 			{
-				block.fiducials.remove(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
+				block.fiducialMap.remove(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
 			}	
 			
 			/*
@@ -197,9 +200,9 @@ public class ModelConstructor
 			* No need to clean up camera. They will always be there.
 			*/
 			
-			if(block.fiducials.isEmpty())
+			if(block.fiducialMap.isEmpty())
 			{
-				blocks.remove(iBlock.block.blockId);
+				blockMap.remove(iBlock.block.blockId);
 			}
 		}
 	}
@@ -209,6 +212,36 @@ public class ModelConstructor
 		double fov = Settings.cameraSettings[camID].fov;
 		double aspect = Settings.cameraSettings[camID].aspectRatio;
 		return Math.sqrt(sqr((cally.calibrationDetails[camID][lm][0]- x)*fov)+sqr((cally.calibrationDetails[camID][lm][1]- y)*(fov/aspect))); 
+	}
+	
+	private Vec3 getUpVector(int CamID)
+	{
+		Vec3[] landmarkToCamera = new Vec3[4];
+		double[] angles = new double[4];
+		for (int k = 0; k < 4; k++)
+		{
+			landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[CamID], Settings.landmarks[k]);
+			angles[k] = getAngle(CamID, k, 0.5, 0.5+0.01);
+		}
+		// Do calculation 
+		Vec3 lineDirection = LinearSystemSolver.solve(landmarkToCamera, angles);
+		Line top = new Line(cally.cameraPositions[CamID], lineDirection);
+		
+		landmarkToCamera = new Vec3[4];
+		angles = new double[4];
+		for (int k = 0; k < 4; k++)
+		{
+			landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[CamID], Settings.landmarks[k]);
+			angles[k] = getAngle(CamID, k, 0.5, 0.5-0.01);
+		}
+		// Do calculation 
+		lineDirection = LinearSystemSolver.solve(landmarkToCamera, angles);
+		Line bottom = new Line(cally.cameraPositions[CamID], lineDirection);
+		
+		top.direction.normalize();
+		bottom.direction.normalize();
+		
+		return Vec3.subtract(top.direction, bottom.direction);
 	}
 		
 	private double sqr(double val)
@@ -220,46 +253,22 @@ public class ModelConstructor
 	{
 		int minEvents = 2;
 		int LIFETIME = 2000;	//ms
+		public int blockID;
+		public Block smartBlock;
+		private HashMap<CamFidIdentifier,Fiducial> fiducialMap;
 	
-		protected class CamFid
-		{
-			int cameraID;
-			int fiducialID;
-			
-			CamFid(int c, int f)
-			{
-				cameraID = c;
-				fiducialID = f;
-			}
-		}
-	
-		protected class Fiducial
-		{
-			public Line line;
-			public int fiducialsID;
-			public Date timestamp;
-			
-			public Fiducial(int _fiducialsID)
-			{
-				fiducialsID = _fiducialsID;
-				timestamp = new Date();
-			}
-		}
 		
 		public BlockInfo(Block _smartBlock)
 		{
-			fiducials = new HashMap<CamFid,Fiducial>();
+			fiducialMap = new HashMap<CamFidIdentifier,Fiducial>();
 			smartBlock = _smartBlock;
 		}
 		
-		public int blockID;
-		public Block smartBlock;
-		private HashMap<CamFid,Fiducial> fiducials;
 		
 		public boolean ready()
 		{
 			Fiducial[] data = new Fiducial[0];
-			data = fiducials.values().toArray(data);
+			data = fiducialMap.values().toArray(data);
 			
 			int count = 0;
 			for (int k = 0; k < data.length; k++)
@@ -281,6 +290,60 @@ public class ModelConstructor
 				return true;
 			else 
 				return false;
+		}
+		
+		protected class CamFidIdentifier
+		{
+			int cameraID;
+			int fiducialID;
+			
+			CamFidIdentifier(int c, int f)
+			{
+				cameraID = c;
+				fiducialID = f;
+			}
+		}
+	
+		protected class Fiducial
+		{
+			public int fiducialsID;
+			public int camID;
+			public double rotation;
+			public Date timestamp;
+			public double camViewX;
+			public double camViewY;
+			public Line line;
+			
+			public Fiducial(CameraEvent camE)
+			{
+				this(camE.fiducialID, camE.rotation, camE.x, camE.y, camE.cameraID);
+			}
+			
+			public Fiducial(int _fiducialsID, double rot, double _camViewX, double _camViewY, int _camID)
+			{
+				fiducialsID = _fiducialsID;
+				rotation = rot;
+				timestamp = new Date();
+				camViewX = _camViewX;
+				camViewY = _camViewY;
+				camID = _camID;
+			}
+			
+			public Line getLine()
+			{
+				//Line calculation
+				Vec3[] landmarkToCamera = new Vec3[4];
+				double[] angles = new double[4];
+				
+				for (int k = 0; k < 4; k++)
+				{
+					landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[camID], Settings.landmarks[k]);
+					angles[k] = getAngle(camID, k, camViewX, camViewY);
+				}
+				// Do calculation 
+				Vec3 lineDirection = LinearSystemSolver.solve(landmarkToCamera, angles);
+				return new Line(cally.cameraPositions[camID], lineDirection);
+			}
 		}
 	}	
 }

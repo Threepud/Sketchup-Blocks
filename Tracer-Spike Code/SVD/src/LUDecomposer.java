@@ -1,6 +1,4 @@
-package sketchupblocks.math;
 
-import sketchupblocks.exception.UnexpectedArrayConversionException;
 
 public class LUDecomposer 
  {
@@ -138,6 +136,17 @@ public class LUDecomposer
         return backwardSub(y, LUP[1]);
     }
     
+    private static void printArray(double[] p)
+    {
+        for (int k = 0; k < p.length; k++)
+            System.out.println(p[k]);
+    }
+    
+    private static void printArray(int[] p)
+    {
+        for (int k = 0; k < p.length; k++)
+            System.out.println(p[k]);
+    }
     
     private static double[] forwardSub(double[] b, Matrix L, Matrix P) throws UnexpectedArrayConversionException
     {

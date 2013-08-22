@@ -1,5 +1,6 @@
 package sketchupblocks.math;
 import sketchupblocks.exception.UnexpectedVectorConversionException;
+import sketchupblocks.exception.UnexpectedArrayConversionException;
 
 public class Matrix 
 {
@@ -16,18 +17,11 @@ public class Matrix
     }
 
     //Constructor 2
-    public Matrix(int _rows, int _cols, double[][] d)
+    public Matrix(double[][] d)
     {
-        rows = _rows;
-        cols = _cols;
+        rows = d.length;
+        cols = d[0].length;
         data = d;
-        if (d.length != _rows || d[0].length != _cols)
-        {
-            System.out.println("Mismatch netween specified row x col numbers and actual data");
-            rows = -1;
-            cols = -1;
-            data= null;
-        }
     }
 
     //Constructor 3
@@ -89,11 +83,97 @@ public class Matrix
         data[3] = new double[]{v.w};
     }
 	
-    public Vec3 toVec3() throws UnexpectedVectorConversionException 
+    
+    public Matrix(double[] d)
+    {
+        cols = 1;
+        rows = d.length;
+        data = new double[rows][cols];
+        for (int k = 0; k < rows; k++)
+        {
+            data[k][0] = d[k];
+        }
+    }
+    
+    public void repeatAsRows(Vec3 v)
+    {
+        if (cols != 3 || rows != 3)
+        {
+            System.out.println("Cannot set as repeat vector");
+        }
+        for (int k = 0; k < 3; k++)
+        {
+            data[k][0] = v.x;
+            data[k][1] = v.y;
+            data[k][2] = v.z;
+        }
+    }
+    
+    
+    
+    public void repeatAsCols(Vec3 v)
+    {
+        if (cols != 3 || rows != 3)
+        {
+            System.out.println("Cannot set as repeat vector");
+        }
+        for (int k = 0; k < 3; k++)
+        {
+            data[0][k] = v.x;
+            data[1][k] = v.y;
+            data[2][k] = v.z;
+        }
+    }
+    
+    
+    
+    public boolean isSquare()
+    {
+        if (rows == cols)
+                return true;
+        else return false;
+    }
+    
+    
+    public static Matrix subtract(Matrix A, Matrix B)
+    {
+        if (A.cols != B.cols || A.rows != B.rows)
+        {
+            System.out.println("Cannot subtract these matrices");
+            return null;
+        }
+        
+        double[][] data = new double[A.rows][A.cols];
+        
+        for (int k = 0; k < A.rows; k++)
+        {
+            for (int i = 0; i < A.cols; i++)
+            {
+                data[k][i] = A.data[k][i] - B.data[k][i];
+            }
+        }
+        return new Matrix(data);
+    }
+    
+    public double[] toArray() throws UnexpectedArrayConversionException
+    {
+        if (cols != 1)
+        {
+             throw new UnexpectedArrayConversionException("Cannot convert matrix to Array");
+        }
+        double[] res = new double[rows];
+        for (int k = 0; k < rows; k++)
+        {
+            res[k] = data[k][0];
+        }
+        return res;
+    }
+    
+	 public Vec3 toVec3() throws UnexpectedVectorConversionException 
 	 {
 	     if (cols != 1 || rows < 3)
 	     {
-    		throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3");
+			throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3");
 	    	 
 	     }
 	     else
@@ -103,18 +183,35 @@ public class Matrix
 	     }
 	 }
 	
-	public Vec4 toVec4() throws UnexpectedVectorConversionException
+	 public Vec4 toVec4() throws UnexpectedVectorConversionException
 	 {
 	     if (cols != 1 || rows != 4)
 	     {
 	         throw new UnexpectedVectorConversionException("Cannot convert matrix to vec4");
-         }
-         else
-         {
-             Vec4 result = new Vec4(data[0][0], data[1][0], data[2][0], data[3][0]);
-             return result;
-         }
+	     }
+	     else
+	     {
+	         Vec4 result = new Vec4(data[0][0], data[1][0], data[2][0], data[3][0]);
+	         return result;
+	     }
 	 }
+	
+	public Vec3[] toVec3Array() throws UnexpectedVectorConversionException
+	{
+	    if (rows != 3)
+	    {
+	        throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3Array");
+	    }
+	
+	    Vec3[] res = new Vec3[cols];
+	
+	    for (int k = 0; k < cols; k++)
+	    {
+	        res[k] = new Vec3(data[0][k], data[1][k], data[2][k]);
+	    }
+	    return res;
+	    
+	}
 	
 	public static Vec3 multiply(Matrix m1, Vec3 v)
 	{

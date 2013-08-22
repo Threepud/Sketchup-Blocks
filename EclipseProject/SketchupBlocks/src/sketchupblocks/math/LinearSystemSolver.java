@@ -34,10 +34,10 @@ public class LinearSystemSolver
         Matrix AtB = Matrix.multiply(At, BMat);
         Matrix AtA = Matrix.multiply(At, A);
         
-        DecompositionResult dcres = LUDecomposer.decompose(AtA.data);
+        Matrix[] lup = LUDecomposer.decompose(AtA);
         try
         {
-        	double[] res = LUDecomposer.solve(AtB.toVec3().toArray(), dcres);
+        	double[] res = LUDecomposer.solve(AtB.toArray(), lup);
             return new Vec3(res);
         }
         catch(Exception e)

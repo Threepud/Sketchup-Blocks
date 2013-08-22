@@ -1,27 +1,30 @@
 package sketchupblocks.base;
 
 import sketchupblocks.database.SmartBlock;
+import sketchupblocks.math.Line;
+import sketchupblocks.math.LinearSystemSolver;
 import sketchupblocks.math.Matrix;
+import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Vec4;
 
-public class MysticalModelCenterCalculator 
+public class ModelCenterCalculator 
 {
 
 	private static double ERROR_MARGIN = 0.5; //Of square difference
 	
-	public static Vec3 calculateModelCenter(InputBlock[] fidData, Vec3[] positions, Vec3[] cameraViewVectors)
+	public static Vec3 calculateModelCenter(Vec3 [] rotation, SmartBlock sBlock, Vec3[] positions, Integer[] fidIDs)
 	{
 		try
 		{
-				if (fidData.length == 3)
+				if (fidIDs.length == 3)
 				{
 					//Ask the mystical SVD decomposer.
 					return null;
 				}
 				
-				Vec3 m1 = Vec3.scalar(-1, ((SmartBlock)fidData[0].block).fiducialCoordinates[fidData[0].cameraEvent.fiducialID]);
-				Vec3 m2 = Vec3.scalar(-1, ((SmartBlock)fidData[1].block).fiducialCoordinates[fidData[1].cameraEvent.fiducialID]);
+				Vec3 m1 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[0]]); //((SmartBlock)fidData[0].block).fiducialCoordinates[fidData[0].cameraEvent.fiducialID]);
+				Vec3 m2 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[1]]);//((SmartBlock)fidData[1].block).fiducialCoordinates[fidData[1].cameraEvent.fiducialID]);
 				Vec3 m1m2Mid = Vec3.midpoint(m1, m2);
 				
 				//Now translate these points so that m1m2Mid is at the origin.
@@ -51,27 +54,33 @@ public class MysticalModelCenterCalculator
 				
 				//Now we have 3 points, so we can continue from there....
 				//Get the rotation between the model points and fiducial points
-				Matrix R = SVDDecomposer.getRotationMatrix(new Vec3[]{m1o, m2o, oOffsetPoint}, new Vec3[]{w1o, w2o, offsetPoint});
+				Matrix R = RotationMatrixCalculator.calculateRotationMatrix(new Vec3[]{m1o, m2o, oOffsetPoint}, new Vec3[]{w1o, w2o, offsetPoint});
 				
-				//mOffset = x
+				//oOffset = x
 				//basis2 = y
 				//d = z
-				Vec3 basis2 = Vec3.cross(dm, oOffset); //Right?
+				Vec3 basis2 = Vec3.cross(dm, oOffset);
 				//So now we can rotate about x and y
+				Matrix cobDSpace = new Matrix(new Vec3[]{oOffset, basis2, dm}, true);
 				
-				Matrix toDWorld = new Matrix(new Vec3[]{oOffset, basis2, dm}, true);
+				Matrix toDWorld = Matrix.multiply(Matrix.multiply(cobDSpace, R), wTranslation);
 				
-				Vec3[] dFidNorms = new Vec3[2];
+				Vec3[] dFidUp = new Vec3[2];
 				for (int k = 0; k < 2; k++)
 				{
 					//Transform our fiducial normals from model space to D world.
-					dFidNorms[k] = fidData[k].block.fiducialOrient[fidData[k].cameraEvent.fiducialID];
-					dFidNorms[k] = Matrix.multiply(mTranslation, new Vec4(dFidNorms[k])).toVec3();
-					dFidNorms[k] = Matrix.multiply(toDWorld, dFidNorms[k]);
+					dFidUp[k] = sBlock.fiducialOrient[fidIDs[k]];
+					dFidUp[k] = Matrix.multiply(mTranslation, new Vec4(dFidUp[k])).toVec3();
+					dFidUp[k] = Matrix.multiply(toDWorld, dFidUp[k]);
 				}
 				
-				RotationMatrix rTry = new RotationMatrix(0);
-				Vec3[] tryNorms = new Vec3[2];
+				
+				for (int i = 0; i < 2; i++)
+					rotation[i] = Matrix.multiply(toDWorld, new Vec4(rotation[i])).toVec3();
+				
+				RotationMatrix3D rTry = new RotationMatrix3D(0);
+				Vec3[] tryUps = new Vec3[2];
+				double [] scores = new double[360];
 				//Now we rotate them iteratively
 				for (int k = 0; k < 360; k += 2)
 				{
@@ -79,20 +88,41 @@ public class MysticalModelCenterCalculator
 					
 					//Rotate the fiducial normals through the proposed angle and see whether that matches the observed norms.
 					//For this, we need the observed norms.
+					double error = 0;
 					for (int i = 0; i < 2; i++)
-						tryNorms[i] = Matrix.multiply(rTry, dFidNorms[i]);
-					
-					
-					//Evaluate goodness of rTry.
+					{
+						tryUps[i] = Matrix.multiply(rTry, dFidUp[i]);
+						
+						Vec3 uhm1 = getProjection(oOffset,basis2,tryUps[i]);
+						Vec3 uhm2 = getProjection(oOffset,basis2,rotation[i]);
+						
+						error += Math.acos(Vec3.dot(uhm1, uhm2));
+						
+					}
+					scores[k] = error;
 				}
+				
+				int highest = 0;
+				for (int k = 0; k < 360; k += 2)
+					if(scores[k] > scores[highest])
+						highest = k;
+				
+				//so highest is the best rotation
 				
 				
 		}
 		catch(Exception e)
 		{
-			System.out.println("Error");
+			System.out.println("Error:"+e);
 		}
 		return null;
+	}
+	
+	static Vec3 getProjection(Vec3 k1,Vec3 k2, Vec3 point)
+	{
+		double scale1 =Vec3.dot(Vec3.normalize(k1),Vec3.normalize(point));
+		double scale2 =Vec3.dot(Vec3.normalize(k2),Vec3.normalize(point));
+		return Vec3.add(Vec3.scalar(scale1,k1), Vec3.scalar(scale2,k2));		
 	}
 	
 	static Matrix getTranslationMatrix(Vec3 one, Vec3 two)
