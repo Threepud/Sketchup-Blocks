@@ -28,13 +28,13 @@ public class MatrixTest
 		data[0] = new double[]{1, 2, 3};
 		data[1] = new double[]{-1, 5, -2};
 		data[2] = new double[]{4, 2, -1};
-		square = new Matrix(3, 3, data);
+		square = new Matrix(data);
 		
 		data = new double[3][2];
 		data[0] = new double[]{1, 2};
 		data[1] = new double[]{-2, 2};
 		data[2] = new double[]{1, 5};
-		rectangle = new Matrix(3, 2, data);
+		rectangle = new Matrix(data);
 	}
 	
 	public boolean matchMatrices(Matrix m1, Matrix m2)
@@ -64,11 +64,11 @@ public class MatrixTest
 		double[][] data = new double[1][2];
 		data[0] = new double[]{1, 2};
 		
-		Matrix m = new Matrix(1, 2, data);
+		Matrix m = new Matrix(data);
 		assertTrue("Column and row numbers incorrectly initialized (Constructor 2)",m.cols == 2 && m.rows == 1);
 		assertTrue("Data incorrectly initialized", m.data[0][0] == 1 && m.data[0][1] == 2);
 		
-		m = new Matrix(2, 2, data);
+		m = new Matrix(data);
 		assertTrue("Matrix size error not noticed", m.data == null);
 	}
 	
@@ -115,7 +115,7 @@ public class MatrixTest
 	{
 		double[][] data = new double[1][1];
 		data[0][0] = 1;
-		Matrix m = new Matrix(1, 1, data);
+		Matrix m = new Matrix(data);
 		try
 		{
 			Vec3 v = square.toVec3();
@@ -153,7 +153,7 @@ public class MatrixTest
 	{
 		double[][] data = new double[1][1];
 		data[0][0] = 1;
-		Matrix m = new Matrix(1, 1, data);
+		Matrix m = new Matrix(data);
 		try
 		{
 			square.toVec4();
@@ -195,7 +195,7 @@ public class MatrixTest
 		d[0] = new double[]{11, 18, -4};
 		d[1] = new double[]{-14, 19, -11};
 		d[2] = new double[]{-2, 16, 9};
-		Matrix ssC = new Matrix(3, 3, d);
+		Matrix ssC = new Matrix(d);
 		assertTrue("Incorrect square-square multiplication", matchMatrices(ss, ssC));
 		//Square-nonsquare
 		ss = Matrix.multiply(square,  rectangle);
@@ -204,7 +204,7 @@ public class MatrixTest
 		d[0] = new double[]{0, 21};
 		d[1] = new double[]{-13, -2};
 		d[2] = new double[]{-1, 7};
-		ssC = new Matrix(3, 2, d);
+		ssC = new Matrix(d);
 		assertTrue("Incorrect square-rectangular multiplication", matchMatrices(ss, ssC));
 		
 		//Invalid multiplication
@@ -219,7 +219,7 @@ public class MatrixTest
 		d[1] = new double[]{2, 5, 2};
 		d[2] = new double[]{3, -2, -1};
 		
-		assertTrue("Incorrect transpose", matchMatrices(square.transpose(), new Matrix(3, 3, d)));
+		assertTrue("Incorrect transpose", matchMatrices(square.transpose(), new Matrix(d)));
 	}
 
 }
