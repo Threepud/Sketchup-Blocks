@@ -93,7 +93,7 @@ public class BlockDatabase
 		int index = 0;
 		String[] elements = line.split("\t");
 		
-		if(elements.length != 4)
+		if(elements.length != 5)
 			throw new RecordFormatException("DB Smart Block: record length exception.");
 		
 		SmartBlock tempBlock = new SmartBlock();
@@ -144,6 +144,26 @@ public class BlockDatabase
 			}
 		}
 		tempBlock.fiducialCoordinates = fiducialCoordinates;
+		
+		//add fiducial center coordinates in 3D space
+		String[] stringFiducialUp = elements[index++].split(",");
+		Vec3[] fiducialUp = new Vec3[stringFiducialUp.length / 3];
+		for(int x = 0; x < fiducialUp.length; ++x)
+		{
+			int i = 3 * x;
+			try
+			{
+				fiducialUp[x] = new Vec3();
+				fiducialUp[x].x = Double.parseDouble(stringFiducialUp[i]);
+				fiducialUp[x].y = Double.parseDouble(stringFiducialUp[i + 1]);
+				fiducialUp[x].z = Double.parseDouble(stringFiducialUp[i + 2]);
+			}
+			catch(NumberFormatException e)
+			{
+				throw new RecordFormatException("DB Smart Block: fiducial coordinates format exception.");
+			}
+		}
+		tempBlock.fiducialOrient = fiducialUp;
 		
 		//get model data from collada file
 		String fileName = elements[index++];
