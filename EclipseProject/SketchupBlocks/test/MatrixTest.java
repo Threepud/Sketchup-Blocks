@@ -107,7 +107,43 @@ public class MatrixTest
 		Matrix m = new Matrix(colVec);
 		assertTrue("Column and row numbers incorrectly initialized (Constructor 5)",m.cols == 1 && m.rows == 4);
 		assertTrue("Column vec4 incorrectly augmented", m.data[0][0] == 1 && m.data[1][0] == 2);
+	
+	}
+	
+	@Test
+	public void testInverse()
+	{
+		try
+		{
+			Matrix inv = square.getInverse();
+			assert(approximatelyIdentity(Matrix.multiply(inv, square)));
+		}
+		catch(Exception e)
+		{
+			
+		}
 		
+	}
+	
+	private boolean approximatelyIdentity(Matrix one)
+	{
+		for (int k = 0; k < one.rows; k++)
+		{
+			for (int i = 0; i < one.cols; i++)
+			{
+				if (k != i)
+				{
+					if(Math.abs(one.data[k][i]) > 0.000001)
+						return false;
+				}
+				else
+				{
+					if (Math.abs(one.data[k][i] - 1) > 0.000001)
+						return false;
+				}
+			}
+		}
+		return true;
 	}
 	
 	@Test
