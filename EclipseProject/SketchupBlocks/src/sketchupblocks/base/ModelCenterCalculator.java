@@ -8,23 +8,23 @@ import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Vec4;
 
-public class MysticalModelCenterCalculator 
+public class ModelCenterCalculator 
 {
 
 	private static double ERROR_MARGIN = 0.5; //Of square difference
 	
-	public static Vec3 calculateModelCenter(Vec3 [] rotation, InputBlock[] fidData, Vec3[] positions, Vec3[] cameraViewVectors)
+	public static Vec3 calculateModelCenter(Vec3 [] rotation, SmartBlock sBlock, Vec3[] positions, Integer[] fidIDs)
 	{
 		try
 		{
-				if (fidData.length == 3)
+				if (fidIDs.length == 3)
 				{
 					//Ask the mystical SVD decomposer.
 					return null;
 				}
 				
-				Vec3 m1 = Vec3.scalar(-1, ((SmartBlock)fidData[0].block).fiducialCoordinates[fidData[0].cameraEvent.fiducialID]);
-				Vec3 m2 = Vec3.scalar(-1, ((SmartBlock)fidData[1].block).fiducialCoordinates[fidData[1].cameraEvent.fiducialID]);
+				Vec3 m1 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[0]]); //((SmartBlock)fidData[0].block).fiducialCoordinates[fidData[0].cameraEvent.fiducialID]);
+				Vec3 m2 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[1]]);//((SmartBlock)fidData[1].block).fiducialCoordinates[fidData[1].cameraEvent.fiducialID]);
 				Vec3 m1m2Mid = Vec3.midpoint(m1, m2);
 				
 				//Now translate these points so that m1m2Mid is at the origin.
@@ -69,7 +69,7 @@ public class MysticalModelCenterCalculator
 				for (int k = 0; k < 2; k++)
 				{
 					//Transform our fiducial normals from model space to D world.
-					dFidUp[k] = fidData[k].block.fiducialOrient[fidData[k].cameraEvent.fiducialID];
+					dFidUp[k] = sBlock.fiducialOrient[fidIDs[k]];
 					dFidUp[k] = Matrix.multiply(mTranslation, new Vec4(dFidUp[k])).toVec3();
 					dFidUp[k] = Matrix.multiply(toDWorld, dFidUp[k]);
 				}
@@ -107,8 +107,8 @@ public class MysticalModelCenterCalculator
 					if(scores[k] > scores[highest])
 						highest = k;
 				
-				
 				//so highest is the best rotation
+				
 				
 		}
 		catch(Exception e)
