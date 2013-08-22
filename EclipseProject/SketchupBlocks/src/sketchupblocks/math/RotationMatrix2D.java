@@ -1,10 +1,8 @@
-package sketchupblocks.base;
+package sketchupblocks.math;
 
-import sketchupblocks.math.Matrix;
-
-public class RotationMatrix extends Matrix
+public class RotationMatrix2D extends Matrix
 {
-	RotationMatrix(double theta)
+	RotationMatrix2D(double theta)
 	{
 		super(2, 2);
 		double[][] d = new double[2][];
