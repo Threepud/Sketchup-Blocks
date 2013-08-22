@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import processing.core.*;
 import processing.event.*;
 import sketchupblocks.base.ColladaLoader;
+import sketchupblocks.base.Model;
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
 import sketchupblocks.base.Settings;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.BlockNoTypeException;
 import sketchupblocks.exception.BlockNotFoundException;
+import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
@@ -75,19 +77,16 @@ public class ModelViewer implements ModelChangeListener
 		tilesTexture = window.loadImage("./images/newTile.png");
 	}
 	
-	public void setLobby(Lobby _lobby) throws RuntimeException
+	public void setLobby(Lobby _lobby) throws Exception
 	{
 	    lobby = _lobby;
-	    
-	    /*
 	    Model model = lobby.getModel();
-	    
 	    if(model == null)
 	    	throw new ModelNotSetException("Model Viewer: Model not set.");
 	    else
 	    	blockList = new ArrayList<>(model.getBlocks());
-	    	*/
 	    
+	    /*
 	    //################
 	    //debug for viewer
 	    blockList = new ArrayList<>();
@@ -96,7 +95,7 @@ public class ModelViewer implements ModelChangeListener
 	    modelBlock.smartBlock = smartBlock;
 	    //################
 	    
-	    blockList.add(modelBlock);
+	    blockList.add(modelBlock);*/
 	}
 	  
 	public void fireModelChangeEvent(ModelBlock change) throws Exception
@@ -195,7 +194,7 @@ public class ModelViewer implements ModelChangeListener
 			for(int x = 0; x < smartBlock.indices.length; ++x)
 			{
 				Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
-				window.vertex((float)vertex.x, (float)vertex.y, (float)vertex.z);
+				window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
 			}
 			
 			window.endShape();
