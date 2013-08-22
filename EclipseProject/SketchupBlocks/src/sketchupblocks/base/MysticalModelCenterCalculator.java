@@ -56,13 +56,14 @@ public class MysticalModelCenterCalculator
 				//Get the rotation between the model points and fiducial points
 				Matrix R = RotationMatrixCalculator.calculateRotationMatrix(new Vec3[]{m1o, m2o, oOffsetPoint}, new Vec3[]{w1o, w2o, offsetPoint});
 				
-				//mOffset = x
+				//oOffset = x
 				//basis2 = y
 				//d = z
-				Vec3 basis2 = Vec3.cross(dm, oOffset); //Right?
+				Vec3 basis2 = Vec3.cross(dm, oOffset);
 				//So now we can rotate about x and y
+				Matrix cobDSpace = new Matrix(new Vec3[]{oOffset, basis2, dm}, true);
 				
-				Matrix toDWorld = new Matrix(new Vec3[]{oOffset, basis2, dm}, true);
+				Matrix toDWorld = Matrix.multiply(Matrix.multiply(cobDSpace, R), wTranslation);
 				
 				Vec3[] dFidUp = new Vec3[2];
 				for (int k = 0; k < 2; k++)
@@ -92,7 +93,10 @@ public class MysticalModelCenterCalculator
 					{
 						tryUps[i] = Matrix.multiply(rTry, dFidUp[i]);
 						
-						error += Math.acos(Vec3.dot(tryUps[i], rotation[i]));
+						Vec3 uhm1 = getProjection(oOffset,basis2,tryUps[i]);
+						Vec3 uhm2 = getProjection(oOffset,basis2,rotation[i]);
+						
+						error += Math.acos(Vec3.dot(uhm1, uhm2));
 						
 					}
 					scores[k] = error;
@@ -112,6 +116,13 @@ public class MysticalModelCenterCalculator
 			System.out.println("Error:"+e);
 		}
 		return null;
+	}
+	
+	static Vec3 getProjection(Vec3 k1,Vec3 k2, Vec3 point)
+	{
+		double scale1 =Vec3.dot(Vec3.normalize(k1),Vec3.normalize(point));
+		double scale2 =Vec3.dot(Vec3.normalize(k2),Vec3.normalize(point));
+		return Vec3.add(Vec3.scalar(scale1,k1), Vec3.scalar(scale2,k2));		
 	}
 	
 	static Matrix getTranslationMatrix(Vec3 one, Vec3 two)
