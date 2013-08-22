@@ -20,10 +20,10 @@ public class Calibrator
 			calibrated[k] = false;
 		}
 		for(int l = 0 ; l < haveBlockDetails.length ; l++)
-		for(int k = 0 ; k < haveBlockDetails[l].length ; k++)
-		{
-			haveBlockDetails[l][k] = false;
-		}
+			for(int k = 0 ; k < haveBlockDetails[l].length ; k++)
+			{
+				haveBlockDetails[l][k] = false;
+			}
 	}
 	
 	public boolean isCalibrated()
