@@ -156,11 +156,11 @@ public class ModelViewer implements ModelChangeListener
 		
 		window.background(0);
 		
-		createConstructionFloor();
-		createBlocks();
+		drawConstructionFloor();
+		drawBlocks();
 	}
 	
-	private void createConstructionFloor()
+	private void drawConstructionFloor()
 	{
 		window.pushMatrix();
 		
@@ -185,7 +185,7 @@ public class ModelViewer implements ModelChangeListener
 		window.popMatrix();
 	}
 	
-	private void createBlocks()
+	private void drawBlocks()
 	{
 		//draw block list
 		for(ModelBlock block: blockList)
