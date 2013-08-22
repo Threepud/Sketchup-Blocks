@@ -66,7 +66,7 @@ public class ModelConstructor
 		Line [] lines = new Line[numFiducials];
 		for(int k = 0 ; k < fids.length ; k++)
 		{
-			lines[k] = fids[k].line;
+			lines[k] = fids[k].getLine(); //Unicorn
 		}
 		
 		Vec3 [] positions = new Vec3[numFiducials]; //Get from DB
@@ -115,21 +115,20 @@ public class ModelConstructor
 		Particle bestabc = null;
 		
 		bestabc = system.go();
-		//.................So nou het ek die punte, soortvan.....Wat nou??????
+		
 		//Nou het ek die positions van die fiducials in 3D space nodig, die kameras se viewvectors en die Smart blocks wat involved is.
 		Vec3 [] fiducialWorld = new Vec3[numFiducials];
 		Vec3 [] rotations = new Vec3[numFiducials];
-			for(int k = 0 ; k < numFiducials ; k++)
-				{
-					fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-					fiducialWorld[k] = Vec3.add(lines[k].point,Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-					
-					RotationMatrix3D rTry = new RotationMatrix3D(fids[k].rotation);			//We need to check that this is actually correct.
-					rotations[k] = getUpVector(camIDs[k].cameraID);
-					rotations[k] =  Matrix.multiply(rTry, new Vec4(rotations[k])).toVec3();
-				}
+		for(int k = 0 ; k < numFiducials ; k++)
+		{
+			fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+			fiducialWorld[k] = Vec3.add(lines[k].point,Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
 			
-		
+			RotationMatrix3D rTry = new RotationMatrix3D(fids[k].rotation);			//We need to check that this is actually correct.
+			rotations[k] = getUpVector(camIDs[k].cameraID);
+			rotations[k] =  Matrix.multiply(rTry, new Vec4(rotations[k])).toVec3();
+		}
+			
 			
 		/*
 		* rotations -- the rotations as viewed by the camera
@@ -186,21 +185,11 @@ public class ModelConstructor
 			
 			if(fiducial == null)
 			{
-				fiducial =  block.new Fiducial(iBlock.cameraEvent.fiducialID,iBlock.cameraEvent.rotation);
+				fiducial =  block.new Fiducial(iBlock.cameraEvent);
 				block.fiducials.put(block.new CamFid(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
 			}		
 
-			//Line calculation
-			Vec3[] landmarkToCamera = new Vec3[4];
-			double[] angles = new double[4];
-			for (int k = 0; k < 4; k++)
-			{
-				landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[iBlock.cameraEvent.cameraID], Settings.landmarks[k]);
-				angles[k] = getAngle(iBlock.cameraEvent.cameraID, k, iBlock.cameraEvent.x, iBlock.cameraEvent.y);
-			}
-			// Do calculation 
-			Vec3 mysticalLine = LinearSystemSolver.solve(landmarkToCamera, angles);
-			fiducial.line = new Line(cally.cameraPositions[iBlock.cameraEvent.cameraID], mysticalLine);
+			//Get line used to be here
 			
 			if(block.ready())
 			{
@@ -268,12 +257,40 @@ public class ModelConstructor
 			public double rotation;
 			public int fiducialsID;
 			public Date timestamp;
+			public double camViewX;
+			public double camViewY;
+			public int camID;
 			
-			public Fiducial(int _fiducialsID, double rot)
+			
+			public Fiducial(CameraEvent camE)
+			{
+				this(camE.fiducialID, camE.rotation, camE.x, camE.y, camE.cameraID);
+			}
+			
+			public Fiducial(int _fiducialsID, double rot, double _camViewX, double _camViewY, int _camID)
 			{
 				fiducialsID = _fiducialsID;
 				rotation = rot;
 				timestamp = new Date();
+				camViewX = _camViewX;
+				camViewY = _camViewY;
+				camID = _camID;
+			}
+			
+			public Line getLine()
+			{
+				//Line calculation
+				Vec3[] landmarkToCamera = new Vec3[4];
+				double[] angles = new double[4];
+				
+				for (int k = 0; k < 4; k++)
+				{
+					landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[camID], Settings.landmarks[k]);
+					angles[k] = getAngle(camID, k, camViewX, camViewY);
+				}
+				// Do calculation 
+				Vec3 lineDirection = LinearSystemSolver.solve(landmarkToCamera, angles);
+				return new Line(cally.cameraPositions[camID], lineDirection);
 			}
 		}
 		
