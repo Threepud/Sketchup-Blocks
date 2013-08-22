@@ -14,6 +14,7 @@ import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.BlockNoTypeException;
 import sketchupblocks.exception.BlockNotFoundException;
 import sketchupblocks.exception.ModelNotSetException;
+import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
@@ -167,6 +168,7 @@ public class ModelViewer implements ModelChangeListener
 			for(int x = 0; x < smartBlock.indices.length; ++x)
 			{
 				Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
+				vertex = Matrix.multiply(block.transformationMatrix, vertex);
 				window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
 			}
 			
