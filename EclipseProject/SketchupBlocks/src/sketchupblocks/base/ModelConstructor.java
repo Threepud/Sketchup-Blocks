@@ -59,81 +59,87 @@ public class ModelConstructor
 			store(iBlock);
 		}
 		
-		
 	}
 	
 	private void processBin(BlockInfo bin)
 	{
-		BlockInfo.Fiducial [] fids = null;
-		fids = bin.fiducialMap.values().toArray(fids);
-		
-		BlockInfo.CamFidIdentifier [] camIDs = null;
-		camIDs = bin.fiducialMap.keySet().toArray(camIDs);
-		
-		int numFiducials = fids.length;
-		
-		Line[] lines = new Line[numFiducials];
-		for(int k = 0 ; k < fids.length ; k++)
+		if (bin.smartBlock instanceof SmartBlock)
 		{
-			lines[k] = fids[k].getLine(); 
-		}
-		
-		Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
-		if (!(bin.smartBlock instanceof SmartBlock))
-		{
-			System.out.println("Attempting to process command block, but this feature is not yet supported");
-			return;
-		}
-		
-		SmartBlock sBlock =(SmartBlock)(bin.smartBlock);
-		ArrayList<Integer> fiducialIndices = new ArrayList<Integer>();
-		
-		for (int k = 0 ; k < numFiducials ; k++)
-		{
-			int fiducialIndex = -1;
-			for (int i = 0 ; i < sBlock.associatedFiducials.length; i++)
+			BlockInfo.Fiducial [] fids = null;
+			fids = bin.fiducialMap.values().toArray(fids);
+			
+			BlockInfo.CamFidIdentifier [] camIDs = null;
+			camIDs = bin.fiducialMap.keySet().toArray(camIDs);
+			
+			int numFiducials = fids.length;
+			
+			Line[] lines = new Line[numFiducials];
+			for(int k = 0 ; k < fids.length ; k++)
 			{
-				if (sBlock.associatedFiducials[i] == fids[k].fiducialsID)
+				lines[k] = fids[k].getLine(); 
+			}
+			
+			Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
+			if (!(bin.smartBlock instanceof SmartBlock))
+			{
+				System.out.println("Attempting to process command block, but this feature is not yet supported");
+				return;
+			}
+			
+			SmartBlock sBlock =(SmartBlock)(bin.smartBlock);
+			ArrayList<Integer> fiducialIndices = new ArrayList<Integer>();
+			
+			for (int k = 0 ; k < numFiducials ; k++)
+			{
+				int fiducialIndex = -1;
+				for (int i = 0 ; i < sBlock.associatedFiducials.length; i++)
 				{
-					fiducialIndex = i;
-					fiducialIndices.add(i);
-					break;
+					if (sBlock.associatedFiducials[i] == fids[k].fiducialsID)
+					{
+						fiducialIndex = i;
+						fiducialIndices.add(i);
+						break;
+					}
 				}
+				if(fiducialIndex == -1)
+				{
+					throw new RuntimeException("Smart Block fiducials don't match");
+				}
+				fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
 			}
-			if(fiducialIndex == -1)
+				
+			//Bin should have enough information to get position.
+			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
+			Particle bestabc = system.go();
+			
+			Vec3 [] fiducialWorld = new Vec3[numFiducials];
+			Vec3 [] upRotWorld = new Vec3[numFiducials];
+			for(int k = 0 ; k < numFiducials ; k++)
 			{
-				throw new RuntimeException("Smart Block fiducials don't match");
+				fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+				fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+				
+				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation);	
+				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
+				upRotWorld[k] =  Matrix.multiply(rot, new Vec4(upRotWorld[k])).toVec3();
 			}
-			fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
-		}
 			
-		//Bin should have enough information to get position.
-		ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
-		Particle bestabc = system.go();
-		
-		Vec3 [] fiducialWorld = new Vec3[numFiducials];
-		Vec3 [] upRotWorld = new Vec3[numFiducials];
-		for(int k = 0 ; k < numFiducials ; k++)
+			
+			/*
+			* upRotWorld -- the rotations as viewed by the camera
+			* fiducialWorld -- Fiducial locations
+			* lines[k].direction -- the k'th fiducial view vector
+			* sBlock -- The smart block
+			*/
+			
+			Matrix transform = ModelCenterCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, (Integer[])fiducialIndices.toArray());
+			
+			eddy.updateModel(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
+		}
+		else
 		{
-			fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-			fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-			
-			RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation);	
-			upRotWorld[k] = getUpVector(camIDs[k].cameraID);
-			upRotWorld[k] =  Matrix.multiply(rot, new Vec4(upRotWorld[k])).toVec3();
+			System.out.println("Attempting to process a Command Block, but this is not yet supported");
 		}
-		
-		
-		/*
-		* upRotWorld -- the rotations as viewed by the camera
-		* fiducialWorld -- Fiducial locations
-		* lines[k].direction -- the k'th fiducial view vector
-		* sBlock -- The smart block
-		*/
-		
-		ModelCenterCalculator.calculateModelCenter(upRotWorld, sBlock, fiducialWorld, (Integer[])fiducialIndices.toArray());
-		
-		
 	}
 	
 	private ParticleSystemSettings getPSOConfiguration(Vec3[] fidCoordsM, Line[] lines, int numFids)
@@ -158,6 +164,7 @@ public class ModelConstructor
 	
 	private void store(InputBlock iBlock)
 	{
+		
 		if (iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
@@ -193,7 +200,7 @@ public class ModelConstructor
 			if (block.fiducialMap.containsKey(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID)))
 			{
 				block.fiducialMap.remove(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
-			}	
+			}
 			
 			/*
 			* Cleanup -- Remove blocks if not seen
@@ -203,6 +210,8 @@ public class ModelConstructor
 			if(block.fiducialMap.isEmpty())
 			{
 				blockMap.remove(iBlock.block.blockId);
+				if (iBlock.block instanceof SmartBlock)
+					eddy.updateModel(new ModelBlock((SmartBlock)iBlock.block, null, ModelBlock.ChangeType.REMOVE));
 			}
 		}
 	}
