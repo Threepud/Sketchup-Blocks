@@ -46,8 +46,11 @@ public class ModelConstructor
 			boolean changedPosition = cally.processBlock(iBlock);
 			calibrated = cally.isCalibrated();
 			//Propagate updated camera positions to the appropriate parties.
+			System.out.println("Calibrated: "+calibrated);
+			System.out.println("changed: "+changedPosition);
 			if (changedPosition && calibrated)
 			{
+				System.out.println("Sending camera positions through to model viewer");
 				for (int k = 0; k < Settings.numCameras; k++)
 				{
 					sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
@@ -65,10 +68,10 @@ public class ModelConstructor
 	{
 		if (bin.smartBlock instanceof SmartBlock)
 		{
-			BlockInfo.Fiducial [] fids = null;
+			BlockInfo.Fiducial [] fids = new BlockInfo.Fiducial[0];
 			fids = bin.fiducialMap.values().toArray(fids);
 			
-			BlockInfo.CamFidIdentifier [] camIDs = null;
+			BlockInfo.CamFidIdentifier [] camIDs = new BlockInfo.CamFidIdentifier[0];
 			camIDs = bin.fiducialMap.keySet().toArray(camIDs);
 			
 			int numFiducials = fids.length;
@@ -269,6 +272,7 @@ public class ModelConstructor
 		
 		public BlockInfo(Block _smartBlock)
 		{
+			blockID = _smartBlock.blockId;
 			fiducialMap = new HashMap<CamFidIdentifier,Fiducial>();
 			smartBlock = _smartBlock;
 		}
