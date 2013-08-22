@@ -1,5 +1,7 @@
 package sketchupblocks.math;
 
+import javax.management.RuntimeErrorException;
+
 /**
  *
  * @author cravingoxygen
@@ -12,10 +14,9 @@ public class LinearSystemSolver
      */
     public static Vec3 solve(Vec3[] input, double[] angles) 
     {
-    	if (angles.length != 3)
+    	if (angles.length != 4)
     	{
-    		System.out.println("Invalid solve attemped");
-    		return null;
+    		throw new RuntimeException();
     	}
     	
         Matrix A = new Matrix(input, false);
@@ -23,7 +24,7 @@ public class LinearSystemSolver
         double [] bVecData = new double[4];
         for (int k = 0; k < 4; k++)
         {
-            bVecData[k] = input[k].length()*Math.cos(angles[0]);
+            bVecData[k] = input[k].length()*Math.cos(angles[k]);
         }
         Vec4 BVec = new Vec4(bVecData);
         
