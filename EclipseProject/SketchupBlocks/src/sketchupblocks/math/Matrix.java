@@ -101,6 +101,7 @@ public class Matrix
         if (cols != 3 || rows != 3)
         {
             System.out.println("Cannot set as repeat vector");
+            throw new RuntimeException();
         }
         for (int k = 0; k < 3; k++)
         {
@@ -117,6 +118,7 @@ public class Matrix
         if (cols != 3 || rows != 3)
         {
             System.out.println("Cannot set as repeat vector");
+            throw new RuntimeException();
         }
         for (int k = 0; k < 3; k++)
         {
@@ -126,7 +128,20 @@ public class Matrix
         }
     }
     
-    
+    public Matrix padMatrix() throws UnexpectedNonSquareMatrixException
+    {
+    	if(!isSquare())
+    		throw new UnexpectedNonSquareMatrixException("I'm really not that square.");
+    	
+    	Matrix result = new Matrix(rows + 1, cols + 1);
+    	for(int x = 0; x < cols; ++x)
+    		for(int i = 0; i < rows; ++i)
+    			result.data[x][i] = data[x][i];
+    	
+    	result.data[rows][cols] = 1;
+    	
+    	return result;
+    }
     
     public boolean isSquare()
     {
@@ -162,7 +177,7 @@ public class Matrix
         if (A.cols != B.cols || A.rows != B.rows)
         {
             System.out.println("Cannot subtract these matrices");
-            return null;
+            throw new RuntimeException();
         }
         
         double[][] data = new double[A.rows][A.cols];
@@ -239,8 +254,8 @@ public class Matrix
 	{
 		if (m1.cols != 3)
 		{
-			System.out.println("Error!! Cannot multiply with vec3");
-			return null;
+			System.out.println("Error!! Cannot multiply with vec3 "+m1.cols);
+			throw new RuntimeException();
 		}
 		
 		double[] vdata = v.toArray();
@@ -263,8 +278,8 @@ public class Matrix
 	{
 		if (m1.cols != 4)
 		{
-			System.out.println("Error!! Cannot multiply with vec3");
-			return null;
+			System.out.println("Error!! Cannot multiply with vec4 "+m1.cols);
+			throw new RuntimeException();
 		}
 		
 		double[] vdata = v.toArray();
@@ -288,7 +303,14 @@ public class Matrix
 	        if (m1.cols != m2.rows)
 	        {
 	            System.out.println("Invalid multiplication\nm1.cols: "+m1.cols+"\tm2.rows: "+m2.rows);
-	        return null;
+	            try
+	            {
+	            	throw new RuntimeException();
+	            }
+	            catch(Exception e)
+	            {
+	            	e.printStackTrace();
+	            }
 		    }
 		    Matrix res = new Matrix(m1.rows, m2.cols);
 		
