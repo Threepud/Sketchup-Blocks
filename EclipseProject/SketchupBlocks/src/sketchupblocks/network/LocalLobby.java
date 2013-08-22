@@ -14,7 +14,11 @@ public class LocalLobby implements Lobby
 	  
 	public void updateModel(ModelBlock modelBlock)
 	{
-		model.addModelBlock(modelBlock);
+		System.out.println("In Eddy yo! " + modelChangeListeners.size());
+		if(modelBlock.type == ModelBlock.ChangeType.UPDATE)
+			model.addModelBlock(modelBlock);
+		else
+			model.removeModelBlock(modelBlock);
 		modelChangeListeners.trimToSize();
 		for (int k = 0; k < modelChangeListeners.size(); k++)
 		{
