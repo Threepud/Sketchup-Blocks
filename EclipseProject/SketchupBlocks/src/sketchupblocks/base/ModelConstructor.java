@@ -115,7 +115,7 @@ public class ModelConstructor
 			//Bin should have enough information to get position.
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
 			Particle bestabc = null;
-			System.out.println("Calculated m's "+bin.blockID+" num fids:" + fids.length);
+			System.out.println("Calculated m's "+bin.blockID+" num fids: " + fids.length);
 			for(int k = 0 ; k < 5 ; k++)
 			{
 				
@@ -200,6 +200,7 @@ public class ModelConstructor
 			if(block.ready() && calibrated)
 			{
 				processBin(block);
+				blockMap.remove(block.blockID);
 			}
 		}
 		else //When a remove call is received
