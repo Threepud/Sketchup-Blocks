@@ -18,11 +18,15 @@ public class RotationMatrixCalculator
 	        Matrix setB = new Matrix(pointsB, true);
 	        
 	        Matrix H = calculateCovariance(setA, setB, centroidA.toArray(), centroidB.toArray());
+	       /* System.out.println("A: "+setA);
+	        System.out.println("B: "+setB);
+	        System.out.println("Covariance: "+H);*/
 	        Matrix [] usv = SVDecomposer.decompose(H); //U, S, V
 	        
 	        Matrix proposedR = Matrix.multiply(usv[2], usv[0].transpose());
 	        
-	        if(calculateDeterminant(proposedR) < 0)
+	        //System.out.println("Determinant of R: "+Matrix.determinant(proposedR));
+	        if(Matrix.determinant(proposedR) < 0)
 	        {
 	            int COLUMN_THREE = 2;
 	            for (int k = 0; k < proposedR.rows; k++)
@@ -46,6 +50,9 @@ public class RotationMatrixCalculator
 	        t.data = data;
 	        t = new Matrix(data);
 	        
+	        //System.out.println("Translation: "+t);
+	        //System.out.println("Rotation: "+proposedR);
+	        
 	       return new Matrix[]{proposedR, t};
 		}
 		catch(Exception e)
@@ -55,22 +62,6 @@ public class RotationMatrixCalculator
 		return null;
 	}
 	
-	
-	
-	private static double calculateDeterminant(Matrix R)
-    {
-        Matrix[] lup = LUDecomposer.decompose(R);
-        
-        
-        double res= 1;
-        for (int k = 0; k < lup[2].rows; k++)
-        {
-            res *= lup[1].data[k][k];
-        }
-        
-        int numInversions = lup[3].cols;
-        return numInversions % 2 != 0 ? -1*res : res;
-    }
     
 	private static Matrix calculateCovariance(Matrix A, Matrix B, double[] midA, double[] midB) throws Exception
     {
@@ -118,13 +109,16 @@ public class RotationMatrixCalculator
         for (int k = 0; k < points.length; k++)
         {
         	System.out.println("Received point; "+points[k]);
-            center[k] += points[k].x;
-            center[k] += points[k].y;
-            center[k] += points[k].z;
-            center[k] /= 3.0;
+            center[0] += points[k].x;
+            center[1] += points[k].y;
+            center[2] += points[k].z;
+            //center[k] /= 3.0;
         }
         
+        
         Vec3 res = new Vec3(center);
+        System.out.println("Intermediate: "+res);
+        res = Vec3.scalar(1.0/3.0, res);
         System.out.println("Calculated centroid: "+res);
         System.out.println("-----------------------------");
         return res;
