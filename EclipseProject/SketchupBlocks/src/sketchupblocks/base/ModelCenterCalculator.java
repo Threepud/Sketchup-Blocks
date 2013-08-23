@@ -23,8 +23,12 @@ public class ModelCenterCalculator
 				if (fidIDs.length > 2)
 				{
 					Vec3 m3 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[2]]);
-					
-					Matrix[] transformMatrices = RotationMatrixCalculator.calculateTransformationMatrices(new Vec3[]{m1, m2, m3}, positions);
+					Vec3[] threePositions = new Vec3[3];
+					for (int k = 0; k < 3; k++)
+					{
+						threePositions[k] = positions[k];
+					}
+					Matrix[] transformMatrices = RotationMatrixCalculator.calculateTransformationMatrices(new Vec3[]{m1, m2, m3}, threePositions);
 					return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
 				}
 				
