@@ -80,6 +80,7 @@ public class ModelConstructor
 			for(int k = 0 ; k < fids.length ; k++)
 			{
 				lines[k] = fids[k].getLine(); 
+				lines[k].direction.normalize();
 			}
 			
 			Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
@@ -113,13 +114,24 @@ public class ModelConstructor
 				
 			//Bin should have enough information to get position.
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
-			Particle bestabc = system.go();
+			Particle bestabc = null;
+			System.out.println("Calculated m's "+bin.blockID+" num fids:" + fids.length);
+			for(int k = 0 ; k < 5 ; k++)
+			{
+				
+			bestabc = system.go();
+			
+				for(int l = 0 ; l < bestabc.bestPosition.length ; l++)
+				{
+					System.out.print(bestabc.bestPosition[l] + " " );
+				}
+				System.out.println();
+			}
 			
 			Vec3 [] fiducialWorld = new Vec3[numFiducials];
 			Vec3 [] upRotWorld = new Vec3[numFiducials];
 			for(int k = 0 ; k < numFiducials ; k++)
 			{
-				fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
 				fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
 				
 				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation);	
@@ -263,7 +275,7 @@ public class ModelConstructor
 		
 	class BlockInfo
 	{
-		int minEvents = 2;
+		int minEvents = 3;
 		int LIFETIME = 2000;	//ms
 		public int blockID;
 		public Block smartBlock;
@@ -314,6 +326,20 @@ public class ModelConstructor
 			{
 				cameraID = c;
 				fiducialID = f;
+			}
+			@Override
+			public boolean equals(Object other)
+			{
+				if(other instanceof CamFidIdentifier)
+					return ((CamFidIdentifier)other).cameraID == cameraID && ((CamFidIdentifier)other).fiducialID == fiducialID;
+				else
+					return false;
+			}
+			
+			@Override
+			public int hashCode()
+			{
+			return 	(cameraID*256)+fiducialID;
 			}
 		}
 	
