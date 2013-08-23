@@ -83,7 +83,7 @@ public class LUDecomposer
                     lu[i][j] -= temp *lu[k][j];
             }
         }
-        return new Matrix[]{getL(lu), getU(lu), getP(indx), new Matrix(count, count)};
+        return new Matrix[]{getL(lu), getU(lu), getP(indx)};
     }
     
     private static Matrix getP(int[] indx)
