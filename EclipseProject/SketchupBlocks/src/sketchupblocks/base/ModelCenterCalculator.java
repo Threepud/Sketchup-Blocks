@@ -18,14 +18,16 @@ public class ModelCenterCalculator
 	{
 		try
 		{
-				if (fidIDs.length == 3)
+			Vec3 m1 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[0]]); //((SmartBlock)fidData[0].block).fiducialCoordinates[fidData[0].cameraEvent.fiducialID]);
+			Vec3 m2 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[1]]);//((SmartBlock)fidData[1].block).fiducialCoordinates[fidData[1].cameraEvent.fiducialID]);
+				if (fidIDs.length > 2)
 				{
-					//Ask the mystical SVD decomposer.
-					return null;
+					Vec3 m3 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[2]]);
+					
+					Matrix[] transformMatrices = RotationMatrixCalculator.calculateTransformationMatrices(new Vec3[]{m1, m2, m3}, positions);
+					return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
 				}
 				
-				Vec3 m1 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[0]]); //((SmartBlock)fidData[0].block).fiducialCoordinates[fidData[0].cameraEvent.fiducialID]);
-				Vec3 m2 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[1]]);//((SmartBlock)fidData[1].block).fiducialCoordinates[fidData[1].cameraEvent.fiducialID]);
 				Vec3 m1m2Mid = Vec3.midpoint(m1, m2);
 				
 				//Now translate these points so that m1m2Mid is at the origin.
@@ -55,7 +57,8 @@ public class ModelCenterCalculator
 				//Now we have 3 points, so we can continue from there....
 				//Get the rotation between the model points and fiducial points
 				//Rotates world fiducials positions to fit model positions
-				Matrix R = RotationMatrixCalculator.calculateRotationMatrix(new Vec3[]{w1o, w2o, offsetPoint},new Vec3[]{m1o, m2o, oOffsetPoint});
+				Matrix R = RotationMatrixCalculator.calculateTransformationMatrices(new Vec3[]{w1o, w2o, offsetPoint},new Vec3[]{m1o, m2o, oOffsetPoint})[0];
+				//(R*A.')'
 				
 				//oOffset = x
 				//basis2 = y
