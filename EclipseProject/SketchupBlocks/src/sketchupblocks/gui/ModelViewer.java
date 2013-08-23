@@ -158,15 +158,16 @@ public class ModelViewer implements ModelChangeListener
 	
 	private void drawBlocks()
 	{
+		window.scale(10, 10, 10);
+		
 		//draw block list
 		for(ModelBlock block: new ArrayList<ModelBlock>(blockMap.values()))
 		{
 			if(block.type == ModelBlock.ChangeType.REMOVE)
 				System.out.println("Drawing removed block!");
-			SmartBlock smartBlock = block.smartBlock;
-			window.scale(10, 10, 10);
-			window.beginShape(PConstants.TRIANGLES);
 			
+			SmartBlock smartBlock = block.smartBlock;
+			window.beginShape(PConstants.TRIANGLES);
 			for(int x = 0; x < smartBlock.indices.length; ++x)
 			{
 				Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
