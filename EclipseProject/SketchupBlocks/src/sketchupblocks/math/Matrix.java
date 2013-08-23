@@ -128,6 +128,50 @@ public class Matrix
         }
     }
     
+    public static double determinant(Matrix m) throws UnexpectedNonSquareMatrixException
+    {
+    	if (!m.isSquare())
+    		throw new UnexpectedNonSquareMatrixException("Cannot calculate determinant of nonsquare matrix");
+    	if (m.rows == 1 && m.cols == 1)
+    	{
+    		return m.data[0][0];
+    	}
+    	
+    	double sum = 0;
+    	for (int j = 0; j < m.cols; j++)
+    	{
+    		sum += m.data[0][j]*Math.pow(-1, j)*Matrix.determinant(getMinor(m, 0, j));
+    	}
+    	
+    	return sum;
+    }
+    
+    private static Matrix getMinor(Matrix m, int row, int col)
+    {
+    	
+    	double[][] d = new double[m.rows - 1][m.cols-1];
+    	
+    	int mi = 0; 
+    	int mj = 0;
+    	for (int i = 0; i < m.rows; i++)
+    	{
+    		if (i != row)
+    		{
+	    		for (int j = 0; j < m.cols; j++)
+	    		{
+	    			if (j != col)
+	    			{
+	    				d[mi][mj] = m.data[i][j];
+	    				mj++;
+	    			}
+	    		}
+    			mi++;
+    			mj = 0;
+    		}
+    	}
+    	return new Matrix(d);
+    }
+    
     public Matrix padMatrix() throws UnexpectedNonSquareMatrixException
     {
     	if(!isSquare())
@@ -376,15 +420,16 @@ public class Matrix
 	}
 	
 	@Override
-	public String toString()
+    public String toString()
     {
-        String res = "";
+        String res = "[";
         for (int r = 0; r < rows; r++)
         {
                 for (int c = 0; c < cols; c++)
-                        res += data[r][c]+"\t";
-                res += "\n";
+                        res += data[r][c]+" ";
+                res += ";";
         }
+        res += "]";
         return res;
     }
 }
