@@ -40,20 +40,22 @@ public class ModelConstructor
 	  
 	public void receiveBlock(InputBlock iBlock)
 	{
-		if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE)
+		if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE  )
 		{
-			
-			boolean changedPosition = cally.processBlock(iBlock);
-			calibrated = cally.isCalibrated();
-			//Propagate updated camera positions to the appropriate parties.
-			System.out.println("Calibrated: "+calibrated);
-			System.out.println("changed: "+changedPosition);
-			if (changedPosition && calibrated)
+			if(!cally.isCalibrated())
 			{
-				System.out.println("Sending camera positions through to model viewer");
-				for (int k = 0; k < Settings.numCameras; k++)
+				boolean changedPosition = cally.processBlock(iBlock);
+				calibrated = cally.isCalibrated();
+				//Propagate updated camera positions to the appropriate parties.
+				System.out.println("Calibrated: "+calibrated);
+				System.out.println("changed: "+changedPosition);
+				if (changedPosition && calibrated)
 				{
-					sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
+					System.out.println("Sending camera positions through to model viewer");
+					for (int k = 0; k < Settings.numCameras; k++)
+					{
+						sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
+					}
 				}
 			}
 		}
@@ -81,6 +83,7 @@ public class ModelConstructor
 			{
 				lines[k] = fids[k].getLine(); 
 				lines[k].direction.normalize();
+				System.out.println("Line "+k+":"+lines[k].point+" +m* " +lines[k].direction);
 			}
 			
 			Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
@@ -91,6 +94,7 @@ public class ModelConstructor
 			}
 			
 			SmartBlock sBlock =(SmartBlock)(bin.smartBlock);
+			System.out.println("Doing Block:"+sBlock.blockId);
 			ArrayList<Integer> fiducialIndices = new ArrayList<Integer>();
 			
 			for (int k = 0 ; k < numFiducials ; k++)
@@ -115,10 +119,7 @@ public class ModelConstructor
 			//Bin should have enough information to get position.
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
 			Particle bestabc = null;
-			System.out.println("Calculated m's "+bin.blockID+" num fids: " + fids.length);
-			for(int k = 0 ; k < 5 ; k++)
-			{
-				
+			System.out.println("Calculated m's "+bin.blockID+" num fids: " + fids.length);			
 			bestabc = system.go();
 			
 				for(int l = 0 ; l < bestabc.bestPosition.length ; l++)
@@ -126,14 +127,13 @@ public class ModelConstructor
 					System.out.print(bestabc.bestPosition[l] + " " );
 				}
 				System.out.println();
-			}
 			
 			Vec3 [] fiducialWorld = new Vec3[numFiducials];
 			Vec3 [] upRotWorld = new Vec3[numFiducials];
 			for(int k = 0 ; k < numFiducials ; k++)
 			{
 				fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-				
+	
 				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation);	
 				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
 				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
@@ -146,8 +146,63 @@ public class ModelConstructor
 			* lines[k].direction -- the k'th fiducial view vector
 			* sBlock -- The smart block
 			*/
+			
+			/*
+			 * Now colapse the arrays
+			 */
+			/*Integer indexs[] = new Integer[numFiducials];
+			int fidIDs []  = new int[numFiducials];
+			int [] addCount = new int[numFiducials];
+			Vec3 [] upPass = new Vec3[numFiducials];
+			Vec3 [] posPass = new Vec3[numFiducials];
+			int count= 1;
+			//setup
+			indexs[0] = fiducialIndices.get(0) ;
+			upPass[0] = upRotWorld[0];
+			posPass[0] = fiducialWorld[0];
+			fidIDs[0] = fids[0].fiducialsID;
+			addCount[0] =1;
+			
+			for(int k = 1 ; k < numFiducials ; k++)
+				{
+					boolean match = false;
+					int l;
+					for(l = 0 ; l < count ; l++)
+						{
+							if(fidIDs[l] == fids[k].fiducialsID)
+							{
+								match = true;
+								break;
+							}	
+						}
+					if(match)
+					{
+						addCount[l]++;
+						upPass[l] = Vec3.add(upPass[l],upRotWorld[k] );
+						posPass[l] = Vec3.add(posPass[l],fiducialWorld[k] );
+					}
+					else
+					{
+						indexs[count] = fiducialIndices.get(k)  ;
+						upPass[count] = upRotWorld[k];
+						posPass[count] = fiducialWorld[k];
+						fidIDs[count] = fids[k].fiducialsID;
+						addCount[count] =1;
+						count++;
+					}
+						
+				}
+					
+				for(int k = 1 ; k < count ; k++)		
+				{
+					upPass[k] = Vec3.scalar(1.0/addCount[k], upPass[k]);
+					posPass[k] = Vec3.scalar(1.0/addCount[k], posPass[k]);
+				}*/
+				
+			
 			Integer[] temp = new Integer[0];
 			Matrix transform = ModelCenterCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(temp));
+			//Matrix transform = ModelCenterCalculator.getModelTransformationMatrix(upPass, sBlock, posPass, indexs);
 			
 			eddy.updateModel(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
 		}
@@ -162,18 +217,18 @@ public class ModelConstructor
 		ParticleSystemSettings settings = new ParticleSystemSettings();
 		settings.eval = new BlockPosition(fidCoordsM,lines);
 		settings.tester = null;
-		settings.creator = new ParticleCreator(numFids,0,100);
+		settings.creator = new ParticleCreator(numFids,0,90);
 		
-		settings.particleCount = 100;
-		settings.iterationCount= 2000;
+		settings.particleCount = 80;
+		settings.iterationCount= 8000;
 		
-		settings.ringTopology = true;
-		settings.ringSize = 1;
+		settings.ringTopology = false;
+		settings.ringSize = 5;
 		
 		settings.socialStart = 0.72;
 		settings.cognitiveStart = 0.72;
 		settings.momentum = 1.4;
-		settings.MaxComponentVelocity = 1;
+		settings.MaxComponentVelocity = 0.1;
 		return settings;
 	}
 	
@@ -200,7 +255,8 @@ public class ModelConstructor
 			if(block.ready() && calibrated)
 			{
 				processBin(block);
-				blockMap.remove(block.blockID);
+				//blockMap.remove(block.blockID);
+				block.fiducialMap.clear();
 			}
 		}
 		else //When a remove call is received
@@ -236,27 +292,29 @@ public class ModelConstructor
 	{
 		double fov = Settings.cameraSettings[camID].fov;
 		double aspect = Settings.cameraSettings[camID].aspectRatio;
-		return Math.sqrt(sqr((cally.calibrationDetails[camID][lm][0]- x)*fov)+sqr((cally.calibrationDetails[camID][lm][1]- y)*(fov/aspect))); 
+		return Math.toRadians( Math.sqrt(sqr((cally.calibrationDetails[camID][lm][0]- x)*fov)+sqr((cally.calibrationDetails[camID][lm][1]- y)*(fov/aspect)))); 
 	}
 	
 	private Vec3 getUpVector(int CamID)
 	{
 		Vec3[] landmarkToCamera = new Vec3[4];
-		double[] angles = new double[4];
 		for (int k = 0; k < 4; k++)
 		{
 			landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[CamID], Settings.landmarks[k]);
+		}
+		
+		double[] angles = new double[4];
+		for (int k = 0; k < 4; k++)
+		{
 			angles[k] = getAngle(CamID, k, 0.5, 0.5+0.01);
 		}
 		// Do calculation 
 		Vec3 lineDirection = LinearSystemSolver.solve(landmarkToCamera, angles);
 		Line top = new Line(cally.cameraPositions[CamID], lineDirection);
 		
-		landmarkToCamera = new Vec3[4];
 		angles = new double[4];
 		for (int k = 0; k < 4; k++)
 		{
-			landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[CamID], Settings.landmarks[k]);
 			angles[k] = getAngle(CamID, k, 0.5, 0.5-0.01);
 		}
 		// Do calculation 
@@ -376,7 +434,7 @@ public class ModelConstructor
 				
 				for (int k = 0; k < 4; k++)
 				{
-					landmarkToCamera[k] = Vec3.subtract(cally.cameraPositions[camID], Settings.landmarks[k]);
+					landmarkToCamera[k] = Vec3.subtract(Settings.landmarks[k],cally.cameraPositions[camID] );
 					angles[k] = getAngle(camID, k, camViewX, camViewY);
 				}
 				// Do calculation 
