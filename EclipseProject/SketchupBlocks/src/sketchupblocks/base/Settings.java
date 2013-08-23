@@ -10,7 +10,7 @@ public class Settings
 	public static int numSlots = 5;
 	public static int scrollTrigger = 15;
 	
-	public static int numCameras = 1;
+	public static int numCameras = 2;
 	public static CameraSettings [] cameraSettings = new CameraSettings[]
 	{
 		new CameraSettings(68.5, 1280.0/720.0, 3333),
