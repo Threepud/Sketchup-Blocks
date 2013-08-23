@@ -51,6 +51,7 @@ public class BlockPosition implements Evaluator
 		EvalResults result = new EvalResults();
 		result.score = 10000;
 		
+		//Not behind the camera
 		for(int k = 0 ; k < arrayLengths ; k++ )
 			if(pa[k] < 0)
 				result.score = 0;
@@ -66,7 +67,7 @@ public class BlockPosition implements Evaluator
 		
 		//Closest to camera
 		for(int k = 0 ; k < arrayLengths ; k++ )
-			errors += pa[k]*pa[k];
+			errors += pa[k]*0.001;
 		
 		
 		result.score /= errors;
@@ -81,9 +82,10 @@ public class BlockPosition implements Evaluator
 		distance+= Math.pow( (lin1.point.x + s1*lin1.direction.x) - (lin2.point.x + s2*lin2.direction.x), 2);
 		distance+= Math.pow( (lin1.point.y + s1*lin1.direction.y) - (lin2.point.y + s2*lin2.direction.y), 2);
 		distance+= Math.pow( (lin1.point.z + s1*lin1.direction.z) - (lin2.point.z + s2*lin2.direction.z), 2);	
+		distance = Math.sqrt(distance);
 	
 		double length = position1.distance(position2);
 		
-		return Math.abs(length*length - distance);
+		return Math.pow(length - distance,2);
 	}
 }
