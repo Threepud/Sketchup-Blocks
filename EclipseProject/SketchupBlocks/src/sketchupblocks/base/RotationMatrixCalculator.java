@@ -8,7 +8,7 @@ import sketchupblocks.math.Vec3;
 
 public class RotationMatrixCalculator 
 {
-	public static Matrix calculateRotationMatrix(Vec3[] pointsA, Vec3[] pointsB)
+	public static Matrix[] calculateTransformationMatrices(Vec3[] pointsA, Vec3[] pointsB)
 	{
 		try
 		{
@@ -31,7 +31,22 @@ public class RotationMatrixCalculator
 	            }
 	            proposedR = Matrix.multiply(usv[2], usv[0].transpose());
 	        }
-	        return proposedR;
+	        
+	        Matrix t = Matrix.add(Matrix.multiply(Matrix.scalar(-1, proposedR), new Matrix(centroidA)), new Matrix(centroidB));
+	        
+	        double[][] data = new double[4][4];
+	        for (int k = 0; k < 4; k++)
+	        {
+	        	data[k][k] = 1;
+	        }
+	        for (int k = 0; k < 3; k++)
+	        {
+	        	data[k][3] = t.data[k][0];
+	        }
+	        t.data = data;
+	        t = new Matrix(data);
+	        
+	       return new Matrix[]{proposedR, t};
 		}
 		catch(Exception e)
 		{
@@ -39,6 +54,8 @@ public class RotationMatrixCalculator
 		}
 		return null;
 	}
+	
+	
 	
 	private static double calculateDeterminant(Matrix R)
     {
