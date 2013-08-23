@@ -172,6 +172,26 @@ public class Matrix
     	return new Matrix(d);
     }
     
+    public static Matrix add(Matrix A, Matrix B)
+    {
+        if (A.cols != B.cols || A.rows != B.rows)
+        {
+            System.out.println("Cannot add these matrices");
+            throw new RuntimeException();
+        }
+        
+        double[][] data = new double[A.rows][A.cols];
+        
+        for (int k = 0; k < A.rows; k++)
+        {
+            for (int i = 0; i < A.cols; i++)
+            {
+                data[k][i] = A.data[k][i] + B.data[k][i];
+            }
+        }
+        return new Matrix(data);
+    }
+    
     public static Matrix subtract(Matrix A, Matrix B)
     {
         if (A.cols != B.cols || A.rows != B.rows)
@@ -326,6 +346,19 @@ public class Matrix
 		    }
 	
 	    return res;
+	}
+	
+	public static Matrix scalar(double s, Matrix m)
+	{
+		double[][] d = new double[m.rows][m.cols];
+		for (int k = 0; k < m.rows; k++)
+		{
+			for (int i = 0; i < m.cols; i++)
+			{
+				d[k][i] = m.data[k][i]*s;
+			}
+		}
+		return new Matrix(d);
 	}
 	
 	public Matrix transpose()
