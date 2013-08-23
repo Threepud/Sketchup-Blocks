@@ -280,7 +280,9 @@ public class SVDecomposer
         A = unprep(A);
         
         Matrix[] res = new Matrix[]{A, W, V};
-        
+        /*System.out.println("U = "+A);
+        System.out.println("S = "+W);
+        System.out.println("V = "+V);*/
         return res;
         
     }
