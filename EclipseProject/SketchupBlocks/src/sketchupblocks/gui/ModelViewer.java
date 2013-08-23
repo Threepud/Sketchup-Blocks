@@ -76,7 +76,7 @@ public class ModelViewer implements ModelChangeListener
 		window = _window;
 		window.registerMethod("keyEvent", modelViewerEventListener);
 		
-		tilesTexture = window.loadImage("./images/newTile.png");
+		tilesTexture = window.loadImage("./images/FloorTile.png");
 	}
 	
 	public void setLobby(Lobby _lobby) throws Exception
@@ -162,7 +162,7 @@ public class ModelViewer implements ModelChangeListener
 		for(ModelBlock block: new ArrayList<ModelBlock>(blockMap.values()))
 		{
 			if(block.type == ModelBlock.ChangeType.REMOVE)
-				System.out.println("AAAAAAAAJJJJJJJJJJHASLFKHJ");
+				System.out.println("Drawing removed block!");
 			SmartBlock smartBlock = block.smartBlock;
 			window.scale(10, 10, 10);
 			window.beginShape(PConstants.TRIANGLES);
