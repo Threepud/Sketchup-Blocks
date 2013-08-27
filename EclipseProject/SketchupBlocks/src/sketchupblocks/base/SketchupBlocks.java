@@ -8,11 +8,12 @@ public class SketchupBlocks extends PApplet
 	
 	Interpreter[] wimpie;
 	SessionManager sessMan;
+	Settings settings;
 	
 	public void setup()
 	{
 		size(displayWidth, displayHeight, P3D);
-		//frameRate(60);
+		frameRate(60);
 		noSmooth();
 		
 		if (frame != null) 
@@ -20,6 +21,7 @@ public class SketchupBlocks extends PApplet
 			frame.setResizable(false);
 		}
 		
+		settings = new Settings("Settings.xml");
 		sessMan = new SessionManager(this);
 		//sessMan.setModelConstructor(new ModelConstructor(sessMan));
 		wimpie = new Interpreter[Settings.numCameras];

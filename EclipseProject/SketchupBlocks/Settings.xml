@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Settings>
+	<System>
+		<VersionNumber>0.8</VersionNumber>
+		<DebugVerbose>3</DebugVerbose>
+	</System>
+	<Cameras>
+		<NumberOfCameras>2</NumberOfCameras>
+		<CameraSettings id="1">
+			<FOV>68.5</FOV>
+			<Width>1280.0</Width>
+			<Height>720.0</Height>
+			<Port>3333</Port>
+		</CameraSettings>
+		<CameraSettings id="2">
+			<FOV>68.5</FOV>
+			<Width>1280.0</Width>
+			<Height>720.0</Height>
+			<Port>3334</Port>
+		</CameraSettings>
+	</Cameras>
+	<Calibration>
+		<Landmark id="1">0,0,0</Landmark>
+		<Landmark id="1">0,5.6,0</Landmark>
+		<Landmark id="1">5.6,5.6,0</Landmark>
+		<Landmark id="1">5.6,0,0</Landmark>
+	</Calibration>
+	<GUI>
+		<ShowSplash>false</ShowSplash>
+		<SplashTTL>1000</SplashTTL>
+		<CommandWaitTime>1000</CommandWaitTime>
+	</GUI>
+</Settings>

@@ -67,12 +67,13 @@ public class SessionManager
 		}
     	
     	menu = new Menu(this);
+    	/*
     	projectSlots = new Slot[Settings.numSlots];
     	for (int k = 0; k < projectSlots.length; k++)
     	{
     		projectSlots[k] = new Slot(Settings.slotName+k);
     	}
-    	
+    	*/
     	cameraPositions = new Vec3[Settings.numCameras];
 	}
 	

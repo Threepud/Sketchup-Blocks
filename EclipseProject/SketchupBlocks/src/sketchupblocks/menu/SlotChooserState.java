@@ -38,8 +38,8 @@ public class SlotChooserState extends MenuState
 				{
 					float diff = cEvent.rotation - rot;
 					//This may need refining.
-					int moveNum = (int)(diff/Settings.scrollTrigger);
-					
+					//int moveNum = (int)(diff/Settings.scrollTrigger);
+					/*
 					if (moveNum != 0)
 					{
 						slotNumber = (slotNumber+moveNum)%Settings.numSlots;
@@ -47,7 +47,7 @@ public class SlotChooserState extends MenuState
 						System.out.println("Currently selected slot: "+slotNumber);
 					}
 					else if (Settings.verbose >= 3)
-						System.out.println("--SlotChooser has not moved slots --");
+						System.out.println("--SlotChooser has not moved slots --");*/
 				}
 				
 				return false;
