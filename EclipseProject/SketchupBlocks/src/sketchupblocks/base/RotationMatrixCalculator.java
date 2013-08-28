@@ -50,8 +50,8 @@ public class RotationMatrixCalculator
 	        t.data = data;
 	        t = new Matrix(data);
 	        
-	        //System.out.println("Translation: "+t);
-	        //System.out.println("Rotation: "+proposedR);
+	        System.out.println("Translation: "+t);
+	        System.out.println("Rotation: "+proposedR);
 	        
 	       return new Matrix[]{proposedR, t};
 		}
