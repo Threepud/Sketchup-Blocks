@@ -392,6 +392,14 @@ public class Matrix
 	    return res;
 	}
 	
+	public static Matrix identity(int n)
+	{
+		double[][] d = new double[n][n];
+		for (int k = 0; k < n; k++)
+			d[k][k] = 1;
+		return new Matrix(d);
+	}
+	
 	public static Matrix scalar(double s, Matrix m)
 	{
 		double[][] d = new double[m.rows][m.cols];
