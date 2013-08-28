@@ -28,6 +28,11 @@ public class Settings
 	public static int splashTTL;
 	public static int commandWaitTime;
 	
+	//Debug recording
+	public static boolean liveData = false;
+	public static String recordingInputFileName = "output";
+	public static boolean timeDelay = false;
+	
 	public Settings()
 	{
 		readSettings("Settings.xml");
@@ -137,8 +142,7 @@ public class Settings
 	{
 		public double fov;
 		public double aspectRatio;
-		int port;
-		
+		public int port;
 		CameraSettings(double _fov, double _aspectRatio, int _port)
 		{
 			fov = _fov;
