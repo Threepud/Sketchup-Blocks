@@ -8,6 +8,7 @@ import java.util.Iterator;
 import sketchupblocks.database.*;
 import sketchupblocks.calibrator.*;
 import sketchupblocks.math.Line;
+import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.LinearSystemSolver;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.RotationMatrix3D;
@@ -83,7 +84,6 @@ public class ModelConstructor
 			{
 				lines[k] = fids[k].getLine(); 
 				lines[k].direction.normalize();
-				System.out.println("Line "+k+":"+lines[k].point+" +m* " +lines[k].direction);
 			}
 			
 			Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
@@ -94,7 +94,7 @@ public class ModelConstructor
 			}
 			
 			SmartBlock sBlock =(SmartBlock)(bin.smartBlock);
-			System.out.println("Doing Block:"+sBlock.blockId);
+			//System.out.println("Doing Block:"+sBlock.blockId);
 			ArrayList<Integer> fiducialIndices = new ArrayList<Integer>();
 			
 			for (int k = 0 ; k < numFiducials ; k++)
@@ -114,19 +114,24 @@ public class ModelConstructor
 					throw new RuntimeException("Smart Block fiducials don't match");
 				}
 				fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
+				if (k != 0)
+				{
+				System.out.println("Line "+k+":"+lines[k].point+" +m* " +lines[k].direction);
+				System.out.println("Distance b/w "+(k-1)+" and "+(k)+" is "+fidCoordsM[k].distance(fidCoordsM[k-1]));
+				}
 			}
 				
 			//Bin should have enough information to get position.
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
 			Particle bestabc = null;
-			System.out.println("Calculated m's "+bin.blockID+" num fids: " + fids.length);			
+			//System.out.println("Calculated m's "+bin.blockID+" num fids: " + fids.length);	
 			bestabc = system.go();
 			
-				for(int l = 0 ; l < bestabc.bestPosition.length ; l++)
+				/*for(int l = 0 ; l < bestabc.bestPosition.length ; l++)
 				{
 					System.out.print(bestabc.bestPosition[l] + " " );
 				}
-				System.out.println();
+				System.out.println();*/
 			
 			Vec3 [] fiducialWorld = new Vec3[numFiducials];
 			Vec3 [] upRotWorld = new Vec3[numFiducials];
@@ -309,7 +314,7 @@ public class ModelConstructor
 			angles[k] = getAngle(CamID, k, 0.5, 0.5+0.01);
 		}
 		// Do calculation 
-		Vec3 lineDirection = LinearSystemSolver.solve(landmarkToCamera, angles);
+		Vec3 lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
 		Line top = new Line(cally.cameraPositions[CamID], lineDirection);
 		
 		angles = new double[4];
@@ -318,7 +323,7 @@ public class ModelConstructor
 			angles[k] = getAngle(CamID, k, 0.5, 0.5-0.01);
 		}
 		// Do calculation 
-		lineDirection = LinearSystemSolver.solve(landmarkToCamera, angles);
+		lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
 		Line bottom = new Line(cally.cameraPositions[CamID], lineDirection);
 		
 		top.direction.normalize();
@@ -438,7 +443,9 @@ public class ModelConstructor
 					angles[k] = getAngle(camID, k, camViewX, camViewY);
 				}
 				// Do calculation 
-				Vec3 lineDirection = LinearSystemSolver.solve(landmarkToCamera, angles);
+				Vec3 lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
+				System.out.println("Camera position: "+cally.cameraPositions[camID]);
+				System.out.println("Line direction: "+lineDirection);
 				return new Line(cally.cameraPositions[camID], lineDirection);
 			}
 		}
