@@ -1,7 +1,5 @@
 package sketchupblocks.math;
 
-import javax.management.RuntimeErrorException;
-
 /**
  *
  * @author cravingoxygen
@@ -12,34 +10,34 @@ public class LinearSystemSolver
     /**
      * @param args the command line arguments
      */
-    public static Vec3 solve(Vec3[] input, double[] angles) 
+    
+    public static Matrix solve(Matrix input, double[] b) throws Exception
     {
-    	if (angles.length != 4)
+    	//r1*c1*r2*c2 = r1*c2
+    	if (b.length != input.rows)
     	{
-    		throw new RuntimeException();
+    		throw new Exception("No unique solution");
     	}
     	
-        Matrix A = new Matrix(input, false);
+    	Matrix A = input;
+    	Matrix B = new Matrix(b);
+    	
+    	if (!input.isSquare())
+    	{
+    	
+	        Matrix At = A.transpose();
+	        
+	        Matrix AtB = Matrix.multiply(At, B);
+	        Matrix AtA = Matrix.multiply(At, A);
+	        B = AtB;
+	        A = AtA;
+    	}
         
-        double [] bVecData = new double[4];
-        for (int k = 0; k < 4; k++)
-        {
-            bVecData[k] = input[k].length()*Math.cos(angles[k]);
-        }
-        Vec4 BVec = new Vec4(bVecData);
-        
-       
-        Matrix At = A.transpose();
-        
-        Matrix BMat = new Matrix(BVec);
-        Matrix AtB = Matrix.multiply(At, BMat);
-        Matrix AtA = Matrix.multiply(At, A);
-        
-        Matrix[] lup = LUDecomposer.decompose(AtA);
+        Matrix[] lup = LUDecomposer.decompose(A);
         try
         {
-        	double[] res = LUDecomposer.solve(AtB.toArray(), lup);
-            return new Vec3(res);
+        	double[] res = LUDecomposer.solve(B.toArray(), lup);
+            return new Matrix(res);
         }
         catch(Exception e)
         {
