@@ -49,7 +49,7 @@ public class Settings
 		catch (IOException | ParserConfigurationException | SAXException e) 
 		{
 			e.printStackTrace();
-			return;
+			System.exit(-1);
 		}
 		
 		//System
@@ -65,21 +65,72 @@ public class Settings
 		numCameras = Integer.parseInt(numberOfCameras.getContent());
 		cameraSettings = new CameraSettings[numCameras];
 		
-		for(int x = 0; x < numCameras; ++x)
+		int cameraCount = 0;
+		for(int x = 0; x < cameras.getChildCount(); ++x)
 		{
 			XML camera = cameras.getChild(x);
-			double fov = Double.parseDouble(camera.getChild("FOV").getContent());
-			double width = Double.parseDouble(camera.getChild("Width").getContent());
-			double height = Double.parseDouble(camera.getChild("Height").getContent());
-			int port = Integer.parseInt(camera.getChild("Port").getContent());
-			cameraSettings[x] = new CameraSettings(fov, width/height, port);
+			if(camera.getName().equals("CameraSettings"))
+			{
+				double fov = Double.parseDouble(camera.getChild("FOV").getContent());
+				double width = Double.parseDouble(camera.getChild("Width").getContent());
+				double height = Double.parseDouble(camera.getChild("Height").getContent());
+				int port = Integer.parseInt(camera.getChild("Port").getContent());
+				cameraSettings[cameraCount++] = new CameraSettings(fov, width/height, port);
+			}
+		}
+		
+		if(numCameras > cameraCount)
+		{
+			System.err.println("Settings: Too many suggested number of cameras.");
+			System.exit(-1);
 		}
 		
 		//Calibration
+		XML calibration = settings.getChild("Calibration");
+		int numLandmarks = 0;
+		//count landmarks
+		for(int x = 0; x < calibration.getChildCount(); ++x)
+		{
+			if(calibration.getChild(x).getName().equals("Landmark"))
+				numLandmarks++;
+		}
 		
+		
+		landmarks = new Vec3[numLandmarks];
+		int landmarkCount = 0;
+		for(int x = 0; x < calibration.getChildCount(); ++x)
+		{
+			if(calibration.getChild(x).getName().equals("Landmark"))
+			{
+				String line = calibration.getChild(x).getContent();
+				String[] coordsString = line.replaceAll("[" + " " + "\t" + "]", "").split(",");
+				
+				if(coordsString.length != 3)
+				{
+					System.err.println("Landmark coordinates incomplete.");
+					System.exit(-1);
+				}
+				
+				double[] coords = 
+				{
+					Double.parseDouble(coordsString[0]),
+					Double.parseDouble(coordsString[1]),
+					Double.parseDouble(coordsString[2])
+				};
+				landmarks[landmarkCount++] = new Vec3(coords[0], coords[1], coords[2]);
+			}
+		}
 		
 		//GUI
+		XML gui = settings.getChild("GUI");
 		
+		XML showSplashNode = gui.getChild("ShowSplash");
+		XML splashTTLNode = gui.getChild("SplashTTL");
+		XML commandWaitTimeNode = gui.getChild("CommandWaitTime");
+		
+		showSplash = Boolean.parseBoolean(showSplashNode.getContent());
+		splashTTL = Integer.parseInt(splashTTLNode.getContent());
+		commandWaitTime = Integer.parseInt(commandWaitTimeNode.getContent());
 	}
 	
 	public static class CameraSettings

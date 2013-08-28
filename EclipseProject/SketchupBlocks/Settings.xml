@@ -21,9 +21,9 @@
 	</Cameras>
 	<Calibration>
 		<Landmark id="1">0,0,0</Landmark>
-		<Landmark id="1">0,5.6,0</Landmark>
-		<Landmark id="1">5.6,5.6,0</Landmark>
-		<Landmark id="1">5.6,0,0</Landmark>
+		<Landmark id="2">0,5.6,0</Landmark>
+		<Landmark id="3">5.6,5.6,0</Landmark>
+		<Landmark id="4">5.6,0,0</Landmark>
 	</Calibration>
 	<GUI>
 		<ShowSplash>false</ShowSplash>
