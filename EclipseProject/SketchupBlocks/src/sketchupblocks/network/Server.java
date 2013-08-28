@@ -21,7 +21,7 @@ class Server extends Thread implements ModelChangeListener
 		port = _port;
 		try
 		{
-		listner = new ServerSocket(_port);
+			listner = new ServerSocket(port);
 		}
 		catch(Exception e)
 		{
