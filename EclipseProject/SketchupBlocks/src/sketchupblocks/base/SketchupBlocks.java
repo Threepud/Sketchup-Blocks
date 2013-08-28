@@ -1,6 +1,8 @@
 package sketchupblocks.base;
 
 import processing.core.*;
+import sketchupblocks.recording.Feeder;
+import sketchupblocks.recording.Recorder;
 
 public class SketchupBlocks extends PApplet 
 {
@@ -24,9 +26,20 @@ public class SketchupBlocks extends PApplet
 		sessMan = new SessionManager(this);
 		//sessMan.setModelConstructor(new ModelConstructor(sessMan));
 		wimpie = new Interpreter[Settings.numCameras];
-		for (int k = 0;  k < Settings.numCameras; k++)
+		if (Settings.liveData)
 		{
-			wimpie[k] = new Interpreter(Settings.cameraSettings[k].port, sessMan, this, k);
+			for (int k = 0;  k < Settings.numCameras; k++)
+			{
+				wimpie[k] = new Interpreter(Settings.cameraSettings[k].port, sessMan, this, k);
+			}
+		}
+		else
+		{
+			for (int k = 0;  k < Settings.numCameras; k++)
+			{
+				wimpie[k] = new Feeder(sessMan, this, k);
+				((Feeder)wimpie[k]).start();
+			}
 		}
 	}
 
