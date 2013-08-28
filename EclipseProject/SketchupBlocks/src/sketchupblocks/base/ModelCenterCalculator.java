@@ -29,7 +29,10 @@ public class ModelCenterCalculator
 						threePositions[k] = positions[k];
 					}
 					Matrix[] transformMatrices = RotationMatrixCalculator.calculateTransformationMatrices(new Vec3[]{m1, m2, m3}, threePositions);
-					return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
+					//return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
+					Matrix m = Matrix.multiply(transformMatrices[1],  Matrix.identity(4)); 
+					System.out.println("TRANSFORMATION: "+m);
+					return m;
 				}
 				
 				Vec3 m1m2Mid = Vec3.midpoint(m1, m2);
