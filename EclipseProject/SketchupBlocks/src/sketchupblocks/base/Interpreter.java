@@ -5,16 +5,23 @@ import TUIO.*;
 
 public class Interpreter
 {
-	private SessionManager sessionMan;
 	private PApplet parent;
 	private TuioProcessing tuioClient;
-	private int cameraID;
+	protected int cameraID;
+	protected SessionManager sessMan;
 	  
 	public Interpreter(int port, SessionManager _sessMan, PApplet _parent, int _id)
 	{
-		sessionMan = _sessMan;
+		sessMan = _sessMan;
 		parent = _parent;
 		tuioClient  = new TuioProcessing(this, port);
+		cameraID = _id;
+	}
+	
+	public Interpreter(SessionManager _sessMan, PApplet _parent, int _id)
+	{
+		sessMan = _sessMan;
+		parent = _parent;
 		cameraID = _id;
 	}
   
@@ -36,7 +43,7 @@ public class Interpreter
 		came.type = CameraEvent.EVENT_TYPE.ADD;
 		came.fiducialID = tobj.getSymbolID();
 		came.cameraID = cameraID;
-		sessionMan.onCameraEvent(came);
+		sessMan.onCameraEvent(came);
 	}
 
 	// called when an object is removed from the scene
@@ -52,7 +59,7 @@ public class Interpreter
 		came.type = CameraEvent.EVENT_TYPE.REMOVE;
 		came.fiducialID = tobj.getSymbolID();
 		came.cameraID = cameraID;
-		sessionMan.onCameraEvent(came);
+		sessMan.onCameraEvent(came);
 	}
 	
 	// called when an object is moved
@@ -68,7 +75,7 @@ public class Interpreter
 		came.type = CameraEvent.EVENT_TYPE.UPDATE;
 		came.fiducialID = tobj.getSymbolID();
 		came.cameraID = cameraID;
-		sessionMan.onCameraEvent(came);
+		sessMan.onCameraEvent(came);
 	}
 	
 	// called when a cursor is added to the scene
