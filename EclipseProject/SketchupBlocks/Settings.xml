@@ -26,8 +26,8 @@
 		<Landmark id="4">5.6,0,0</Landmark>
 	</Calibration>
 	<GUI>
-		<ShowSplash>false</ShowSplash>
-		<SplashTTL>1000</SplashTTL>
+		<ShowSplash>true</ShowSplash>
+		<SplashTTL>3000</SplashTTL>
 		<CommandWaitTime>1000</CommandWaitTime>
 	</GUI>
 </Settings>

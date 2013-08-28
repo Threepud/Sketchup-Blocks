@@ -1,9 +1,8 @@
 
-import static org.junit.Assert.*;
-import org.junit.*;
-import org.junit.rules.ExpectedException;
-import org.junit.runners.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import sketchupblocks.menu.Menu;
 
@@ -21,7 +20,7 @@ public class MenuTest
 	@Before
 	public void setup()
 	{
-		menu = new Menu(null);
+		menu = new Menu(null, null);
 	}
 	
 	

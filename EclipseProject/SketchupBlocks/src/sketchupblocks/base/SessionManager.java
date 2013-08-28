@@ -46,6 +46,7 @@ public class SessionManager
 			System.exit(-1);
 		}
 		sarah.setWindow(parent);
+		menu = new Menu(this, parent);
 		
 		lobby.registerChangeListener(sarah);
 		
@@ -66,7 +67,6 @@ public class SessionManager
 			e.printStackTrace();
 		}
     	
-    	menu = new Menu(this);
     	/*
     	projectSlots = new Slot[Settings.numSlots];
     	for (int k = 0; k < projectSlots.length; k++)
@@ -89,8 +89,16 @@ public class SessionManager
     	{
     		if (Settings.verbose >= 3)
     			System.out.println("--Recognized command block--");
-    		InputBlock iblock = new InputBlock(block, cameraEvent);
-    		jimmy.receiveBlock(iblock);
+    		//Rotate model viewer
+    		if(((CommandBlock) block).type == CommandBlock.CommandType.ROTATE)
+    		{
+    			sarah.rotateView(cameraEvent);
+    		}
+    		else
+    		{
+    			InputBlock iblock = new InputBlock(block, cameraEvent);
+        		jimmy.receiveBlock(iblock);
+    		}
     	}
     	else if (block instanceof SmartBlock)
     	{

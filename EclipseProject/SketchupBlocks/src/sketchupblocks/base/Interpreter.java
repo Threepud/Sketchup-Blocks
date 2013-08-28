@@ -28,6 +28,9 @@ public class Interpreter
 	{
 		CameraEvent came = new CameraEvent();
 		came.rotation = tobj.getAngle();
+		came.rotAcceleration = tobj.getRotationAccel();
+		came.rotVelocity = tobj.getRotationSpeed();
+		came.xVelocity = tobj.getXSpeed();
 		came.x = tobj.getX();
 		came.y = tobj.getY();
 		came.type = CameraEvent.EVENT_TYPE.ADD;
@@ -41,6 +44,9 @@ public class Interpreter
 	{
 		CameraEvent came = new CameraEvent();
 		came.rotation = tobj.getAngle();
+		came.rotAcceleration = tobj.getRotationAccel();
+		came.rotVelocity = tobj.getRotationSpeed();
+		came.xVelocity = tobj.getXSpeed();
 		came.x = tobj.getX();
 		came.y = tobj.getY();
 		came.type = CameraEvent.EVENT_TYPE.REMOVE;
@@ -54,6 +60,9 @@ public class Interpreter
 	{
 		CameraEvent came = new CameraEvent();
 		came.rotation = tobj.getAngle();
+		came.rotAcceleration = tobj.getRotationAccel();
+		came.rotVelocity = tobj.getRotationSpeed();
+		came.xVelocity = tobj.getXSpeed();
 		came.x = tobj.getX();
 		came.y = tobj.getY();
 		came.type = CameraEvent.EVENT_TYPE.UPDATE;

@@ -5,15 +5,13 @@ import java.util.HashMap;
 
 import processing.core.*;
 import processing.event.*;
-import sketchupblocks.base.ColladaLoader;
+import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.Model;
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
 import sketchupblocks.base.Settings;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.BlockNoTypeException;
-import sketchupblocks.exception.BlockNotFoundException;
-import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
@@ -29,8 +27,17 @@ public class ModelViewer implements ModelChangeListener
 	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
 	private int selectCamera = 0;
 	
+	//fiducial
+	private double velocityScalar = 2.0;
+	
+	//camera
 	private double currentRotation = 0;
-	private double rotationIncrement = 0.02;
+	//TODO: make dynamic depending on distance to target rotation
+	private double rightVel = 0;
+	private double leftVel = 0;
+	private double maxVel = 0.1;
+	private double rotationIncrement = 0.03;
+	private double rotationDecrement = 0.004;
 	private double cameraHeight = -500;
 	private double cameraRadius = 500;
 	private boolean rotateLeft = false;
@@ -94,16 +101,6 @@ public class ModelViewer implements ModelChangeListener
 	    {
 	    	throw e;
 	    }
-	    /*
-	    //################
-	    //debug for viewer
-	    blockList = new ArrayList<>();
-	    SmartBlock smartBlock = ColladaLoader.getSmartBlock("./models/PaperCube.dae");
-	    ModelBlock modelBlock = new ModelBlock();
-	    modelBlock.smartBlock = smartBlock;
-	    //################
-	    
-	    blockList.add(modelBlock);*/
 	}
 	  
 	public void fireModelChangeEvent(ModelBlock change) throws BlockNoTypeException
@@ -114,9 +111,22 @@ public class ModelViewer implements ModelChangeListener
 			blockMap.remove(new Integer(change.smartBlock.blockId));
 	}
 	
+	public void rotateView(CameraEvent event)
+	{
+		System.out.println("X VEL: " + event.xVelocity);
+		
+		if(event.type == CameraEvent.EVENT_TYPE.ADD || event.type == CameraEvent.EVENT_TYPE.UPDATE)
+		{
+			if(event.xVelocity < 0)
+				rightVel = -1 * (event.xVelocity / velocityScalar);
+			else if(event.xVelocity > 0)
+				leftVel = (event.xVelocity / velocityScalar);
+		}
+	}
+	
 	public void drawModel()
 	{
-		rotateCamera();
+		updateCamera();
 		
 		window.camera((float)currentCamera.eye.x, (float)currentCamera.eye.y, (float)currentCamera.eye.z,
 				      (float)currentCamera.at.x, (float)currentCamera.at.y, (float)currentCamera.at.z,
@@ -189,22 +199,38 @@ public class ModelViewer implements ModelChangeListener
 		}
 	}
 	
-	private void rotateCamera()
+	private void changeTarget()
 	{
 		if(selectCamera != 0)
 			return;
 		
-		if(rotateRight)
-			currentRotation -= rotationIncrement;
-		if(rotateLeft)
-			currentRotation += rotationIncrement;
+		if(rotateRight && rightVel < maxVel)
+			rightVel += rotationIncrement;
+		if(rotateLeft && leftVel < maxVel)
+			leftVel += rotationIncrement;
 		
-		if(rotateRight || rotateLeft)
-		{
-			userCamera.eye.x = cameraRadius * Math.cos(currentRotation);
-			userCamera.eye.z = cameraRadius * Math.sin(currentRotation);
-			userCamera.eye.y = cameraHeight;
-		}
+		if(rightVel > maxVel)
+			rightVel = maxVel;
+		if(leftVel > maxVel)
+			leftVel = maxVel;
+	}
+	
+	private void updateCamera()
+	{
+		changeTarget();
+		
+		rightVel -= rotationDecrement;
+		leftVel -= rotationDecrement;
+		if(rightVel < 0)
+			rightVel = 0;
+		if(leftVel < 0)
+			leftVel = 0;
+		
+		currentRotation -= rightVel - leftVel;
+		
+		userCamera.eye.x = cameraRadius * Math.cos(currentRotation);
+		userCamera.eye.z = cameraRadius * Math.sin(currentRotation);
+		userCamera.eye.y = cameraHeight;
 	}
 	
 	protected class ModelViewerEventListener

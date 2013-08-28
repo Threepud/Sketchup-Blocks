@@ -14,7 +14,6 @@ public class SketchupBlocks extends PApplet
 	{
 		size(displayWidth, displayHeight, P3D);
 		frameRate(60);
-		noSmooth();
 		
 		if (frame != null) 
 		{
