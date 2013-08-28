@@ -14,7 +14,6 @@ public class LUDecomposer
     		System.out.println("Cannot decompose nonsquare matrix.");
     		return null;
     	}
-        int count = 0;
         int n = a.cols;
         double[][] lu = a.data;
         int[] indx = new int[n];
@@ -64,7 +63,6 @@ public class LUDecomposer
             
             if (k != imax)
             {
-                count++;
                 for (j = 0; j < n; j++)
                 {
                     temp = lu[imax][j];
