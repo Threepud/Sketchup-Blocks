@@ -11,6 +11,7 @@ import TUIO.TuioProcessing;
 import TUIO.TuioTime;
 import processing.core.PApplet;
 import sketchupblocks.base.CameraEvent;
+import sketchupblocks.base.Settings;
 
 public class Recorder
 {
@@ -19,7 +20,7 @@ public class Recorder
 	private TuioProcessing tuioClient;
 	private int cameraID;
 	
-	private static String outputFile = "output";
+	private static String outputFile = Settings.recordingInputFileName;
 	private boolean recording = false;
 	private String outputString;
 	private Date prev;

@@ -29,9 +29,9 @@ public class Settings
 	public static int commandWaitTime;
 	
 	//Debug recording
-	public static boolean liveData = false;
-	public static String recordingInputFileName = "output";
-	public static boolean timeDelay = false;
+	public static boolean liveData;
+	public static String recordingInputFileName;
+	public static boolean timeDelay;
 	
 	public Settings()
 	{
@@ -136,6 +136,16 @@ public class Settings
 		showSplash = Boolean.parseBoolean(showSplashNode.getContent());
 		splashTTL = Integer.parseInt(splashTTLNode.getContent());
 		commandWaitTime = Integer.parseInt(commandWaitTimeNode.getContent());
+		
+		//Debug recording
+		XML debugRecordingNode = settings.getChild("DebugRecording");
+		XML liveDataNode = debugRecordingNode.getChild("LiveData");
+		XML recordingInputFilenameNode = debugRecordingNode.getChild("RecordingInputFilename");
+		XML timeDelayNode = debugRecordingNode.getChild("TimeDelay");
+		
+		liveData = Boolean.parseBoolean(liveDataNode.getContent());
+		recordingInputFileName = recordingInputFilenameNode.getContent();
+		timeDelay = Boolean.parseBoolean(timeDelayNode.getContent());
 	}
 	
 	public static class CameraSettings

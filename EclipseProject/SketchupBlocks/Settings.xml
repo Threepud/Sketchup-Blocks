@@ -30,4 +30,9 @@
 		<SplashTTL>3000</SplashTTL>
 		<CommandWaitTime>1000</CommandWaitTime>
 	</GUI>
+	<DebugRecording>
+		<LiveData>true</LiveData>
+		<RecordingInputFilename>debugOutput/output</RecordingInputFilename>
+		<TimeDelay>false</TimeDelay>
+	</DebugRecording>
 </Settings>
