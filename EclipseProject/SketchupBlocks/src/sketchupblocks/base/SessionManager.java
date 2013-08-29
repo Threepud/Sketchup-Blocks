@@ -5,10 +5,9 @@ import sketchupblocks.database.Block;
 import sketchupblocks.database.BlockDatabase;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.database.UserBlock;
+import sketchupblocks.gui.Menu;
 import sketchupblocks.gui.ModelViewer;
 import sketchupblocks.math.Vec3;
-import sketchupblocks.menu.Menu;
-import sketchupblocks.menu.Slot;
 import sketchupblocks.network.Lobby;
 import sketchupblocks.network.LocalLobby;
 
@@ -24,8 +23,6 @@ public class SessionManager
 	private Menu menu;
 	private String[] dbPaths;
 	private Vec3 [] cameraPositions;
-	
-	public Slot[] projectSlots;
 	
 	public SessionManager(PApplet _parent)
 	{

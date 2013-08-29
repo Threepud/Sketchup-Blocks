@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import sketchupblocks.menu.Menu;
+import sketchupblocks.gui.Menu;
 
 /*
 Run with:
