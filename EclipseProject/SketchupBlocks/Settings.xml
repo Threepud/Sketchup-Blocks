@@ -31,7 +31,7 @@
 		<CommandWaitTime>3000</CommandWaitTime>
 	</GUI>
 	<DebugRecording>
-		<LiveData>false</LiveData>
+		<LiveData>true</LiveData>
 		<RecordingInputFilename>debugOutput/output</RecordingInputFilename>
 		<TimeDelay>false</TimeDelay>
 	</DebugRecording>

@@ -114,8 +114,6 @@ public class ModelViewer implements ModelChangeListener
 	
 	public void rotateView(CameraEvent event)
 	{
-		System.out.println("X VEL: " + event.xVelocity);
-		
 		if(event.type == CameraEvent.EVENT_TYPE.ADD || event.type == CameraEvent.EVENT_TYPE.UPDATE)
 		{
 			if(event.xVelocity < 0)
