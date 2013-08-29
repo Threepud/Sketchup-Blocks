@@ -30,7 +30,7 @@ public class Menu
 	private long popupStart = -1;
 	private float barRadius = 70;
 	//TODO: make configurable in settings ?
-	private int rotationSpeed = 1000;
+	private int rotationSpeed = Settings.progressBarRotationSpeed;
 	private int randomIndex = -1;
 	private int[][] randomColours = 
 		{

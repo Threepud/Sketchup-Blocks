@@ -27,6 +27,7 @@ public class Settings
 	public static boolean showSplash;
 	public static int splashTTL;
 	public static int commandWaitTime;
+	public static int progressBarRotationSpeed;
 	
 	//Debug recording
 	public static boolean liveData;
@@ -132,10 +133,12 @@ public class Settings
 		XML showSplashNode = gui.getChild("ShowSplash");
 		XML splashTTLNode = gui.getChild("SplashTTL");
 		XML commandWaitTimeNode = gui.getChild("CommandWaitTime");
+		XML progressBarRotationSpeedNode = gui.getChild("ProgressBarRotationSpeed");
 		
 		showSplash = Boolean.parseBoolean(showSplashNode.getContent());
 		splashTTL = Integer.parseInt(splashTTLNode.getContent());
 		commandWaitTime = Integer.parseInt(commandWaitTimeNode.getContent());
+		progressBarRotationSpeed = Integer.parseInt(progressBarRotationSpeedNode.getContent());
 		
 		//Debug recording
 		XML debugRecordingNode = settings.getChild("DebugRecording");

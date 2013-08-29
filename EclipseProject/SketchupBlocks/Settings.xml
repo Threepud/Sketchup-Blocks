@@ -29,6 +29,7 @@
 		<ShowSplash>false</ShowSplash>
 		<SplashTTL>3000</SplashTTL>
 		<CommandWaitTime>3000</CommandWaitTime>
+		<ProgressBarRotationSpeed>1000</ProgressBarRotationSpeed>
 	</GUI>
 	<DebugRecording>
 		<LiveData>true</LiveData>
