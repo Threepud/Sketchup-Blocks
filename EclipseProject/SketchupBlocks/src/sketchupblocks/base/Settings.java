@@ -74,7 +74,7 @@ public class Settings
 		for(int x = 0; x < cameras.getChildCount(); ++x)
 		{
 			XML camera = cameras.getChild(x);
-			if(camera.getName().equals("CameraSettings"))
+			if(camera.getName().equals("CameraSettings") && cameraCount < numCameras)
 			{
 				double fov = Double.parseDouble(camera.getChild("FOV").getContent());
 				double width = Double.parseDouble(camera.getChild("Width").getContent());
