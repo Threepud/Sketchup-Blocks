@@ -173,7 +173,7 @@ public class ColladaLoader
 		visualScene.addChild("node");
 		
 		XML node = visualScene.getChild("node");
-		node.setString("name", "Sketchup Blocks");
+		node.setString("name", "Sketchup-Blocks");
 		
 		//library nodes setup
 		XML libraryNodes = root.getChild("library_nodes");
