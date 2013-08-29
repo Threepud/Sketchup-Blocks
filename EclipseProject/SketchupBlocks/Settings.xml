@@ -28,7 +28,7 @@
 	<GUI>
 		<ShowSplash>false</ShowSplash>
 		<SplashTTL>3000</SplashTTL>
-		<CommandWaitTime>1000</CommandWaitTime>
+		<CommandWaitTime>3000</CommandWaitTime>
 	</GUI>
 	<DebugRecording>
 		<LiveData>true</LiveData>

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import processing.core.*;
 import processing.event.*;
 import sketchupblocks.base.CameraEvent;
+import sketchupblocks.base.ColladaLoader;
 import sketchupblocks.base.Model;
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
@@ -260,6 +261,12 @@ public class ModelViewer implements ModelChangeListener
 					rotateLeft = true;
 				else if(e.getAction() == KeyEvent.RELEASE)
 					rotateLeft = false;
+			}
+			//TODO: remove this
+			else if(e.getKey() == 'e')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+					ColladaLoader.export(new ArrayList<ModelBlock>(blockMap.values()));
 			}
 		}
 	}

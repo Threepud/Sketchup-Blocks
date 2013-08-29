@@ -15,6 +15,7 @@ import org.xml.sax.SAXException;
 
 import processing.data.XML;
 import sketchupblocks.database.SmartBlock;
+import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 
 public class ColladaLoader 
@@ -251,6 +252,7 @@ public class ColladaLoader
 			String vectorString = "";
 			for(Vec3 vector: blocks.get(x).smartBlock.vertices)
 			{
+				vector = Matrix.multiply(blocks.get(x).transformationMatrix, vector.padVec3()).toVec3();
 				vectorString += vector.x / 0.02539999969303608 + " ";
 				vectorString += vector.y / 0.02539999969303608 + " ";
 				vectorString += vector.z / 0.02539999969303608 + " ";
