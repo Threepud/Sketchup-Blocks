@@ -55,7 +55,15 @@ public class Menu
 	
 	public void handleInput(CommandBlock cBlock, CameraEvent cEvent)
 	{
-		
+		switch(cBlock.type)
+		{
+			case EXPORT:
+				break;
+			case SPECTATE:
+				break;
+			default:
+				System.err.println("Command not yet supported.");
+		}
 	}
 	
 	public void drawMenuOverlay()
@@ -113,16 +121,19 @@ public class Menu
 				//TODO: fire command
 			}
 		
+			//draw popup base
 			window.fill(255);
 			window.noStroke();
 			window.rectMode(PConstants.CENTER);
 			window.rect(window.width / 2, window.height / 2, 400, 280, 5);
 			
+			//draw popup outline
 			window.noFill();;
 			window.stroke(100);
 			window.rectMode(PConstants.CENTER);
 			window.rect(window.width / 2, window.height / 2, 390, 270, 5);
 			
+			//draw text
 			window.stroke(200);
 			window.fill(0);
 			window.textFont(headingFont);

@@ -64,13 +64,6 @@ public class SessionManager
 			e.printStackTrace();
 		}
     	
-    	/*
-    	projectSlots = new Slot[Settings.numSlots];
-    	for (int k = 0; k < projectSlots.length; k++)
-    	{
-    		projectSlots[k] = new Slot(Settings.slotName+k);
-    	}
-    	*/
     	cameraPositions = new Vec3[Settings.numCameras];
 	}
 	
@@ -91,10 +84,14 @@ public class SessionManager
     		{
     			sarah.rotateView(cameraEvent);
     		}
-    		else
+    		else if(((CommandBlock) block).type == CommandBlock.CommandType.CALIBRATE)
     		{
     			InputBlock iblock = new InputBlock(block, cameraEvent);
         		jimmy.receiveBlock(iblock);
+    		}
+    		else
+    		{
+    			menu.handleInput((CommandBlock)block, cameraEvent);
     		}
     	}
     	else if (block instanceof SmartBlock)
