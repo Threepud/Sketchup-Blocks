@@ -29,7 +29,6 @@ public class Menu
 	private PFont subFont;
 	private long popupStart = -1;
 	private float barRadius = 70;
-	//TODO: make configurable in settings ?
 	private int rotationSpeed = Settings.progressBarRotationSpeed;
 	private int randomIndex = -1;
 	private int[][] randomColours = 
@@ -119,6 +118,12 @@ public class Menu
 			window.rectMode(PConstants.CENTER);
 			window.rect(window.width / 2, window.height / 2, 400, 280, 5);
 			
+			window.noFill();;
+			window.stroke(100);
+			window.rectMode(PConstants.CENTER);
+			window.rect(window.width / 2, window.height / 2, 390, 270, 5);
+			
+			window.stroke(200);
 			window.fill(0);
 			window.textFont(headingFont);
 			window.textAlign(PConstants.CENTER);

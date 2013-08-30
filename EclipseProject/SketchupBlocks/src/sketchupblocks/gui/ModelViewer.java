@@ -33,12 +33,11 @@ public class ModelViewer implements ModelChangeListener
 	
 	//camera
 	private double currentRotation = 0;
-	//TODO: make dynamic depending on distance to target rotation
 	private double rightVel = 0;
 	private double leftVel = 0;
 	private double maxVel = 0.08;
 	private double rotationIncrement = 0.03;
-	private double rotationDecrement = 0.002;
+	private double rotationDecrement = 0.003;
 	private double cameraHeight = -500;
 	private double cameraRadius = 500;
 	private boolean rotateLeft = false;
