@@ -1,42 +1,8 @@
-Sketchup-Blocks
+Sketchup Blocks
 ===============
 
-Sketchup Blocks project for the CSIR Internet of Things research group.
+Developer Blog: http://sketchupblocks.wordpress.com/
 
-Read more about the Sketchup Blocks project at the developer blog: http://sketchupblocks.wordpress.com/
+The project subscribes to the concept of the Internet of Things. The Internet of Things is centred around the idea of ‘smart objects’ which are physical objects and devices that are given a virtual representation and linked to information networks. These smart objects will ideally be able to capture, react to and communicate about data captured from their physical environment autonomously.
 
-We're making use of the General Public License. This makes our software free which everyone can redistrobute and
-and change under the conditions of the license.
-
-How to apply license terms to our new programs:
-
-Attach the following at the start of each source file
-
-  one line to give the program's name and an idea of what it does.
-  Copyright (C) yyyy  name of author
-  
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  as published by the Free Software Foundation; either version 2
-  of the License, or (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-Contact information should also be added to the files.
-
-Our employer should also sign a disclamer for us like the example below and it should be added to the repo
-
-  Yoyodyne, Inc., hereby disclaims all copyright
-  interest in the program `Gnomovision'
-  (which makes passes at compilers) written 
-  by James Hacker.
-  
-  signature of Ty Coon, 1 April 1989
-  Ty Coon, President of Vice
+This project aims to create a system that can convert physical 3D models into digital models that can be viewed and edited in Google Sketchup. The physical model will be built with blocks that have fiducial markers attached. The locations of these blocks will be picked up on web cameras by Reactivision software and the resulting data will be used to create digital 3D models that can be viewed and exported to Google Sketchup.
