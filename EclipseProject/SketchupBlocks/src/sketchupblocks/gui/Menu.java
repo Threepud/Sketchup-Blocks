@@ -43,12 +43,15 @@ public class Menu
 
 	//sidebar
 	private boolean slideDone = false;
+	private boolean slideStart = false;
 	private boolean calibrated = false;
 	private int sidebarWidth;
 	private int sidebarHeight;
 	private int slide;
 	private PShape[] camBases;
 	private boolean[] calibratedCams;
+	private long sidebarStartTime;
+	private long sidebarTTL = 3000;
 	
 	public Menu(SessionManager _sessMan, PApplet _window)
 	{
@@ -193,9 +196,15 @@ public class Menu
 		{
 			if(calibrated)
 			{
+				if(!slideStart)
+				{
+					sidebarStartTime = System.currentTimeMillis();
+					slideStart = true;
+				}
+				
 				if(-slide > sidebarWidth)
 					slideDone = true;
-				else
+				else if(System.currentTimeMillis() - sidebarStartTime > sidebarTTL)
 					slide--;
 			}
 			
@@ -205,21 +214,19 @@ public class Menu
 			window.rectMode(PConstants.CENTER);
 			window.rect(slide + (sidebarWidth / 2) - 10, (sidebarHeight / 2) - 10, sidebarWidth, sidebarHeight, 5);
 			
-			if(!calibrated)
+			for(int x = 0; x < camBases.length; ++x)
 			{
-				for(int x = 0; x < camBases.length; ++x)
-				{
-					PShape quad = camBases[x];
-					
-					//find out which cameras have been calibrated (calibratedCams)
-					quad.setFill(window.color(255));
-					quad.setStroke(window.color(200));
-					window.shape(quad);
-					
-					window.stroke(100);
-					window.fill(0);
-					window.text((x + 1), quad.getVertexX(0), quad.getVertexY(0) + 10);
-				}
+				PShape quad = camBases[x];
+				
+				//find out which cameras have been calibrated (calibratedCams)
+				quad.setFill(window.color(255));
+				quad.setStroke(window.color(200));
+				quad.translate(slide, 0);
+				window.shape(quad);
+				
+				window.stroke(100);
+				window.fill(0);
+				window.text((x + 1), slide + quad.getVertexX(0), quad.getVertexY(0) + 10);
 			}
 		}
 	}
