@@ -40,6 +40,15 @@ public class Menu
 			{254, 1, 159},
 			{255, 134, 0}
 		};
+
+	//sidebar
+	private boolean slideDone = false;
+	private boolean calibrated = false;
+	private int sidebarWidth;
+	private int sidebarHeight;
+	private int slide;
+	private PShape[] camBases;
+	private boolean[] calibratedCams;
 	
 	public Menu(SessionManager _sessMan, PApplet _window)
 	{
@@ -51,6 +60,35 @@ public class Menu
 		
 		headingFont = window.createFont("Arial", 40, true);
 		subFont = window.createFont("Arial", 30);
+		
+		int offset = 10;
+		int quadSize = 40;
+		sidebarWidth = (offset * 3) + quadSize;
+		sidebarHeight = (offset * 2) + (Settings.numCameras * quadSize) + (Settings.numCameras * offset);
+		camBases = new PShape[Settings.numCameras];
+		for(int x = 0; x < camBases.length; ++x)
+		{
+			camBases[x] = window.createShape
+			(
+				PConstants.RECT, 
+				offset, 
+				offset + (x * quadSize) + (x * offset), 
+				quadSize, 
+				quadSize
+			);
+		}
+	}
+	
+	public void updateCalibratedCameras(boolean[] _calibrated)
+	{
+		calibratedCams = _calibrated;
+		
+		for(boolean bool: calibratedCams)
+		{
+			if(!bool)
+				return;
+		}
+		calibrated = true;
 	}
 	
 	public void handleInput(CommandBlock cBlock, CameraEvent cEvent)
@@ -72,8 +110,9 @@ public class Menu
 		window.noLights();
 		window.hint(PConstants.DISABLE_DEPTH_TEST);
 		
-		drawSplash();
+		drawSidebar();
 		drawPopup();
+		drawSplash();
 		
 		window.hint(PConstants.ENABLE_DEPTH_TEST);
 	}
@@ -145,6 +184,43 @@ public class Menu
 			window.text(popupString, window.width / 2, (window.height / 2) - 20);
 			
 			drawProgressBar();
+		}
+	}
+	
+	public void drawSidebar()
+	{
+		if(!slideDone)
+		{
+			if(calibrated)
+			{
+				if(-slide > sidebarWidth)
+					slideDone = true;
+				else
+					slide--;
+			}
+			
+			//draw sidebar base
+			window.fill(255);
+			window.noStroke();
+			window.rectMode(PConstants.CENTER);
+			window.rect(slide + (sidebarWidth / 2) - 10, (sidebarHeight / 2) - 10, sidebarWidth, sidebarHeight, 5);
+			
+			if(!calibrated)
+			{
+				for(int x = 0; x < camBases.length; ++x)
+				{
+					PShape quad = camBases[x];
+					
+					//find out which cameras have been calibrated (calibratedCams)
+					quad.setFill(window.color(255));
+					quad.setStroke(window.color(200));
+					window.shape(quad);
+					
+					window.stroke(100);
+					window.fill(0);
+					window.text((x + 1), quad.getVertexX(0), quad.getVertexY(0) + 10);
+				}
+			}
 		}
 	}
 	

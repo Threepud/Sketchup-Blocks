@@ -132,6 +132,12 @@ public class SessionManager
 		}
     }
     
+    public void updateCalibratedCameras(boolean[] calibrated)
+    {
+    	//TODO: Replace with listener stuff...
+    	menu.updateCalibratedCameras(calibrated);
+    }
+    
     public void updateCameraPosition(int cameraID, Vec3 camPosition)
     {
     	cameraPositions[cameraID] = camPosition;

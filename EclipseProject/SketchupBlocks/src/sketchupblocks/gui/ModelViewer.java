@@ -259,12 +259,6 @@ public class ModelViewer implements ModelChangeListener
 				else if(e.getAction() == KeyEvent.RELEASE)
 					rotateLeft = false;
 			}
-			//TODO: remove this
-			else if(e.getKey() == 'e')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					ColladaLoader.export(new ArrayList<ModelBlock>(blockMap.values()));
-			}
 		}
 	}
 }

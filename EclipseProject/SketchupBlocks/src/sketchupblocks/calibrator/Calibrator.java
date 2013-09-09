@@ -26,6 +26,11 @@ public class Calibrator
 			}
 	}
 	
+	public boolean[] getCalibrated()
+	{
+		return calibrated;
+	}
+	
 	public boolean isCalibrated()
 	{
 		for (int k = 0; k < calibrated.length; k++)
