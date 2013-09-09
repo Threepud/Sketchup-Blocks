@@ -8,9 +8,11 @@ public class SketchupBlocks extends PApplet
 {
 	private static final long serialVersionUID = 1L;
 	
-	Interpreter[] wimpie;
-	SessionManager sessMan;
-	Settings settings;
+	private static SessionManager sessMan;
+	private static Settings settings;
+	
+	private static boolean created = false;
+	private static long startTime;
 	
 	public void setup()
 	{
@@ -24,27 +26,25 @@ public class SketchupBlocks extends PApplet
 		
 		settings = new Settings("Settings.xml");
 		sessMan = new SessionManager(this);
-		//sessMan.setModelConstructor(new ModelConstructor(sessMan));
-		wimpie = new Interpreter[Settings.numCameras];
-		if (Settings.liveData)
-		{
-			for (int k = 0;  k < Settings.numCameras; k++)
-			{
-				wimpie[k] = new Interpreter(Settings.cameraSettings[k].port, sessMan, this, k);
-			}
-		}
-		else
-		{
-			for (int k = 0;  k < Settings.numCameras; k++)
-			{
-				wimpie[k] = new Feeder(sessMan, this, k);
-				((Feeder)wimpie[k]).start();
-			}
-		}
+		startTime = System.currentTimeMillis();
 	}
 
 	public void draw() 
 	{
+		if(Settings.showSplash)
+		{
+			if(System.currentTimeMillis() - startTime > Settings.splashTTL && !created)
+			{
+				sessMan.createInterpreters();
+				created = true;
+			}
+		}
+		else if(!created)
+		{
+			sessMan.createInterpreters();
+			created = true;
+		}
+		
 		sessMan.drawGUI();
 	}
 	
