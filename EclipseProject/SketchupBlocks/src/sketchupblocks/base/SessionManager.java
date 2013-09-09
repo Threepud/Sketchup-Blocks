@@ -10,6 +10,7 @@ import sketchupblocks.gui.ModelViewer;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 import sketchupblocks.network.LocalLobby;
+import sketchupblocks.recording.Feeder;
 
 public class SessionManager
 {
@@ -109,6 +110,26 @@ public class SessionManager
     		if (Settings.verbose >= 1)
     			System.out.println("--Unrecognized block!!--"+ cameraEvent.fiducialID);
     	}
+    }
+    
+    public void createInterpreters()
+    {
+    	Interpreter[] wimpie = new Interpreter[Settings.numCameras];
+		if (Settings.liveData)
+		{
+			for (int k = 0;  k < Settings.numCameras; k++)
+			{
+				wimpie[k] = new Interpreter(Settings.cameraSettings[k].port, this, parent, k);
+			}
+		}
+		else
+		{
+			for (int k = 0;  k < Settings.numCameras; k++)
+			{
+				wimpie[k] = new Feeder(this, parent, k);
+				((Feeder)wimpie[k]).start();
+			}
+		}
     }
     
     public void updateCameraPosition(int cameraID, Vec3 camPosition)
