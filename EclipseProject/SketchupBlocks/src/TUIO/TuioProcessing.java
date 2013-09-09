@@ -99,7 +99,7 @@ public class TuioProcessing implements TuioListener {
 	}
 	
 	public void updateTuioObject(TuioObject tobj) {
-		System.out.println("Update detected");
+		//System.out.println("Update detected");
 		if (updateTuioObject!=null) {
 			try { 
 				updateTuioObject.invoke(parent, new Object[] { tobj });

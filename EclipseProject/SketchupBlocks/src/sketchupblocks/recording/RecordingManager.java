@@ -11,6 +11,7 @@ public class RecordingManager extends PApplet
 	/**
 	 * 
 	 */
+	static Settings settings;
 	private static final long serialVersionUID = 1L;
 	static Recorder[] recorders;
 	static double timetoRecord = 30000;
@@ -19,7 +20,9 @@ public class RecordingManager extends PApplet
 	
 	public void setup()
 	{
+		settings = new Settings("Settings.xml");
 		recorders = new Recorder[Settings.numCameras];
+		System.out.println("Num recorders created; "+recorders.length+" "+Settings.numCameras);
 		for (int k = 0; k < recorders.length; k++)
 		{
 			recorders[k] = new Recorder(Settings.cameraSettings[k].port, this, k);
@@ -29,6 +32,7 @@ public class RecordingManager extends PApplet
 		{
 			recorders[k].startRecording();
 		}
+		System.out.println("Started recording");
 		timeStarted = new Date();
 	}
 	
