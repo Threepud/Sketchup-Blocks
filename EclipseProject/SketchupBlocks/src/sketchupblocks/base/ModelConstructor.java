@@ -30,7 +30,7 @@ public class ModelConstructor implements Runnable
 	
 	private boolean calibrated = false;
 	
-	private int changeWindow = 10;
+	private int changeWindow = 100;
 	
 	public ModelConstructor(SessionManager _sessMan)
 	{
@@ -140,9 +140,10 @@ public class ModelConstructor implements Runnable
 				while(iterate.hasNext())
 				{
 					BlockInfo b = iterate.next();
-					double timePased = b.lastChange.getTime() - new Date().getTime();
-					if(b.ready() && calibrated && (timePased < changeWindow) )
+					double timePased = Math.abs(b.lastChange.getTime() - new Date().getTime());
+					if(b.ready() && calibrated && (timePased > changeWindow) )
 					{
+						System.out.println("Processing "+b.fiducialMap.size()+" number of lines after"+timePased);
 						processBin(b);
 						b.fiducialMap.clear();
 					}
@@ -183,7 +184,6 @@ public class ModelConstructor implements Runnable
 			}
 			
 			SmartBlock sBlock =(SmartBlock)(bin.smartBlock);
-			//System.out.println("Doing Block:"+sBlock.blockId);
 			ArrayList<Integer> fiducialIndices = new ArrayList<Integer>();
 			
 			for (int k = 0 ; k < numFiducials ; k++)
@@ -203,7 +203,7 @@ public class ModelConstructor implements Runnable
 					throw new RuntimeException("Smart Block fiducials don't match");
 				}
 				fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
-				if (k != 0)
+				if (k != 0 && Settings.verbose > 2)
 				{
 				System.out.println("Line "+k+":"+lines[k].point+" +m* " +lines[k].direction);
 				System.out.println("Distance b/w "+(k-1)+" and "+(k)+" is "+fidCoordsM[k].distance(fidCoordsM[k-1]));
@@ -313,16 +313,16 @@ public class ModelConstructor implements Runnable
 		settings.tester = null;
 		settings.creator = new ParticleCreator(numFids,0,90);
 		
-		settings.particleCount = 80;
-		settings.iterationCount= 8000;
+		settings.particleCount = 160;
+		settings.iterationCount= 1600;
 		
-		settings.ringTopology = false;
-		settings.ringSize = 5;
+		settings.ringTopology = true;
+		settings.ringSize =1;
 		
 		settings.socialStart = 0.72;
 		settings.cognitiveStart = 0.72;
 		settings.momentum = 1.4;
-		settings.MaxComponentVelocity = 0.1;
+		settings.MaxComponentVelocity = 0.51;
 		return settings;
 	}
 	
@@ -478,8 +478,11 @@ public class ModelConstructor implements Runnable
 				}
 				// Do calculation 
 				Vec3 lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
+				if(Settings.verbose >= 3)
+				{
 				System.out.println("Camera position: "+cally.cameraPositions[camID]);
 				System.out.println("Line direction: "+lineDirection);
+				}
 				return new Line(cally.cameraPositions[camID], lineDirection);
 			}
 		}
