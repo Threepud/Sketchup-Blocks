@@ -1,9 +1,11 @@
 package sketchupblocks.base;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import sketchupblocks.database.*;
 import sketchupblocks.calibrator.*;
@@ -16,21 +18,27 @@ import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Vec4;
 import sketchupblocks.network.Lobby;
 
-public class ModelConstructor
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ModelConstructor implements Runnable 
 {
 	private Lobby eddy;
-	private HashMap<Integer,BlockInfo> blockMap;
+	private Map<Integer,BlockInfo> blockMap;
 	
 	private Calibrator cally;
 	private SessionManager sessMan;
 	
 	private boolean calibrated = false;
 	
+	private int changeWindow = 100;
+	
 	public ModelConstructor(SessionManager _sessMan)
 	{
-		blockMap = new HashMap<Integer,BlockInfo>();
+		blockMap = new ConcurrentHashMap<Integer,BlockInfo>();
 		cally = new Calibrator();
 		sessMan = _sessMan;
+		Thread th = new Thread(this);
+		th.start();
 	}
 	  
 	public void setLobby(Lobby lobby)
@@ -67,6 +75,88 @@ public class ModelConstructor
 		
 	}
 	
+	private void store(InputBlock iBlock)
+	{
+		
+		if (iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
+		{
+			BlockInfo block = blockMap.get(iBlock.block.blockId);
+			
+			if (block == null)
+			{
+				block = new BlockInfo(iBlock.block);
+				blockMap.put(iBlock.block.blockId,block);
+			}	
+			
+			BlockInfo.Fiducial fiducial =  block.new Fiducial(iBlock.cameraEvent);
+			block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
+
+			block.lastChange = new Date();
+			
+			/*if(block.ready() && calibrated)
+			{
+				processBin(block);
+				//blockMap.remove(block.blockID);
+				block.fiducialMap.clear();
+			}*/
+		}
+		else //When a remove call is received
+		{
+			BlockInfo block = blockMap.get(iBlock.block.blockId);
+			
+			if (block == null)
+			{
+				System.out.println("Proposed removal of block that has not been added!?");
+				return; // Nothing to remove
+			}	
+			
+			if (block.fiducialMap.containsKey(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID)))
+			{
+				block.fiducialMap.remove(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
+			}
+			
+			/*
+			* Cleanup -- Remove blocks if not seen
+			* No need to clean up camera. They will always be there.
+			*/
+			
+			if(block.fiducialMap.isEmpty())
+			{
+				blockMap.remove(iBlock.block.blockId);
+				if (iBlock.block instanceof SmartBlock)
+					eddy.updateModel(new ModelBlock((SmartBlock)iBlock.block, null, ModelBlock.ChangeType.REMOVE));
+			}
+		}
+	}
+	
+	public void run()
+	{
+		while(true)
+		{
+			try
+			{
+				Collection<BlockInfo> blocks = blockMap.values();
+				Iterator<BlockInfo> iterate = blocks.iterator();
+				while(iterate.hasNext())
+				{
+					BlockInfo b = iterate.next();
+					double timePased = Math.abs(b.lastChange.getTime() - new Date().getTime());
+					if(b.ready() && calibrated && (timePased > changeWindow) )
+					{
+						System.out.println("Processing "+b.fiducialMap.size()+" number of lines after"+timePased);
+						processBin(b);
+						b.fiducialMap.clear();
+					}
+				}
+		
+			}
+			catch(Exception e)
+			{
+				//If the is a concurrent change an exception will be thrown. Then we simply try again.
+			}
+		}
+	}
+	
 	private void processBin(BlockInfo bin)
 	{
 		if (bin.smartBlock instanceof SmartBlock)
@@ -94,7 +184,6 @@ public class ModelConstructor
 			}
 			
 			SmartBlock sBlock =(SmartBlock)(bin.smartBlock);
-			//System.out.println("Doing Block:"+sBlock.blockId);
 			ArrayList<Integer> fiducialIndices = new ArrayList<Integer>();
 			
 			for (int k = 0 ; k < numFiducials ; k++)
@@ -114,7 +203,7 @@ public class ModelConstructor
 					throw new RuntimeException("Smart Block fiducials don't match");
 				}
 				fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
-				if (k != 0)
+				if (k != 0 && Settings.verbose > 2)
 				{
 				System.out.println("Line "+k+":"+lines[k].point+" +m* " +lines[k].direction);
 				System.out.println("Distance b/w "+(k-1)+" and "+(k)+" is "+fidCoordsM[k].distance(fidCoordsM[k-1]));
@@ -224,73 +313,17 @@ public class ModelConstructor
 		settings.tester = null;
 		settings.creator = new ParticleCreator(numFids,0,90);
 		
-		settings.particleCount = 80;
-		settings.iterationCount= 8000;
+		settings.particleCount = 160;
+		settings.iterationCount= 1600;
 		
-		settings.ringTopology = false;
-		settings.ringSize = 5;
+		settings.ringTopology = true;
+		settings.ringSize =1;
 		
 		settings.socialStart = 0.72;
 		settings.cognitiveStart = 0.72;
 		settings.momentum = 1.4;
-		settings.MaxComponentVelocity = 0.1;
+		settings.MaxComponentVelocity = 0.51;
 		return settings;
-	}
-	
-	private void store(InputBlock iBlock)
-	{
-		
-		if (iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
-		{
-			BlockInfo block = blockMap.get(iBlock.block.blockId);
-			
-			if (block == null)
-			{
-				block = new BlockInfo(iBlock.block);
-				blockMap.put(iBlock.block.blockId,block);
-			}	
-			
-			//BlockInfo.Fiducial fiducial = block.fiducialMap.get(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID, iBlock.cameraEvent.fiducialID));
-			
-			BlockInfo.Fiducial fiducial =  block.new Fiducial(iBlock.cameraEvent);
-			block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
-
-			//Get line used to be here
-			
-			if(block.ready() && calibrated)
-			{
-				processBin(block);
-				//blockMap.remove(block.blockID);
-				block.fiducialMap.clear();
-			}
-		}
-		else //When a remove call is received
-		{
-			BlockInfo block = blockMap.get(iBlock.block.blockId);
-			
-			if (block == null)
-			{
-				System.out.println("Proposed removal of block that has not been added!?");
-				return; // Nothing to remove
-			}	
-			
-			if (block.fiducialMap.containsKey(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID)))
-			{
-				block.fiducialMap.remove(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
-			}
-			
-			/*
-			* Cleanup -- Remove blocks if not seen
-			* No need to clean up camera. They will always be there.
-			*/
-			
-			if(block.fiducialMap.isEmpty())
-			{
-				blockMap.remove(iBlock.block.blockId);
-				if (iBlock.block instanceof SmartBlock)
-					eddy.updateModel(new ModelBlock((SmartBlock)iBlock.block, null, ModelBlock.ChangeType.REMOVE));
-			}
-		}
 	}
 	
 	private double getAngle(int camID, int lm, double x, double y)
@@ -343,7 +376,8 @@ public class ModelConstructor
 		int LIFETIME = 2000;	//ms
 		public int blockID;
 		public Block smartBlock;
-		private HashMap<CamFidIdentifier,Fiducial> fiducialMap;
+		public Date lastChange;
+		private Map<CamFidIdentifier,Fiducial> fiducialMap;
 	
 		
 		public BlockInfo(Block _smartBlock)
@@ -444,8 +478,11 @@ public class ModelConstructor
 				}
 				// Do calculation 
 				Vec3 lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
+				if(Settings.verbose >= 3)
+				{
 				System.out.println("Camera position: "+cally.cameraPositions[camID]);
 				System.out.println("Line direction: "+lineDirection);
+				}
 				return new Line(cally.cameraPositions[camID], lineDirection);
 			}
 		}

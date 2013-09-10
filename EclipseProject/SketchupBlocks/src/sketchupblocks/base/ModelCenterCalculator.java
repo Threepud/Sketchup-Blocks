@@ -25,9 +25,11 @@ public class ModelCenterCalculator
 					{
 						modelFidCoords[k] = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[k]]);
 					}
+					
 					Matrix[] transformMatrices = RotationMatrixCalculator.calculateTransformationMatrices(modelFidCoords, positions);
 					//return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
 					Matrix m = Matrix.multiply(transformMatrices[1],  Matrix.identity(4)); 
+
 					System.out.println("TRANSFORMATION: "+m);
 					return m;
 				}
