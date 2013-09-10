@@ -11,6 +11,7 @@ import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 import sketchupblocks.network.LocalLobby;
 import sketchupblocks.recording.Feeder;
+import sketchupblocks.math.Line;
 
 public class SessionManager
 {
@@ -200,6 +201,12 @@ public class SessionManager
     public void spectate(UserBlock  user)
     {
       
+    }
+    
+    public void debugLines(Line [] l)
+    {
+    	
+    	
     }
     
     public void drawGUI()
