@@ -212,7 +212,8 @@ public class ModelConstructor implements Runnable
 					System.out.println("Distance b/w "+(k-1)+" and "+(k)+" is "+fidCoordsM[k].distance(fidCoordsM[k-1]));
 				}
 			}
-			catcher(fidCoordsM, lines, fids);
+			if (Settings.verbose == 10)
+				catcher(fidCoordsM, lines, fids);
 			//Bin should have enough information to get position.
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
 			Particle bestabc = null;
