@@ -56,11 +56,12 @@ public class ModelConstructor implements Runnable
 				boolean changedPosition = cally.processBlock(iBlock);
 				calibrated = cally.isCalibrated();
 				//Propagate updated camera positions to the appropriate parties.
-				System.out.println("Calibrated: "+calibrated);
-				System.out.println("changed: "+changedPosition);
+				if (Settings.verbose >= 3)
+					System.out.println("Calibrated ? "+calibrated);
+				if (Settings.verbose > 3)
+					System.out.println("changed: "+changedPosition);
 				if (changedPosition && calibrated)
 				{
-					System.out.println("Sending camera positions through to model viewer");
 					for (int k = 0; k < Settings.numCameras; k++)
 					{
 						sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
@@ -205,8 +206,8 @@ public class ModelConstructor implements Runnable
 				fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
 				if (k != 0 && Settings.verbose > 2)
 				{
-				System.out.println("Line "+k+":"+lines[k].point+" +m* " +lines[k].direction);
-				System.out.println("Distance b/w "+(k-1)+" and "+(k)+" is "+fidCoordsM[k].distance(fidCoordsM[k-1]));
+					System.out.println("Line "+k+":"+lines[k].point+" +m* " +lines[k].direction);
+					System.out.println("Distance b/w "+(k-1)+" and "+(k)+" is "+fidCoordsM[k].distance(fidCoordsM[k-1]));
 				}
 			}
 				
@@ -227,7 +228,7 @@ public class ModelConstructor implements Runnable
 			for(int k = 0 ; k < numFiducials ; k++)
 			{
 				fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-	
+				//Is ons absolutely convinced dat ons die rotations so kan gebruik?
 				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation);	
 				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
 				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
