@@ -49,11 +49,12 @@ public class Matrix
             cols = 3;
             data = new double[rows][cols];
 
-            for (int k = 0; k < cols; k++)
+            for (int k = 0; k < rows; k++)
             {
-                for (int i = 0; i < rows; i++)
+            	double[] vecData = vecs[k].toArray();
+                for (int i = 0; i < cols; i++)
                 {
-                    data[i][k] = vecs[i].toArray()[k];
+                    data[k][i] = vecData[i];
                 }
             }
         }
@@ -96,14 +97,12 @@ public class Matrix
         }
     }
     
-    public void repeatAsRows(Vec3 v)
+    public void repeatAsRows(Vec3 v, int numRows)
     {
-        if (cols != 3 || rows != 3)
-        {
-            System.out.println("Cannot set as repeat vector");
-            throw new RuntimeException();
-        }
-        for (int k = 0; k < 3; k++)
+        cols = 3;
+        rows = numRows;
+        data = new double[rows][cols];
+        for (int k = 0; k < rows; k++)
         {
             data[k][0] = v.x;
             data[k][1] = v.y;
@@ -113,14 +112,13 @@ public class Matrix
     
     
     
-    public void repeatAsCols(Vec3 v)
+    public void repeatAsCols(Vec3 v, int numCols)
     {
-        if (cols != 3 || rows != 3)
-        {
-            System.out.println("Cannot set as repeat vector");
-            throw new RuntimeException();
-        }
-        for (int k = 0; k < 3; k++)
+        cols = numCols;
+        rows = 3;
+        data = new double[rows][cols];
+        
+        for (int k = 0; k < cols; k++)
         {
             data[0][k] = v.x;
             data[1][k] = v.y;
