@@ -177,6 +177,8 @@ public class ModelConstructor implements Runnable
 				lines[k].direction.normalize();
 			}
 			
+			sessMan.debugLines(lines);
+			
 			Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
 			if (!(bin.smartBlock instanceof SmartBlock))
 			{
