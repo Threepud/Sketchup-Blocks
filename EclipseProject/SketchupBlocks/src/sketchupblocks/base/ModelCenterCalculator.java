@@ -18,23 +18,22 @@ public class ModelCenterCalculator
 	{
 		try
 		{
-			Vec3 m1 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[0]]); //((SmartBlock)fidData[0].block).fiducialCoordinates[fidData[0].cameraEvent.fiducialID]);
-			Vec3 m2 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[1]]);//((SmartBlock)fidData[1].block).fiducialCoordinates[fidData[1].cameraEvent.fiducialID]);
 				if (fidIDs.length > 2)
 				{
-					Vec3 m3 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[2]]);
-					Vec3[] threePositions = new Vec3[3];
-					for (int k = 0; k < 3; k++)
+					Vec3[] modelFidCoords = new Vec3[positions.length];
+					for (int k = 0; k < modelFidCoords.length; k++)
 					{
-						threePositions[k] = positions[k];
+						modelFidCoords[k] = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[k]]);
 					}
-					Matrix[] transformMatrices = RotationMatrixCalculator.calculateTransformationMatrices(new Vec3[]{m1, m2, m3}, threePositions);
+					Matrix[] transformMatrices = RotationMatrixCalculator.calculateTransformationMatrices(modelFidCoords, positions);
 					//return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
 					Matrix m = Matrix.multiply(transformMatrices[1],  Matrix.identity(4)); 
 					System.out.println("TRANSFORMATION: "+m);
 					return m;
 				}
-				
+
+				Vec3 m1 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[0]]); 
+				Vec3 m2 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[1]]);
 				Vec3 m1m2Mid = Vec3.midpoint(m1, m2);
 				
 				//Now translate these points so that m1m2Mid is at the origin.
@@ -154,7 +153,7 @@ public class ModelCenterCalculator
 			result[index++] = Vec3.normalize(new Vec3(1, 1, -(d.x + d.y)/d.z));
 		}
 		else
-			throw new Exception("Now offset can be calculated for given d's");
+			throw new Exception("No offset can be calculated for given d's");
 		return result;
 	}
 	
