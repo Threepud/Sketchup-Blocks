@@ -22,7 +22,7 @@ public class Model
 	
 	public void removeModelBlock(ModelBlock modelBlock)
 	{
-		blockMap.remove(new Integer(modelBlock.smartBlock.blockId));
+		//blockMap.remove(new Integer(modelBlock.smartBlock.blockId));
 	}
 	  
 	public String getId()
