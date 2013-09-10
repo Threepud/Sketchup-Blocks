@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import sketchupblocks.database.*;
+import sketchupblocks.base.ModelConstructor.BlockInfo.Fiducial;
 import sketchupblocks.calibrator.*;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.LineDirectionSolver;
@@ -177,7 +178,12 @@ public class ModelConstructor implements Runnable
 				lines[k].direction.normalize();
 			}
 			
-			sessMan.debugLines(lines);
+			//For debugging purposes
+			//To display debugging lines to fiducial centers
+			String[] IDS = new String[fids.length];
+			for(int a = 0; a < IDS.length; ++a)
+				IDS[a] = fids[a].camID + "," + fids[a].fiducialsID;
+			sessMan.debugLines(IDS, lines);
 			
 			Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
 			if (!(bin.smartBlock instanceof SmartBlock))

@@ -203,10 +203,9 @@ public class SessionManager
       
     }
     
-    public void debugLines(Line [] l)
+    public void debugLines(String[] IDS, Line[] lines)
     {
-    	
-    	
+    	sarah.setDebugLines(IDS, lines);
     }
     
     public void drawGUI()

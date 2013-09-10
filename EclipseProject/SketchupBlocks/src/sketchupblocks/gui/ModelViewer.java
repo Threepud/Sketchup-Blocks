@@ -13,6 +13,7 @@ import sketchupblocks.base.ModelChangeListener;
 import sketchupblocks.base.Settings;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.BlockNoTypeException;
+import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
@@ -43,8 +44,13 @@ public class ModelViewer implements ModelChangeListener
 	private boolean rotateLeft = false;
 	private boolean rotateRight = false;
 	
-	PImage tilesTexture;
+	//fiducial debug lines
+	private boolean camDebug = true;
+	private HashMap<String, Line> debugLines = new HashMap<>();
+	private int lineLength = 50;
 	
+	private PImage tilesTexture;
+	 
 	public ModelViewer()
 	{
 		Vec3 up = new Vec3(0, 1, 0);
@@ -76,6 +82,14 @@ public class ModelViewer implements ModelChangeListener
 	public void setSystemCamera(int index, Camera newCamera)
 	{
 		systemCameras[index] = newCamera;
+	}
+	
+	public void setDebugLines(String[] IDS, Line[] lines)
+	{
+		for(int x = 0; x < IDS.length; ++x)
+		{
+			debugLines.put(IDS[x], lines[x]);
+		}
 	}
 	
 	public void setWindow(PApplet _window)
@@ -137,6 +151,7 @@ public class ModelViewer implements ModelChangeListener
 		
 		drawConstructionFloor();
 		drawBlocks();
+		drawDebugLines();
 	}
 	
 	private void drawConstructionFloor()
@@ -184,6 +199,22 @@ public class ModelViewer implements ModelChangeListener
 			}
 			
 			window.endShape();
+		}
+	}
+	
+	private void drawDebugLines()
+	{
+		if(camDebug)
+		{
+			window.stroke(255);
+			for(Line line: new ArrayList<Line>(debugLines.values()))
+			{
+				Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
+				Vec3 end = new Vec3(lineLength * line.direction.y,
+									-lineLength * line.direction.z,
+									lineLength * line.direction.x);
+				window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+			}
 		}
 	}
 
@@ -259,11 +290,10 @@ public class ModelViewer implements ModelChangeListener
 				else if(e.getAction() == KeyEvent.RELEASE)
 					rotateLeft = false;
 			}
-			//TODO: remove this
-			else if(e.getKey() == 'e')
+			else if(e.getKey() == 'd')
 			{
 				if(e.getAction() == KeyEvent.RELEASE)
-					ColladaLoader.export(new ArrayList<ModelBlock>(blockMap.values()));
+					camDebug = !camDebug;
 			}
 		}
 	}
