@@ -52,7 +52,7 @@ public class Feeder extends Interpreter
 					event.fiducialID = Integer.parseInt(split[4]);
 					event.cameraID = cameraID;
 					events.add(event);
-					System.out.println(cameraID+" added wait-time "+split[6]);
+					
 					if (Settings.timeDelay)
 						waitTimes.add(Double.parseDouble(split[6]));
 					else 
@@ -89,11 +89,8 @@ class Firer extends Thread
 	{
 		while(!events.isEmpty())
 		{
-			//System.out.println("Size before remove: "+events.size());
-			//System.out.println("Size after remove: "+events.size());
 			try
 			{
-				//System.out.println("Sleeping "+waitTimes.get(0));
 				sleep(waitTimes.remove(0).longValue());
 				sessMan.onCameraEvent(events.remove(0));
 			}
@@ -103,6 +100,7 @@ class Firer extends Thread
 			}
 			
 		}
-		System.out.println(cameraID+" is done");
+		if (Settings.verbose > 2)
+			System.out.println(cameraID+" is done");
 	}
 }

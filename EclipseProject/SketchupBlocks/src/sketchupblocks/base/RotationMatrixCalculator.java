@@ -44,9 +44,11 @@ public class RotationMatrixCalculator
 	        	data[k][3] = t.data[k][0];
 	        }
 	        t = new Matrix(data);
-	        
-	        System.out.println("Translation: "+t);
-	        System.out.println("Rotation: "+proposedR);
+	        if (Settings.verbose > 2)
+	        {
+		        System.out.println("Translation: "+t);
+		        System.out.println("Rotation: "+proposedR);
+	        }
 	        
 	       return new Matrix[]{proposedR, t};
 		}
