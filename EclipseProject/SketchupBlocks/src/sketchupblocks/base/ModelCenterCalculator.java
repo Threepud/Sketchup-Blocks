@@ -20,6 +20,7 @@ public class ModelCenterCalculator
 		{
 				if (fidIDs.length > 2)
 				{
+					
 					Vec3[] modelFidCoords = new Vec3[positions.length];
 					for (int k = 0; k < modelFidCoords.length; k++)
 					{
@@ -29,8 +30,8 @@ public class ModelCenterCalculator
 					Matrix[] transformMatrices = RotationMatrixCalculator.calculateTransformationMatrices(modelFidCoords, positions);
 					//return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
 					Matrix m = Matrix.multiply(transformMatrices[1],  Matrix.identity(4)); 
-
-					System.out.println("TRANSFORMATION: "+m);
+					if (Settings.verbose > 3)
+						System.out.println("TRANSFORMATION: "+m);
 					return m;
 				}
 
