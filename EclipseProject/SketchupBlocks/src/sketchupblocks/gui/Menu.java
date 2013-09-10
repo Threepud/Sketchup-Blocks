@@ -218,10 +218,12 @@ public class Menu
 			{
 				PShape quad = camBases[x];
 				
+				if(slide != 0)
+					quad.translate(slide, 0);
+				
 				//find out which cameras have been calibrated (calibratedCams)
 				quad.setFill(window.color(255));
 				quad.setStroke(window.color(200));
-				quad.translate(slide, 0);
 				window.shape(quad);
 				
 				window.stroke(100);
