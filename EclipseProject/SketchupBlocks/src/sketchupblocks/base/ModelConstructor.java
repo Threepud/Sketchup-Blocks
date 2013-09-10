@@ -144,7 +144,8 @@ public class ModelConstructor implements Runnable
 					double timePased = Math.abs(b.lastChange.getTime() - new Date().getTime());
 					if(b.ready() && calibrated && (timePased > changeWindow) )
 					{
-						System.out.println("Processing "+b.fiducialMap.size()+" number of lines after"+timePased);
+						if (Settings.verbose >= 3)
+							System.out.println("Processing "+b.fiducialMap.size()+" number of lines after "+timePased);
 						processBin(b);
 						b.fiducialMap.clear();
 					}
@@ -162,6 +163,7 @@ public class ModelConstructor implements Runnable
 	{
 		if (bin.smartBlock instanceof SmartBlock)
 		{
+			//System.out.println("Processing bin for "+bin.smartBlock.blockId);
 			BlockInfo.Fiducial [] fids = new BlockInfo.Fiducial[0];
 			fids = bin.fiducialMap.values().toArray(fids);
 			
@@ -210,7 +212,7 @@ public class ModelConstructor implements Runnable
 					System.out.println("Distance b/w "+(k-1)+" and "+(k)+" is "+fidCoordsM[k].distance(fidCoordsM[k-1]));
 				}
 			}
-				
+			catcher(fidCoordsM, lines, fids);
 			//Bin should have enough information to get position.
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
 			Particle bestabc = null;
@@ -325,6 +327,34 @@ public class ModelConstructor implements Runnable
 		settings.momentum = 1.4;
 		settings.MaxComponentVelocity = 0.51;
 		return settings;
+	}
+	
+	private void catcher(Vec3[] fidCoordsM, Line[] lines, BlockInfo.Fiducial[] fids)
+	{
+		if (lines.length != fids.length)
+			System.out.println("894032jkfadsfajdsklfd;lsajka;fjlcdskljk;adfs;ljkfdsalj;kdasfj;kldfaskjl;fads");
+		for (int k = 0; k < fids.length-1; k++)
+		{
+			for (int i = k+1; i < fids.length; i++)
+			{
+				if (fids[k].camID != fids[i].camID && fids[k].fiducialsID == fids[i].fiducialsID)
+				{
+					System.out.println("============================================================================");
+					System.out.println("Fiducial "+fids[k].fiducialsID);
+					System.out.println("Camera : "+fids[k].camID);
+					System.out.println(cally.cameraPositions[fids[k].camID]);
+					System.out.println("Direction: ");
+					System.out.println(lines[k].direction);
+					
+					System.out.println("----------------------------------------------------------------------------");
+					System.out.println("Camera : "+fids[i].camID);
+					System.out.println(cally.cameraPositions[fids[i].camID]);
+					System.out.println("Direction: ");
+					System.out.println(lines[i].direction);
+					System.out.println("============================================================================");
+				}
+			}
+		}
 	}
 	
 	private double getAngle(int camID, int lm, double x, double y)
