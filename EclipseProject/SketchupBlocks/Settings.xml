@@ -26,10 +26,10 @@
 		</CameraSettings>
 	</Cameras>
 	<Calibration>
-		<Landmark id="0">0,0,0</Landmark>
-		<Landmark id="1">0,5.6,0</Landmark>
-		<Landmark id="2">5.6,5.6,0</Landmark>
-		<Landmark id="3">5.6,0,0</Landmark>
+		<Landmark id="0">-2.9,-2.9,0</Landmark>
+		<Landmark id="1">-2.9,2.9,0</Landmark>
+		<Landmark id="2">2.9,2.9,0</Landmark>
+		<Landmark id="3">2.9,-2.9,0</Landmark>
 	</Calibration>
 	<GUI>
 		<ShowSplash>false</ShowSplash>
@@ -39,7 +39,7 @@
 	</GUI>
 	<DebugRecording>
 		<LiveData>false</LiveData>
-		<RecordingInputFilename>debugOutput/output</RecordingInputFilename>
-		<TimeDelay>true</TimeDelay>
+		<RecordingInputFilename>debugOutput(Measurements)/output</RecordingInputFilename>
+		<TimeDelay>false</TimeDelay>
 	</DebugRecording>
 </Settings>
