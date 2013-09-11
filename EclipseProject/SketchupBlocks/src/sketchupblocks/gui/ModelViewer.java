@@ -40,14 +40,22 @@ public class ModelViewer implements ModelChangeListener
 	private double rotationIncrement = 0.03;
 	private double rotationDecrement = 0.003;
 	private double cameraHeight = -500;
-	private double cameraRadius = 500;
+	private double cameraRadius = 700;
+	private double zoomVel = 30;
+	private double maxHeight = -2000;
+	private double minHeight = -50;
 	private boolean rotateLeft = false;
 	private boolean rotateRight = false;
+	private boolean zoomIn = false;
+	private boolean zoomOut = false;
 	
 	//fiducial debug lines
 	private boolean camDebug = true;
 	private HashMap<String, Line> debugLines = new HashMap<>();
-	private int lineLength = 50;
+	private int lineLength = 5;
+	
+	//transparent construction floor
+	private boolean alphaBlendFloor = false;
 	
 	private PImage tilesTexture;
 	 
@@ -149,19 +157,25 @@ public class ModelViewer implements ModelChangeListener
 		
 		window.background(0);
 		
-		drawConstructionFloor();
 		drawBlocks();
 		drawDebugLines();
+		drawConstructionFloor();
 	}
 	
 	private void drawConstructionFloor()
 	{
+		
 		window.pushMatrix();
 		
 		window.scale(5f, 1.0f, 5f);
 		
 		window.noStroke();
-		window.fill(255);
+		window.fill(window.color(255));
+		
+		if(alphaBlendFloor)
+			window.tint(255, 50);
+		else
+			window.tint(255, 255);
 		
 		window.beginShape();
 		
@@ -181,6 +195,7 @@ public class ModelViewer implements ModelChangeListener
 	
 	private void drawBlocks()
 	{
+		window.pushMatrix();
 		window.scale(10, 10, 10);
 		
 		//draw block list
@@ -200,22 +215,28 @@ public class ModelViewer implements ModelChangeListener
 			
 			window.endShape();
 		}
+		window.popMatrix();
 	}
 	
 	private void drawDebugLines()
 	{
+		window.pushMatrix();
+		window.scale(1f);
 		if(camDebug)
 		{
-			window.stroke(255);
+			window.stroke(255, 0, 0);
 			for(Line line: new ArrayList<Line>(debugLines.values()))
 			{
 				Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
 				Vec3 end = new Vec3(lineLength * line.direction.y,
 									-lineLength * line.direction.z,
 									lineLength * line.direction.x);
+				start = Vec3.scalar(10, start);
+				end = Vec3.scalar(10, end);
 				window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
 			}
 		}
+		window.popMatrix();
 	}
 
 	private void switchCamera()
@@ -248,6 +269,17 @@ public class ModelViewer implements ModelChangeListener
 	{
 		changeTarget();
 		
+		if(zoomIn && cameraHeight < minHeight)
+		{
+			cameraHeight += zoomVel;
+			cameraRadius -= zoomVel;
+		}
+		if(zoomOut && cameraHeight > maxHeight)
+		{
+			cameraHeight -= zoomVel;
+			cameraRadius += zoomVel;
+		}
+		
 		rightVel -= rotationDecrement;
 		leftVel -= rotationDecrement;
 		if(rightVel < 0)
@@ -274,6 +306,22 @@ public class ModelViewer implements ModelChangeListener
 					selectCamera = e.getKeyCode() - 48;
 				switchCamera();
 			}
+			//zoom in
+			else if(e.getKeyCode() == 38)
+			{
+				if(e.getAction() == KeyEvent.PRESS)
+					zoomIn = true;
+				else if(e.getAction() == KeyEvent.RELEASE)
+					zoomIn = false;
+			}
+			//zoom out
+			else if(e.getKeyCode() == 40)
+			{
+				if(e.getAction() == KeyEvent.PRESS)
+					zoomOut = true;
+				else if(e.getAction() == KeyEvent.RELEASE)
+					zoomOut = false;
+			}
 			//right
 			else if(e.getKeyCode() == 39)
 			{
@@ -290,10 +338,20 @@ public class ModelViewer implements ModelChangeListener
 				else if(e.getAction() == KeyEvent.RELEASE)
 					rotateLeft = false;
 			}
+			else if(e.getKey() == 'e')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+					ColladaLoader.export(new ArrayList<ModelBlock>(blockMap.values()));
+			}
 			else if(e.getKey() == 'd')
 			{
 				if(e.getAction() == KeyEvent.RELEASE)
 					camDebug = !camDebug;
+			}
+			else if(e.getKey() == 't')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+					alphaBlendFloor = !alphaBlendFloor;
 			}
 		}
 	}
