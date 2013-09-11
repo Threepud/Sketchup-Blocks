@@ -200,6 +200,8 @@ public class ModelViewer implements ModelChangeListener
 	private void drawBlocks()
 	{
 		window.pushMatrix();
+		window.noStroke();
+		window.fill(255);
 		window.scale(10, 10, 10);
 		
 		//draw block list
@@ -279,7 +281,7 @@ public class ModelViewer implements ModelChangeListener
 	{
 		changeTarget();
 		
-		if(zoomIn)// && cameraHeight < minHeight)
+		if(zoomIn && cameraHeight < minHeight)
 		{
 			cameraHeight += zoomVel;
 			cameraRadius -= zoomVel;
