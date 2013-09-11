@@ -40,6 +40,21 @@ public class Menu
 			{254, 1, 159},
 			{255, 134, 0}
 		};
+
+	//sidebar
+	private boolean slideDone = false;
+	private boolean slideStart = false;
+	private boolean calibrated = false;
+	private int sidebarWidth;
+	private int sidebarHeight;
+	private int slide;
+	private PShape[] camBases;
+	private boolean[] calibratedCams;
+	private long sidebarStartTime;
+	private long sidebarTTL = 3000;
+	private PImage done;
+	private PImage busy;
+	private PFont sideFont;
 	
 	public Menu(SessionManager _sessMan, PApplet _window)
 	{
@@ -51,6 +66,39 @@ public class Menu
 		
 		headingFont = window.createFont("Arial", 40, true);
 		subFont = window.createFont("Arial", 30);
+		
+		int offset = 10;
+		int quadSize = 40;
+		sidebarWidth = (offset * 3) + quadSize;
+		sidebarHeight = (offset * 2) + (Settings.numCameras * quadSize) + (Settings.numCameras * offset);
+		camBases = new PShape[Settings.numCameras];
+		for(int x = 0; x < camBases.length; ++x)
+		{
+			camBases[x] = window.createShape
+			(
+				PConstants.RECT, 
+				offset, 
+				offset + (x * quadSize) + (x * offset), 
+				quadSize, 
+				quadSize
+			);
+		}
+		
+		done = window.loadImage("./images/correct.png");
+		busy = window.loadImage("./images/wrong.png");
+		sideFont = window.createFont("Arial", 15);
+	}
+	
+	public void updateCalibratedCameras(boolean[] _calibrated)
+	{
+		calibratedCams = _calibrated;
+		
+		for(boolean bool: calibratedCams)
+		{
+			if(!bool)
+				return;
+		}
+		calibrated = true;
 	}
 	
 	public void handleInput(CommandBlock cBlock, CameraEvent cEvent)
@@ -58,6 +106,21 @@ public class Menu
 		switch(cBlock.type)
 		{
 			case EXPORT:
+				if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
+				{
+					showPopup = true;
+					if(sessMan.checkModelExists())
+						showPopup = true;
+					else
+					{
+						//show warning message
+					}
+				}
+				else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
+				{
+					showPopup = false;
+					popupStart = -1;
+				}
 				break;
 			case SPECTATE:
 				break;
@@ -72,8 +135,9 @@ public class Menu
 		window.noLights();
 		window.hint(PConstants.DISABLE_DEPTH_TEST);
 		
-		drawSplash();
+		drawSidebar();
 		drawPopup();
+		drawSplash();
 		
 		window.hint(PConstants.ENABLE_DEPTH_TEST);
 	}
@@ -117,25 +181,21 @@ public class Menu
 			}
 			else if(System.currentTimeMillis() - popupStart > Settings.commandWaitTime)
 			{
+				showPopup = false;
 				popupStart = -1;
-				//TODO: fire command
+				sessMan.exportToFile();
+				return;
 			}
 		
 			//draw popup base
-			window.fill(255);
+			window.fill(0, 0, 0, 150);
 			window.noStroke();
 			window.rectMode(PConstants.CENTER);
-			window.rect(window.width / 2, window.height / 2, 400, 280, 5);
-			
-			//draw popup outline
-			window.noFill();;
-			window.stroke(100);
-			window.rectMode(PConstants.CENTER);
-			window.rect(window.width / 2, window.height / 2, 390, 270, 5);
+			window.rect(window.width / 2, window.height / 2, 400, 280);
 			
 			//draw text
-			window.stroke(200);
-			window.fill(0);
+			//window.stroke(255);
+			window.fill(255);
 			window.textFont(headingFont);
 			window.textAlign(PConstants.CENTER);
 			window.text("Sketchup Blocks", window.width / 2, (window.height / 2) - 80);
@@ -145,6 +205,63 @@ public class Menu
 			window.text(popupString, window.width / 2, (window.height / 2) - 20);
 			
 			drawProgressBar();
+		}
+	}
+	
+	public void drawSidebar()
+	{
+		if(!slideDone)
+		{
+			if(calibrated)
+			{
+				if(!slideStart)
+				{
+					sidebarStartTime = System.currentTimeMillis();
+					slideStart = true;
+				}
+				
+				if(-slide > sidebarWidth)
+					slideDone = true;
+				else if(System.currentTimeMillis() - sidebarStartTime > sidebarTTL)
+					slide--;
+			}
+			
+			window.textFont(sideFont);
+			
+			//draw sidebar base
+			window.fill(255);
+			window.noStroke();
+			window.rectMode(PConstants.CENTER);
+			window.rect(slide + (sidebarWidth / 2) - 10, (sidebarHeight / 2) - 10, sidebarWidth, sidebarHeight);
+			
+			for(int x = 0; x < camBases.length; ++x)
+			{
+				PShape quad = camBases[x];
+				
+				if(slide != 0)
+					quad.translate(-1, 0);
+				
+				if(calibratedCams == null)
+					quad.setTexture(busy);
+				else
+				{
+					if(calibratedCams[x])
+						quad.setTexture(done);
+					else
+						quad.setTexture(busy);
+				}
+				
+				quad.setTextureMode(PConstants.NORMAL);
+				quad.setTextureUV(0, quad.width, quad.height);
+				
+				quad.setFill(window.color(255));
+				quad.setStroke(window.color(255));
+				window.shape(quad);
+				
+				window.stroke(100);
+				window.fill(0);
+				window.text((x + 1), slide + quad.getVertexX(0), quad.getVertexY(0) + 10);
+			}
 		}
 	}
 	

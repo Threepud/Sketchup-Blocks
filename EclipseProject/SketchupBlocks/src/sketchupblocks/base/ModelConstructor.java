@@ -52,6 +52,7 @@ public class ModelConstructor implements Runnable
 	{
 		if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE  )
 		{
+			sessMan.updateCalibratedCameras(cally.getCalibrated());
 			if(!cally.isCalibrated())
 			{
 				boolean changedPosition = cally.processBlock(iBlock);

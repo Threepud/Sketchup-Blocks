@@ -1,10 +1,13 @@
 package sketchupblocks.base;
 
+import java.util.ArrayList;
+
 import processing.core.PApplet;
 import sketchupblocks.database.Block;
 import sketchupblocks.database.BlockDatabase;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.database.UserBlock;
+import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.gui.Menu;
 import sketchupblocks.gui.ModelViewer;
 import sketchupblocks.math.Vec3;
@@ -133,6 +136,12 @@ public class SessionManager
 		}
     }
     
+    public void updateCalibratedCameras(boolean[] calibrated)
+    {
+    	//TODO: Replace with listener stuff...
+    	menu.updateCalibratedCameras(calibrated);
+    }
+    
     public void updateCameraPosition(int cameraID, Vec3 camPosition)
     {
     	cameraPositions[cameraID] = camPosition;
@@ -189,9 +198,40 @@ public class SessionManager
       
     }
     
+    public boolean checkModelExists()
+    {
+    	try 
+		{
+			Model tempModel;
+			tempModel = lobby.getModel();
+			ArrayList<ModelBlock> tempArr = new ArrayList<>(tempModel.getBlocks());
+			
+			return !tempArr.isEmpty();
+		}
+		catch (ModelNotSetException e) 
+		{
+			System.out.println(e);
+			return false;
+		}
+    }
+    
     public void exportToFile()
     {
-      
+		try 
+		{
+			Model tempModel;
+			tempModel = lobby.getModel();
+			ArrayList<ModelBlock> tempArr = new ArrayList<>(tempModel.getBlocks());
+			
+			if(tempArr.isEmpty())
+				return;
+			
+			ColladaLoader.export(tempArr);
+		}
+		catch (ModelNotSetException e) 
+		{
+			System.out.println(e);
+		}
     }
     
     public void saveProject(int slotNumber)
