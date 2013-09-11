@@ -51,7 +51,7 @@ public class ModelViewer implements ModelChangeListener
 	private boolean zoomOut = false;
 	
 	//fiducial debug lines
-	private boolean camDebug = true;
+	private boolean camDebug = false;
 	private HashMap<String, Line> debugLines = new HashMap<>();
 	private int lineLength = 80;
 	private int lineRate = 1;
@@ -243,7 +243,6 @@ public class ModelViewer implements ModelChangeListener
 				start = Vec3.scalar(10, start);
 				end = Vec3.scalar(lineLength * 10, end);
 				end = Vec3.add(start, end);
-				System.out.println("END: " + end.toString());
 				window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
 			}
 		}
