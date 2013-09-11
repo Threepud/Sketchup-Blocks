@@ -52,6 +52,9 @@ public class Menu
 	private boolean[] calibratedCams;
 	private long sidebarStartTime;
 	private long sidebarTTL = 3000;
+	private PImage done;
+	private PImage busy;
+	private PFont sideFont;
 	
 	public Menu(SessionManager _sessMan, PApplet _window)
 	{
@@ -80,6 +83,10 @@ public class Menu
 				quadSize
 			);
 		}
+		
+		done = window.loadImage("./images/correct.png");
+		busy = window.loadImage("./images/wrong.png");
+		sideFont = window.createFont("Arial", 15);
 	}
 	
 	public void updateCalibratedCameras(boolean[] _calibrated)
@@ -99,6 +106,21 @@ public class Menu
 		switch(cBlock.type)
 		{
 			case EXPORT:
+				if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
+				{
+					showPopup = true;
+					if(sessMan.checkModelExists())
+						showPopup = true;
+					else
+					{
+						//show warning message
+					}
+				}
+				else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
+				{
+					showPopup = false;
+					popupStart = -1;
+				}
 				break;
 			case SPECTATE:
 				break;
@@ -159,25 +181,21 @@ public class Menu
 			}
 			else if(System.currentTimeMillis() - popupStart > Settings.commandWaitTime)
 			{
+				showPopup = false;
 				popupStart = -1;
-				//TODO: fire command
+				sessMan.exportToFile();
+				return;
 			}
 		
 			//draw popup base
-			window.fill(255);
+			window.fill(0, 0, 0, 150);
 			window.noStroke();
 			window.rectMode(PConstants.CENTER);
-			window.rect(window.width / 2, window.height / 2, 400, 280, 5);
-			
-			//draw popup outline
-			window.noFill();;
-			window.stroke(100);
-			window.rectMode(PConstants.CENTER);
-			window.rect(window.width / 2, window.height / 2, 390, 270, 5);
+			window.rect(window.width / 2, window.height / 2, 400, 280);
 			
 			//draw text
-			window.stroke(200);
-			window.fill(0);
+			//window.stroke(255);
+			window.fill(255);
 			window.textFont(headingFont);
 			window.textAlign(PConstants.CENTER);
 			window.text("Sketchup Blocks", window.width / 2, (window.height / 2) - 80);
@@ -208,22 +226,36 @@ public class Menu
 					slide--;
 			}
 			
+			window.textFont(sideFont);
+			
 			//draw sidebar base
 			window.fill(255);
 			window.noStroke();
 			window.rectMode(PConstants.CENTER);
-			window.rect(slide + (sidebarWidth / 2) - 10, (sidebarHeight / 2) - 10, sidebarWidth, sidebarHeight, 5);
+			window.rect(slide + (sidebarWidth / 2) - 10, (sidebarHeight / 2) - 10, sidebarWidth, sidebarHeight);
 			
 			for(int x = 0; x < camBases.length; ++x)
 			{
 				PShape quad = camBases[x];
 				
 				if(slide != 0)
-					quad.translate(slide, 0);
+					quad.translate(-1, 0);
 				
-				//find out which cameras have been calibrated (calibratedCams)
+				if(calibratedCams == null)
+					quad.setTexture(busy);
+				else
+				{
+					if(calibratedCams[x])
+						quad.setTexture(done);
+					else
+						quad.setTexture(busy);
+				}
+				
+				quad.setTextureMode(PConstants.NORMAL);
+				quad.setTextureUV(0, quad.width, quad.height);
+				
 				quad.setFill(window.color(255));
-				quad.setStroke(window.color(200));
+				quad.setStroke(window.color(255));
 				window.shape(quad);
 				
 				window.stroke(100);
