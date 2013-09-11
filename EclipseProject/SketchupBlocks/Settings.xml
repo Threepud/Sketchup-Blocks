@@ -2,11 +2,7 @@
 <Settings>
 	<System>
 		<VersionNumber>0.8</VersionNumber>
-<<<<<<< HEAD
 		<DebugVerbose>0</DebugVerbose>
-=======
-		<DebugVerbose>1</DebugVerbose>
->>>>>>> sidebar
 	</System>
 	<Cameras>
 		<NumberOfCameras>3</NumberOfCameras>
