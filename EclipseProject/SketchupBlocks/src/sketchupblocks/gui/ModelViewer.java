@@ -2,6 +2,7 @@ package sketchupblocks.gui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import processing.core.*;
 import processing.event.*;
@@ -52,7 +53,10 @@ public class ModelViewer implements ModelChangeListener
 	//fiducial debug lines
 	private boolean camDebug = true;
 	private HashMap<String, Line> debugLines = new HashMap<>();
-	private int lineLength = 5;
+	private int lineLength = 80;
+	private int lineRate = 1;
+	private boolean lineShorter = false;
+	private boolean lineLonger = false;
 	
 	//transparent construction floor
 	private boolean alphaBlendFloor = false;
@@ -220,6 +224,12 @@ public class ModelViewer implements ModelChangeListener
 	
 	private void drawDebugLines()
 	{
+		//TODO: remove me
+		if(lineShorter)
+			lineLength -= lineRate;
+		if(lineLonger)
+			lineLength += lineRate;
+		
 		window.pushMatrix();
 		window.scale(1f);
 		if(camDebug)
@@ -228,11 +238,12 @@ public class ModelViewer implements ModelChangeListener
 			for(Line line: new ArrayList<Line>(debugLines.values()))
 			{
 				Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
-				Vec3 end = new Vec3(lineLength * line.direction.y,
-									-lineLength * line.direction.z,
-									lineLength * line.direction.x);
+				Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
+				
 				start = Vec3.scalar(10, start);
-				end = Vec3.scalar(10, end);
+				end = Vec3.scalar(lineLength * 10, end);
+				end = Vec3.add(start, end);
+				System.out.println("END: " + end.toString());
 				window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
 			}
 		}
@@ -269,7 +280,7 @@ public class ModelViewer implements ModelChangeListener
 	{
 		changeTarget();
 		
-		if(zoomIn && cameraHeight < minHeight)
+		if(zoomIn)// && cameraHeight < minHeight)
 		{
 			cameraHeight += zoomVel;
 			cameraRadius -= zoomVel;
@@ -352,6 +363,20 @@ public class ModelViewer implements ModelChangeListener
 			{
 				if(e.getAction() == KeyEvent.RELEASE)
 					alphaBlendFloor = !alphaBlendFloor;
+			}
+			else if(e.getKey() == '[')
+			{
+				if(e.getAction() == KeyEvent.PRESS)
+					lineShorter = true;
+				else if(e.getAction() == KeyEvent.RELEASE)
+					lineShorter = false;
+			}
+			else if(e.getKey() == ']')
+			{
+				if(e.getAction() == KeyEvent.PRESS)
+					lineLonger = true;
+				else if(e.getAction() == KeyEvent.RELEASE)
+					lineLonger = false;
 			}
 		}
 	}
