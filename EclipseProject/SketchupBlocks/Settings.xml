@@ -2,7 +2,7 @@
 <Settings>
 	<System>
 		<VersionNumber>0.8</VersionNumber>
-		<DebugVerbose>0</DebugVerbose>
+		<DebugVerbose>-10</DebugVerbose>
 	</System>
 	<Cameras>
 		<NumberOfCameras>3</NumberOfCameras>
