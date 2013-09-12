@@ -40,6 +40,6 @@
 	<DebugRecording>
 		<LiveData>false</LiveData>
 		<RecordingInputFilename>debugOutput(Measurements)/output</RecordingInputFilename>
-		<TimeDelay>false</TimeDelay>
+		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
 </Settings>
