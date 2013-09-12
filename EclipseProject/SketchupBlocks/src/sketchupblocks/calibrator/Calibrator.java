@@ -88,8 +88,8 @@ public class Calibrator
 		settings.tester = null;
 		settings.creator = new ParticleCreator(4,0,100);
 		
-		settings.particleCount = 100;
-		settings.iterationCount= 2000;
+		settings.particleCount = 200;
+		settings.iterationCount= 3000;
 		
 		settings.ringTopology = true;
 		settings.ringSize = 1;
@@ -97,7 +97,7 @@ public class Calibrator
 		settings.socialStart = 0.72;
 		settings.cognitiveStart = 0.72;
 		settings.momentum = 1.4;
-		settings.MaxComponentVelocity = 1;
+		settings.MaxComponentVelocity = 0.51;
 		
 		ParticleSystem system = new ParticleSystem(settings);
 		
@@ -111,12 +111,12 @@ public class Calibrator
 		settings.tester = null;
 		settings.creator = new ParticleCreator(3,-100,100);
 		settings.ringSize = 10;
-		settings.particleCount = 20;
-		settings.iterationCount= 2000;
+		settings.particleCount = 200;
+		settings.iterationCount= 3000;
 		settings.socialStart = 0.72;
 		settings.cognitiveStart = 0.72;
 		settings.momentum = 1.4;
-		settings.MaxComponentVelocity = 1;		
+		settings.MaxComponentVelocity = 0.51;		
 
 
 		system = new ParticleSystem(settings);

@@ -85,7 +85,7 @@ public class RotationMatrixCalculator
         
         
         Vec3 res = new Vec3(center);
-        res = Vec3.scalar(1.0/3.0, res);
+        res = Vec3.scalar(1.0/points.length, res);
         return res;
     }
 }

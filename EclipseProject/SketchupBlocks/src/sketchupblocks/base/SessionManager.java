@@ -248,6 +248,11 @@ public class SessionManager
     	sarah.setDebugLines(IDS, lines);
     }
     
+    public void debugPoints(String[] IDS, Vec3[] lines)
+    {
+    	
+    }
+    
     public void drawGUI()
     {
     	sarah.drawModel();
