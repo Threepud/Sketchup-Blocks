@@ -57,7 +57,14 @@ public class CalibrationTest
 		block.blockId = 60;
 		
 		InputBlock input = new InputBlock(block,event);
-		cally.processBlock(input);
+		try
+		{
+			cally.processBlock(input);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	
 	 //61
 		event = new CameraEvent();
@@ -75,7 +82,14 @@ public class CalibrationTest
 		block.blockId = 61;
 		
 		input = new InputBlock(block,event);
-		cally.processBlock(input);
+		try
+		{
+			cally.processBlock(input);
+		}
+		catch(Exception e)
+		{
+			
+		}
 	//62
 		event = new CameraEvent();
 		event.x =  0.464791f;
@@ -92,7 +106,14 @@ public class CalibrationTest
 		block.blockId = 62;
 		
 		input = new InputBlock(block,event);
-		cally.processBlock(input);
+		try
+		{
+			cally.processBlock(input);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	//63
 		event = new CameraEvent();
 		event.x = 0.3637672f;
@@ -109,7 +130,14 @@ public class CalibrationTest
 		block.blockId = 63;
 		
 		input = new InputBlock(block,event);
-		cally.processBlock(input);
+		try
+		{
+			cally.processBlock(input);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		assertTrue("Is not calibrated",cally.isCalibrated());
 	    Vec3 camPosition = cally.cameraPositions[0];
 	    assertTrue("X component differs by "+Math.abs(camPosition.x - 22.5) ,Math.abs(camPosition.x - 22.5) < 5);
