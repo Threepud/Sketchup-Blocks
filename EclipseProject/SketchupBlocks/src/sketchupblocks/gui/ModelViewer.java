@@ -192,7 +192,7 @@ public class ModelViewer implements ModelChangeListener
 		window.pointLight(200, 200, 200, 100, -1000, 400);
 		window.ambientLight(50, 50, 50);
 		
-		window.background(0);
+		window.background(50);
 		
 		drawDebugLines();
 		drawDebugPoints();

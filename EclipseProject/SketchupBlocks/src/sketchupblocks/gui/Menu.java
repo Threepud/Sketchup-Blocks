@@ -127,29 +127,35 @@ public class Menu
 	
 	public void handleInput(CommandBlock cBlock, CameraEvent cEvent)
 	{
-		switch(cBlock.type)
+		if(calibrated)
 		{
-			case EXPORT:
-				if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
-				{
-					exportPopup = true;
-					if(sessMan.checkModelExists())
-						exportPopup = true;
-					else
+			switch(cBlock.type)
+			{
+				case EXPORT:
+					if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
 					{
-						//show warning message
+						if(sessMan.checkModelExists())
+						{
+							exportPopup = true;
+							showLoadingPopup = true;
+						}
+						else
+						{
+							//show warning message
+						}
 					}
-				}
-				else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
-				{
-					exportPopup = false;
-					popupStart = -1;
-				}
-				break;
-			case SPECTATE:
-				break;
-			default:
-				System.err.println("Command not yet supported.");
+					else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
+					{
+						showLoadingPopup = false;
+						exportPopup = false;
+						popupStart = -1;
+					}
+					break;
+				case SPECTATE:
+					break;
+				default:
+					System.err.println("Command not yet supported.");
+			}
 		}
 	}
 	
