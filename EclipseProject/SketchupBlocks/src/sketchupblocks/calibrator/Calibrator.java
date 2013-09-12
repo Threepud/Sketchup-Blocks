@@ -1,7 +1,12 @@
 package sketchupblocks.calibrator;
 import sketchupblocks.base.InputBlock;
 import sketchupblocks.base.Settings;
+import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
+import sketchupblocks.math.nonlinearmethods.CP;
+import sketchupblocks.math.nonlinearmethods.ErrorFunction;
+import sketchupblocks.math.nonlinearmethods.Newton;
+import sketchupblocks.math.nonlinearmethods.SIS;
 
 
 public class Calibrator 
@@ -40,7 +45,7 @@ public class Calibrator
 		return true;
 	}
 	
-	public boolean processBlock(InputBlock iBlock)
+	public boolean processBlock(InputBlock iBlock) throws Exception
 	{
 		calibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][0] = iBlock.cameraEvent.x;
 		calibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][1] = iBlock.cameraEvent.y;
@@ -62,11 +67,11 @@ public class Calibrator
 		return false;	
 	}
 	
-	private void calculateCameraPosition(int cameraID)
+	private void calculateCameraPosition(int cameraID) throws Exception
 	{
 		if(Settings.verbose >= 3)
 			System.out.println("Camera busy calibrating");
-		ParticleSystemSettings settings = new ParticleSystemSettings();
+		
 		double [] lengths = new double[6];
 		
 		lengths[0] = Settings.landmarks[0].distance(Settings.landmarks[1]);
@@ -77,55 +82,29 @@ public class Calibrator
 		lengths[5] = Settings.landmarks[1].distance(Settings.landmarks[3]);
 		
 		double [] angles = new double[6];
-	    angles[0] = getAngle(cameraID, 0, 1);//Math.sqrt(sqr((calibrationDetails[cameraID][0][0]- calibrationDetails[cameraID][1][0])*fov)+sqr((calibrationDetails[cameraID][0][1]- calibrationDetails[cameraID][1][1])*(fov/aspect))); 
-	    angles[1] = getAngle(cameraID, 1, 2);//Math.sqrt(sqr((calibrationDetails[cameraID][1][0]- calibrationDetails[cameraID][2][0])*fov)+sqr((calibrationDetails[cameraID][1][1]- calibrationDetails[cameraID][2][1])*(fov/aspect)));
-	    angles[2] = getAngle(cameraID, 2, 3);//Math.sqrt(sqr((calibrationDetails[cameraID][2][0]- calibrationDetails[cameraID][3][0])*fov)+sqr((calibrationDetails[cameraID][2][1]- calibrationDetails[cameraID][3][1])*(fov/aspect)));
-	    angles[3] = getAngle(cameraID, 3, 0);//Math.sqrt(sqr((calibrationDetails[cameraID][3][0]- calibrationDetails[cameraID][0][0])*fov)+sqr((calibrationDetails[cameraID][3][1]- calibrationDetails[cameraID][4][1])*(fov/aspect)));
-	    angles[4] = getAngle(cameraID, 0, 2);//Math.sqrt(sqr((calibrationDetails[cameraID][0][0]- calibrationDetails[cameraID][2][0])*fov)+sqr((calibrationDetails[cameraID][0][1]- calibrationDetails[cameraID][2][1])*(fov/aspect)));
-	    angles[5] = getAngle(cameraID, 1, 3);//Math.sqrt(sqr((calibrationDetails[cameraID][1][0]- calibrationDetails[cameraID][3][0])*fov)+sqr((calibrationDetails[cameraID][1][1]- calibrationDetails[cameraID][3][1])*(fov/aspect)));
-		
-		settings.eval = new TriangleEval(lengths,angles);
-		settings.tester = null;
-		settings.creator = new ParticleCreator(4,0,100);
-		
-		settings.particleCount = 200;
-		settings.iterationCount= 3000;
-		
-		settings.ringTopology = true;
-		settings.ringSize = 1;
-		
-		settings.socialStart = 0.72;
-		settings.cognitiveStart = 0.72;
-		settings.momentum = 1.4;
-		settings.MaxComponentVelocity = 0.51;
-		
-		ParticleSystem system = new ParticleSystem(settings);
-		
-		Particle bestabc = null;
-		
-		bestabc = system.go(); // a b c d 
+	    angles[0] = getAngle(cameraID, 0, 1); 
+	    angles[1] = getAngle(cameraID, 1, 2);
+	    angles[2] = getAngle(cameraID, 2, 3);
+	    angles[3] = getAngle(cameraID, 3, 0);
+	    angles[4] = getAngle(cameraID, 0, 2);
+	    angles[5] = getAngle(cameraID, 1, 3);
+
+	    
+	    SIS radiiFunction = new SIS(lengths, angles);
+	    ErrorFunction radiiErrorFunction = new ErrorFunction(radiiFunction);
+	    double[] radiiX0 = new double[]{60, 60, 60, 60};
+	    Matrix radii = Newton.go(new Matrix(radiiX0), radiiErrorFunction);
+	    
+	    CP camPosFunction = new CP(Settings.landmarks, radii.toArray());
+	    ErrorFunction camPosErrorFunction = new ErrorFunction(camPosFunction);
+	    double[] camPosX0 = new double[]{1, 1, 1};
+	    Matrix camPos = Newton.go(new Matrix(camPosX0), camPosErrorFunction);
 			
-		settings.eval = new SphereEval(bestabc.bestPosition[0],bestabc.bestPosition[1],
-				bestabc.bestPosition[2],bestabc.bestPosition[3],Settings.landmarks[0],
-					Settings.landmarks[1],Settings.landmarks[2],Settings.landmarks[3]);
-		settings.tester = null;
-		settings.creator = new ParticleCreator(3,-100,100);
-		settings.ringSize = 10;
-		settings.particleCount = 200;
-		settings.iterationCount= 3000;
-		settings.socialStart = 0.72;
-		settings.cognitiveStart = 0.72;
-		settings.momentum = 1.4;
-		settings.MaxComponentVelocity = 0.51;		
-
-
-		system = new ParticleSystem(settings);
-                
-		Particle best = null;
-		
-		best = system.go(); // x y z
-		
-		cameraPositions[cameraID] = new Vec3(best.bestPosition[0],best.bestPosition[1],best.bestPosition[2]);	
+	    if (Settings.verbose > 3)
+    	{
+	    	System.out.println(camPos.toVec3());
+    	}
+	    cameraPositions[cameraID] = camPos.toVec3();
 		calibrated[cameraID] = true;
 	}
 	
@@ -133,7 +112,7 @@ public class Calibrator
 	{
 		double fov = Settings.cameraSettings[camID].fov;
 		double aspect = Settings.cameraSettings[camID].aspectRatio;
-		return Math.sqrt(sqr((calibrationDetails[camID][one][0]- calibrationDetails[camID][two][0])*fov)+sqr((calibrationDetails[camID][one][1]- calibrationDetails[camID][two][1])*(fov/aspect))); 
+		return Math.toRadians(Math.sqrt(sqr((calibrationDetails[camID][one][0]- calibrationDetails[camID][two][0])*fov)+sqr((calibrationDetails[camID][one][1]- calibrationDetails[camID][two][1])*(fov/aspect)))); 
 	}
 	
 	private double sqr(double val)

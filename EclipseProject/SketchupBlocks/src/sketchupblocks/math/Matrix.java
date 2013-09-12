@@ -254,6 +254,19 @@ public class Matrix
         return new Matrix(data);
     }
     
+    public double norm()
+    {
+        if (cols != 1)
+        {
+            System.out.println("Norm for multi-col matrix is not supported");
+            throw new RuntimeException();
+        }
+        double sum = 0;
+        for (int k = 0; k < rows; k++)
+            sum += data[k][0]*data[k][0];
+        return Math.sqrt(sum);
+    }
+    
     public double[] toArray() throws UnexpectedArrayConversionException
     {
         if (cols != 1)

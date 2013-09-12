@@ -2,7 +2,7 @@
 <Settings>
 	<System>
 		<VersionNumber>0.8</VersionNumber>
-		<DebugVerbose>0</DebugVerbose>
+		<DebugVerbose>-10</DebugVerbose>
 	</System>
 	<Cameras>
 		<NumberOfCameras>3</NumberOfCameras>
@@ -40,6 +40,6 @@
 	<DebugRecording>
 		<LiveData>false</LiveData>
 		<RecordingInputFilename>debugOutput(Measurements)/output</RecordingInputFilename>
-		<TimeDelay>false</TimeDelay>
+		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
 </Settings>

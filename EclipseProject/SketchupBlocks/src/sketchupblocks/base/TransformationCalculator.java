@@ -4,7 +4,7 @@ import sketchupblocks.math.SVDecomposer;
 import sketchupblocks.math.Vec3;
 
 
-public class RotationMatrixCalculator 
+public class TransformationCalculator 
 {
 	public static Matrix[] calculateTransformationMatrices(Vec3[] pointsA, Vec3[] pointsB)
 	{

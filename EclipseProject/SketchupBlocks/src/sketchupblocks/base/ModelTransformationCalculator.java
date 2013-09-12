@@ -9,7 +9,7 @@ import sketchupblocks.math.RotationMatrix4D;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Vec4;
 
-public class ModelCenterCalculator 
+public class ModelTransformationCalculator 
 {
 
 	private static double ERROR_MARGIN = 0.5; //Of square difference
@@ -27,12 +27,12 @@ public class ModelCenterCalculator
 						modelFidCoords[k] = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[k]]);
 					}
 					
-					Matrix[] transformMatrices = RotationMatrixCalculator.calculateTransformationMatrices(modelFidCoords, positions);
-					//return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
-					Matrix m = Matrix.multiply(transformMatrices[1],  Matrix.identity(4)); 
+					Matrix[] transformMatrices = TransformationCalculator.calculateTransformationMatrices(modelFidCoords, positions);
+					return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
+					/*Matrix m = Matrix.multiply(transformMatrices[1],  Matrix.identity(4)); 
 					if (Settings.verbose > 3)
 						System.out.println("TRANSFORMATION: "+m);
-					return m;
+					return m;*/
 				}
 
 				Vec3 m1 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[0]]); 
@@ -66,7 +66,7 @@ public class ModelCenterCalculator
 				//Now we have 3 points, so we can continue from there....
 				//Get the rotation between the model points and fiducial points
 				//Rotates world fiducials positions to fit model positions
-				Matrix R = RotationMatrixCalculator.calculateTransformationMatrices(new Vec3[]{w1o, w2o, offsetPoint},new Vec3[]{m1o, m2o, oOffsetPoint})[0];
+				Matrix R = TransformationCalculator.calculateTransformationMatrices(new Vec3[]{w1o, w2o, offsetPoint},new Vec3[]{m1o, m2o, oOffsetPoint})[0];
 				//(R*A.')'
 				
 				//oOffset = x
