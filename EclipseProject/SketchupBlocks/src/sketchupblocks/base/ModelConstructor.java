@@ -50,30 +50,38 @@ public class ModelConstructor implements Runnable
 	  
 	public void receiveBlock(InputBlock iBlock)
 	{
-		if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE  )
+		try
 		{
-			sessMan.updateCalibratedCameras(cally.getCalibrated());
-			if(!cally.isCalibrated())
+			if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE  )
 			{
-				boolean changedPosition = cally.processBlock(iBlock);
-				calibrated = cally.isCalibrated();
-				//Propagate updated camera positions to the appropriate parties.
-				if (Settings.verbose >= 3)
-					System.out.println("Calibrated ? "+calibrated);
-				if (Settings.verbose > 3)
-					System.out.println("changed: "+changedPosition);
-				if (changedPosition && calibrated)
+				sessMan.updateCalibratedCameras(cally.getCalibrated());
+				if(!cally.isCalibrated())
 				{
-					for (int k = 0; k < Settings.numCameras; k++)
+					boolean changedPosition = cally.processBlock(iBlock);
+					calibrated = cally.isCalibrated();
+					//Propagate updated camera positions to the appropriate parties.
+					if (Settings.verbose >= 3)
+						System.out.println("Calibrated ? "+calibrated);
+					if (Settings.verbose > 3)
+						System.out.println("changed: "+changedPosition);
+					if (changedPosition && calibrated)
 					{
-						sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
+						for (int k = 0; k < Settings.numCameras; k++)
+						{
+							
+							sessMan.updateCameraPosition(k, cally.cameraPositions[k]);
+						}
 					}
 				}
 			}
+			else 
+			{
+				store(iBlock);
+			}
 		}
-		else 
+		catch(Exception e)
 		{
-			store(iBlock);
+			e.printStackTrace();
 		}
 		
 	}
@@ -318,9 +326,12 @@ public class ModelConstructor implements Runnable
 				
 			
 			Integer[] temp = new Integer[0];
-			Matrix transform = ModelCenterCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(temp));
+			Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(temp));
 			//Matrix transform = ModelCenterCalculator.getModelTransformationMatrix(upPass, sBlock, posPass, indexs);
-			
+			if (Settings.verbose > 2)
+			{
+				System.out.println("Transform: "+transform);
+			}
 			eddy.updateModel(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
 		}
 		else
