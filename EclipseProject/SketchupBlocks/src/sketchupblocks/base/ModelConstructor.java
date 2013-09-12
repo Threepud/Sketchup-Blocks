@@ -143,6 +143,7 @@ public class ModelConstructor implements Runnable
 				while(iterate.hasNext())
 				{
 					BlockInfo b = iterate.next();
+					if (b == null) continue;
 					double timePased = Math.abs(b.lastChange.getTime() - new Date().getTime());
 					if(b.ready() && calibrated && (timePased > changeWindow) )
 					{
@@ -152,10 +153,12 @@ public class ModelConstructor implements Runnable
 						b.fiducialMap.clear();
 					}
 				}
+				Thread.sleep(1);
 		
 			}
 			catch(Exception e)
 			{
+				e.printStackTrace();
 				//If the is a concurrent change an exception will be thrown. Then we simply try again.
 			}
 		}
@@ -223,6 +226,7 @@ public class ModelConstructor implements Runnable
 			}
 			if (Settings.verbose == 10)
 				catcher(fidCoordsM, lines, fids);
+			
 			//Bin should have enough information to get position.
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
 			Particle bestabc = null;
@@ -245,6 +249,12 @@ public class ModelConstructor implements Runnable
 				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
 				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
 			}
+			String[] IDP = new String[numFiducials];
+			for(int a = 0; a < IDP.length; ++a)
+				IDP[a] = ""+fids[a].fiducialsID;
+			sessMan.debugPoints(IDP, fiducialWorld);
+			
+			
 			
 			
 			/*
@@ -326,8 +336,8 @@ public class ModelConstructor implements Runnable
 		settings.tester = null;
 		settings.creator = new ParticleCreator(numFids,0,90);
 		
-		settings.particleCount = 160;
-		settings.iterationCount= 1600;
+		settings.particleCount = 32;
+		settings.iterationCount= 32000;
 		
 		settings.ringTopology = true;
 		settings.ringSize =1;
@@ -426,6 +436,7 @@ public class ModelConstructor implements Runnable
 			blockID = _smartBlock.blockId;
 			fiducialMap = new HashMap<CamFidIdentifier,Fiducial>();
 			smartBlock = _smartBlock;
+			lastChange = new Date();
 		}
 		
 		
