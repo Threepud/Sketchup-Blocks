@@ -42,9 +42,10 @@ public class ModelViewer implements ModelChangeListener
 	private double rotationDecrement = 0.003;
 	private double cameraHeight = -500;
 	private double cameraRadius = 700;
+	
 	private double zoomVel = 30;
 	private double maxHeight = -2000;
-	private double minHeight = -50;
+	private double minHeight = -100;
 	private boolean rotateLeft = false;
 	private boolean rotateRight = false;
 	private boolean zoomIn = false;
@@ -155,7 +156,13 @@ public class ModelViewer implements ModelChangeListener
 		window.camera((float)currentCamera.eye.x, (float)currentCamera.eye.y, (float)currentCamera.eye.z,
 				      (float)currentCamera.at.x, (float)currentCamera.at.y, (float)currentCamera.at.z,
 				      (float)currentCamera.up.x, (float)currentCamera.up.y, (float)currentCamera.up.z);
-			
+		
+		final float fov = PConstants.PI/3;
+		final float cameraZ = (float)(window.height/2.0) / (float)Math.tan(fov/2.0);
+		final float aspectR = (float)window.width / (float)window.height;
+		window.perspective(fov, aspectR, cameraZ/100.0f, cameraZ*100.0f);
+		
+		window.directionalLight(150, 150, 150, 0.2f, 0.8f, 0f);
 		window.pointLight(200, 200, 200, 100, -1000, 400);
 		window.ambientLight(50, 50, 50);
 		
@@ -168,10 +175,7 @@ public class ModelViewer implements ModelChangeListener
 	
 	private void drawConstructionFloor()
 	{
-		
 		window.pushMatrix();
-		
-		window.scale(5f, 1.0f, 5f);
 		
 		window.noStroke();
 		window.fill(window.color(255));
@@ -187,11 +191,14 @@ public class ModelViewer implements ModelChangeListener
 		window.textureMode(PConstants.NORMAL);
 		window.textureWrap(PConstants.REPEAT);
 		
-		window.vertex(-100, 0, -100, 0, 0);
-		window.vertex(100, 0, -100, 10, 0);
-		window.vertex(100, 0, 100, 10, 10);
-		window.vertex(-100, 0, 100, 0, 10);
+		final int point = 5000;
+		final int repeat = 100;
 		
+		window.vertex(-point, 0, -point, 0, 0);
+		window.vertex(point, 0, -point, repeat, 0);
+		window.vertex(point, 0, point, repeat, repeat);
+		window.vertex(-point, 0, point, 0, repeat);
+				
 		window.endShape(PConstants.CLOSE);
 		
 		window.popMatrix();
