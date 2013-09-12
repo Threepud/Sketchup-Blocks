@@ -2,8 +2,6 @@ package sketchupblocks.gui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
-
 import processing.core.*;
 import processing.event.*;
 import sketchupblocks.base.CameraEvent;
@@ -52,12 +50,20 @@ public class ModelViewer implements ModelChangeListener
 	private boolean zoomOut = false;
 	
 	//fiducial debug lines
-	private boolean camDebug = false;
+	private boolean showDebugLines = false;
 	private HashMap<String, Line> debugLines = new HashMap<>();
 	private int lineLength = 80;
 	private int lineRate = 1;
 	private boolean lineShorter = false;
 	private boolean lineLonger = false;
+	
+	//fiducial debug points
+	private boolean showDebugPoints = false;
+	private HashMap<String, Vec3> debugPointsMap = new HashMap<>();
+	
+	//debug model
+	private boolean showModel = true;
+	private boolean transparentModel = false;
 	
 	//transparent construction floor
 	private boolean alphaBlendFloor = false;
@@ -99,9 +105,29 @@ public class ModelViewer implements ModelChangeListener
 	
 	public void setDebugLines(String[] IDS, Line[] lines)
 	{
+		if(IDS.length != lines.length)
+		{
+			System.out.println("ERROR: Debug lines, lengths don't match.");
+			return;
+		}
+		
 		for(int x = 0; x < IDS.length; ++x)
 		{
 			debugLines.put(IDS[x], lines[x]);
+		}
+	}
+	
+	public void setDebugPoints(String[] IDS, Vec3[] points)
+	{
+		if(IDS.length != points.length)
+		{
+			System.out.println("ERROR: Debug points, lengths don't match.");
+			return;
+		}
+		
+		for(int x = 0; x < IDS.length; ++x)
+		{
+			debugPointsMap.put(IDS[x], points[x]);
 		}
 	}
 	
@@ -168,8 +194,9 @@ public class ModelViewer implements ModelChangeListener
 		
 		window.background(0);
 		
-		drawBlocks();
 		drawDebugLines();
+		drawDebugPoints();
+		drawBlocks();
 		drawConstructionFloor();
 	}
 	
@@ -206,34 +233,62 @@ public class ModelViewer implements ModelChangeListener
 	
 	private void drawBlocks()
 	{
-		window.pushMatrix();
-		window.noStroke();
-		window.fill(255);
-		window.scale(10, 10, 10);
-		
-		//draw block list
-		for(ModelBlock block: new ArrayList<ModelBlock>(blockMap.values()))
+		if(showModel)
 		{
-			if(block.type == ModelBlock.ChangeType.REMOVE)
-				System.out.println("Drawing removed block!");
+			window.pushMatrix();
+			window.noStroke();
+			if(transparentModel)
+				window.fill(255, 255, 255, 100);
+			else
+				window.fill(255);
+			window.scale(10, 10, 10);
 			
-			SmartBlock smartBlock = block.smartBlock;
-			window.beginShape(PConstants.TRIANGLES);
-			for(int x = 0; x < smartBlock.indices.length; ++x)
+			//draw block list
+			for(ModelBlock block: new ArrayList<ModelBlock>(blockMap.values()))
 			{
-				Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
-				vertex = Matrix.multiply(block.transformationMatrix, vertex.padVec3()).toVec3();
-				window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
+				if(block.type == ModelBlock.ChangeType.REMOVE)
+					System.out.println("Drawing removed block!");
+				
+				SmartBlock smartBlock = block.smartBlock;
+				window.beginShape(PConstants.TRIANGLES);
+				for(int x = 0; x < smartBlock.indices.length; ++x)
+				{
+					Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
+					vertex = Matrix.multiply(block.transformationMatrix, vertex.padVec3()).toVec3();
+					window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
+				}
+				
+				window.endShape();
 			}
+			window.popMatrix();
 			
-			window.endShape();
+			if(transparentModel)
+				window.fill(255);
 		}
-		window.popMatrix();
+	}
+	
+	private void drawDebugPoints()
+	{
+		if(showDebugPoints)
+		{
+			window.noStroke();
+			window.fill(0, 255, 0);
+			for(Vec3 point: debugPointsMap.values())
+			{
+				window.pushMatrix();
+				
+				point = Vec3.scalar(10, point);
+				window.translate((float)point.y, (float)-point.z, (float)point.x);
+				window.sphere(5);
+				
+				window.popMatrix();
+			}
+			window.fill(255);
+		}
 	}
 	
 	private void drawDebugLines()
 	{
-		//TODO: remove me
 		if(lineShorter)
 			lineLength -= lineRate;
 		if(lineLonger)
@@ -241,10 +296,10 @@ public class ModelViewer implements ModelChangeListener
 		
 		window.pushMatrix();
 		window.scale(1f);
-		if(camDebug)
+		if(showDebugLines)
 		{
 			window.stroke(255, 0, 0);
-			for(Line line: new ArrayList<Line>(debugLines.values()))
+			for(Line line: debugLines.values())
 			{
 				Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
 				Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
@@ -362,10 +417,30 @@ public class ModelViewer implements ModelChangeListener
 				if(e.getAction() == KeyEvent.RELEASE)
 					ColladaLoader.export(new ArrayList<ModelBlock>(blockMap.values()));
 			}
-			else if(e.getKey() == 'd')
+			else if(e.getKey() == 'm')
 			{
 				if(e.getAction() == KeyEvent.RELEASE)
-					camDebug = !camDebug;
+					showModel = !showModel;
+			}
+			else if(e.getKey() == 'm')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+					showModel = !showModel;
+			}
+			else if(e.getKey() == 'n')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+					transparentModel = !transparentModel;
+			}
+			else if(e.getKey() == 'l')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+					showDebugLines = !showDebugLines;
+			}
+			else if(e.getKey() == 'p')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+					showDebugPoints = !showDebugPoints;
 			}
 			else if(e.getKey() == 't')
 			{
