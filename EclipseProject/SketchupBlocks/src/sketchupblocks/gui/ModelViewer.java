@@ -257,6 +257,7 @@ public class ModelViewer implements ModelChangeListener
 				for(int x = 0; x < smartBlock.indices.length; ++x)
 				{
 					Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
+					//System.out.println(block.transformationMatrix);
 					vertex = Matrix.multiply(block.transformationMatrix, vertex.padVec3()).toVec3();
 					window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
 				}
