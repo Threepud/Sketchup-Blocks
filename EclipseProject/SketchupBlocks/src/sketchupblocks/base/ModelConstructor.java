@@ -17,6 +17,10 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Vec4;
+import sketchupblocks.math.nonlinearmethods.BPos;
+import sketchupblocks.math.nonlinearmethods.ErrorFunction;
+import sketchupblocks.math.nonlinearmethods.GradientDescent;
+import sketchupblocks.math.nonlinearmethods.Newton;
 import sketchupblocks.network.Lobby;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -131,12 +135,12 @@ public class ModelConstructor implements Runnable
 			* No need to clean up camera. They will always be there.
 			*/
 			
-			if(block.fiducialMap.isEmpty())
+			/*if(block.fiducialMap.isEmpty())
 			{
 				blockMap.remove(iBlock.block.blockId);
 				if (iBlock.block instanceof SmartBlock)
 					eddy.updateModel(new ModelBlock((SmartBlock)iBlock.block, null, ModelBlock.ChangeType.REMOVE));
-			}
+			}*/
 		}
 	}
 	
@@ -156,9 +160,9 @@ public class ModelConstructor implements Runnable
 					if(b.ready() && calibrated && (timePased > changeWindow) )
 					{
 						if (Settings.verbose >= 3)
-							System.out.println("Processing "+b.fiducialMap.size()+" number of lines after "+timePased);
+							System.err.println("Processing "+b.fiducialMap.size()+" number of lines after "+timePased);
 						processBin(b);
-						b.fiducialMap.clear();
+						//b.fiducialMap.clear();
 					}
 				}
 				Thread.sleep(1);
@@ -200,12 +204,9 @@ public class ModelConstructor implements Runnable
 			sessMan.debugLines(IDS, lines);
 			
 			Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
-			if (!(bin.smartBlock instanceof SmartBlock))
-			{
-				System.out.println("Attempting to process command block, but this feature is not yet supported");
-				return;
-			}
 			
+			
+			//Generate list of the indices (into the smartblock's associatedFiducials list) of the observed fiducials.
 			SmartBlock sBlock =(SmartBlock)(bin.smartBlock);
 			ArrayList<Integer> fiducialIndices = new ArrayList<Integer>();
 			
@@ -225,6 +226,7 @@ public class ModelConstructor implements Runnable
 				{
 					throw new RuntimeException("Smart Block fiducials don't match");
 				}
+				
 				fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
 				if (k != 0 && Settings.verbose > 2)
 				{
@@ -232,31 +234,24 @@ public class ModelConstructor implements Runnable
 					System.out.println("Distance b/w "+(k-1)+" and "+(k)+" is "+fidCoordsM[k].distance(fidCoordsM[k-1]));
 				}
 			}
-			if (Settings.verbose == 10)
-				catcher(fidCoordsM, lines, fids);
 			
 			//Bin should have enough information to get position.
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
 			Particle bestabc = null;
-			//System.out.println("Calculated m's "+bin.blockID+" num fids: " + fids.length);	
 			bestabc = system.go();
 			
-				/*for(int l = 0 ; l < bestabc.bestPosition.length ; l++)
-				{
-					System.out.print(bestabc.bestPosition[l] + " " );
-				}
-				System.out.println();*/
+			
 			
 			Vec3 [] fiducialWorld = new Vec3[numFiducials];
 			Vec3 [] upRotWorld = new Vec3[numFiducials];
 			for(int k = 0 ; k < numFiducials ; k++)
 			{
 				fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-				//Is ons absolutely convinced dat ons die rotations so kan gebruik?
 				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation);	
 				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
 				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
 			}
+
 			String[] IDP = new String[numFiducials];
 			for(int a = 0; a < IDP.length; ++a)
 				IDP[a] = fids[a].camID + "," + fids[a].fiducialsID;
@@ -264,70 +259,88 @@ public class ModelConstructor implements Runnable
 			
 			
 			
+			/************************************************************/
+		/*	ArrayList<Integer> uniqueFidID = new ArrayList<Integer>();
+			ArrayList<Integer> uniqueIndices = new ArrayList<Integer>();
+			ArrayList<Integer> uniqueFidBlockIndex = new ArrayList<Integer>();
+			for (int k = 0; k < numFiducials; k++)
+			{
+				System.out.println(fids[k].fiducialsID);
+				if (!uniqueFidID.contains(fids[k].fiducialsID))
+				{
+					uniqueIndices.add(k);
+					uniqueFidID.add(fids[k].fiducialsID);
+					uniqueFidBlockIndex.add(fiducialIndices.get(k));
+				}
+			}
+			Vec3[] camPos = new Vec3[uniqueIndices.size()];
+			Vec3[] dirVecs = new Vec3[uniqueIndices.size()];
+			double[] dists = new double[uniqueIndices.size()*(uniqueIndices.size()-1)/2];
 			
-			/*
-			* upRotWorld -- the rotations as viewed by the camera
-			* fiducialWorld -- Fiducial locations
-			* lines[k].direction -- the k'th fiducial view vector
-			* sBlock -- The smart block
+			for (int k = 0; k < uniqueIndices.size(); k++)
+			{
+				camPos[k] = cally.cameraPositions[fids[uniqueIndices.get(k)].camID];
+				dirVecs[k] = lines[uniqueIndices.get(k)].direction;
+			}
+			int distsIndex = 0;
+			for (int k = 0; k < uniqueIndices.size()-1; k++)
+			{
+				for (int i = k+1; i < uniqueIndices.size(); i++)
+				{
+					dists[distsIndex++] = fidCoordsM[uniqueIndices.get(k)].distance(fidCoordsM[uniqueIndices.get(i)]);
+				}
+			}
+			double[] x0 = new double[uniqueIndices.size()];
+			for (int k = 0; k < x0.length; k++)
+				x0[k] = 50;
+			
+			if (Settings.verbose < 0)
+			{
+				System.out.println("Num unique observed fiducials "+uniqueFidID.size());
+				System.out.println("Camera positions: ");
+				for (int k = 0; k < camPos.length; k++)
+					System.out.println("\t"+camPos[k]);
+				System.out.println("Direction vectors: ");
+				for (int k = 0; k < dirVecs.length; k++)
+					System.out.println("\t"+dirVecs[k]);
+				System.out.println("Distances: ");
+				for (int k = 0; k < dists.length; k++)
+					System.out.println("\t"+dists[k]);
+				System.out.println("UNIQUENESS");
+				for (int k = 0; k < uniqueFidID.size(); k++)
+				{
+					System.out.println("ID: "+uniqueFidID.get(k)+" has index "+uniqueIndices.get(k));
+				}
+			}
+			
+			BPos blockPosFunction = new BPos(uniqueIndices.size(), camPos, dirVecs, dists);
+			ErrorFunction blockPosErrorFunction = new ErrorFunction(blockPosFunction);
+			Matrix blockPos = GradientDescent.go(x0, blockPosErrorFunction);
+			
+			try
+			{
+				double[] lambdas = blockPos.toArray();
+				fiducialWorld = new Vec3[lambdas.length];
+				for (int k = 0; k < lambdas.length; k++)
+					fiducialWorld[k] = Vec3.add(camPos[k], Vec3.scalar(lambdas[k], dirVecs[k]));
+				
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				return;
+			}	
 			*/
 			
-			/*
-			 * Now colapse the arrays
-			 */
-			/*Integer indexs[] = new Integer[numFiducials];
-			int fidIDs []  = new int[numFiducials];
-			int [] addCount = new int[numFiducials];
-			Vec3 [] upPass = new Vec3[numFiducials];
-			Vec3 [] posPass = new Vec3[numFiducials];
-			int count= 1;
-			//setup
-			indexs[0] = fiducialIndices.get(0) ;
-			upPass[0] = upRotWorld[0];
-			posPass[0] = fiducialWorld[0];
-			fidIDs[0] = fids[0].fiducialsID;
-			addCount[0] =1;
-			
-			for(int k = 1 ; k < numFiducials ; k++)
-				{
-					boolean match = false;
-					int l;
-					for(l = 0 ; l < count ; l++)
-						{
-							if(fidIDs[l] == fids[k].fiducialsID)
-							{
-								match = true;
-								break;
-							}	
-						}
-					if(match)
-					{
-						addCount[l]++;
-						upPass[l] = Vec3.add(upPass[l],upRotWorld[k] );
-						posPass[l] = Vec3.add(posPass[l],fiducialWorld[k] );
-					}
-					else
-					{
-						indexs[count] = fiducialIndices.get(k)  ;
-						upPass[count] = upRotWorld[k];
-						posPass[count] = fiducialWorld[k];
-						fidIDs[count] = fids[k].fiducialsID;
-						addCount[count] =1;
-						count++;
-					}
-						
-				}
-					
-				for(int k = 1 ; k < count ; k++)		
-				{
-					upPass[k] = Vec3.scalar(1.0/addCount[k], upPass[k]);
-					posPass[k] = Vec3.scalar(1.0/addCount[k], posPass[k]);
-				}*/
-				
+			IDP = new String[fiducialWorld.length];
+			for(int a = 0; a < IDP.length; ++a)
+				IDP[a] = ""+fids[a].fiducialsID;
+			sessMan.debugPoints(IDP, fiducialWorld);
 			
 			Integer[] temp = new Integer[0];
 			Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(temp));
-			//Matrix transform = ModelCenterCalculator.getModelTransformationMatrix(upPass, sBlock, posPass, indexs);
+			//Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, uniqueFidBlockIndex.toArray(temp));
+			
 			if (Settings.verbose > 2)
 			{
 				System.out.println("Transform: "+transform);
@@ -348,7 +361,7 @@ public class ModelConstructor implements Runnable
 		settings.creator = new ParticleCreator(numFids,0,90);
 		
 		settings.particleCount = 32;
-		settings.iterationCount= 32000;
+		settings.iterationCount= 640;
 		
 		settings.ringTopology = true;
 		settings.ringSize =1;
@@ -356,36 +369,8 @@ public class ModelConstructor implements Runnable
 		settings.socialStart = 0.72;
 		settings.cognitiveStart = 0.72;
 		settings.momentum = 1.4;
-		settings.MaxComponentVelocity = 0.51;
+		settings.MaxComponentVelocity = 0.75;
 		return settings;
-	}
-	
-	private void catcher(Vec3[] fidCoordsM, Line[] lines, BlockInfo.Fiducial[] fids)
-	{
-		if (lines.length != fids.length)
-			System.out.println("894032jkfadsfajdsklfd;lsajka;fjlcdskljk;adfs;ljkfdsalj;kdasfj;kldfaskjl;fads");
-		for (int k = 0; k < fids.length-1; k++)
-		{
-			for (int i = k+1; i < fids.length; i++)
-			{
-				if (fids[k].camID != fids[i].camID && fids[k].fiducialsID == fids[i].fiducialsID)
-				{
-					System.out.println("============================================================================");
-					System.out.println("Fiducial "+fids[k].fiducialsID);
-					System.out.println("Camera : "+fids[k].camID);
-					System.out.println(cally.cameraPositions[fids[k].camID]);
-					System.out.println("Direction: ");
-					System.out.println(lines[k].direction);
-					
-					System.out.println("----------------------------------------------------------------------------");
-					System.out.println("Camera : "+fids[i].camID);
-					System.out.println(cally.cameraPositions[fids[i].camID]);
-					System.out.println("Direction: ");
-					System.out.println(lines[i].direction);
-					System.out.println("============================================================================");
-				}
-			}
-		}
 	}
 	
 	private double getAngle(int camID, int lm, double x, double y)
@@ -435,7 +420,7 @@ public class ModelConstructor implements Runnable
 	class BlockInfo
 	{
 		int minEvents = 3;
-		int LIFETIME = 2000;	//ms
+		int LIFETIME = 500;	//ms
 		public int blockID;
 		public Block smartBlock;
 		public Date lastChange;
@@ -551,3 +536,62 @@ public class ModelConstructor implements Runnable
 		}
 	}	
 }
+
+/*
+* upRotWorld -- the rotations as viewed by the camera
+* fiducialWorld -- Fiducial locations
+* lines[k].direction -- the k'th fiducial view vector
+* sBlock -- The smart block
+*/
+
+/*
+ * Now colapse the arrays
+ */
+/*Integer indexs[] = new Integer[numFiducials];
+int fidIDs []  = new int[numFiducials];
+int [] addCount = new int[numFiducials];
+Vec3 [] upPass = new Vec3[numFiducials];
+Vec3 [] posPass = new Vec3[numFiducials];
+int count= 1;
+//setup
+indexs[0] = fiducialIndices.get(0) ;
+upPass[0] = upRotWorld[0];
+posPass[0] = fiducialWorld[0];
+fidIDs[0] = fids[0].fiducialsID;
+addCount[0] =1;
+
+for(int k = 1 ; k < numFiducials ; k++)
+	{
+		boolean match = false;
+		int l;
+		for(l = 0 ; l < count ; l++)
+			{
+				if(fidIDs[l] == fids[k].fiducialsID)
+				{
+					match = true;
+					break;
+				}	
+			}
+		if(match)
+		{
+			addCount[l]++;
+			upPass[l] = Vec3.add(upPass[l],upRotWorld[k] );
+			posPass[l] = Vec3.add(posPass[l],fiducialWorld[k] );
+		}
+		else
+		{
+			indexs[count] = fiducialIndices.get(k)  ;
+			upPass[count] = upRotWorld[k];
+			posPass[count] = fiducialWorld[k];
+			fidIDs[count] = fids[k].fiducialsID;
+			addCount[count] =1;
+			count++;
+		}
+			
+	}
+		
+	for(int k = 1 ; k < count ; k++)		
+	{
+		upPass[k] = Vec3.scalar(1.0/addCount[k], upPass[k]);
+		posPass[k] = Vec3.scalar(1.0/addCount[k], posPass[k]);
+	}*/
