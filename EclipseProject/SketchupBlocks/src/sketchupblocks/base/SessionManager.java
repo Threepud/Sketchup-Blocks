@@ -200,19 +200,38 @@ public class SessionManager
     
     public boolean checkModelExists()
     {
-    	return kreshnik.checkModelExists();
+    	try 
+		{
+			Model tempModel;
+			tempModel = lobby.getModel();
+			ArrayList<ModelBlock> tempArr = new ArrayList<>(tempModel.getBlocks());
+			
+			return !tempArr.isEmpty();
+		}
+		catch (ModelNotSetException e) 
+		{
+			System.out.println(e);
+			return false;
+		}
     }
     
     public void exportToFile()
     {
-    	try 
-    	{
-			kreshnik.export();
-		} 
-    	catch (ModelNotSetException e1) 
-    	{
-			System.out.println(e1);
+    	if(!checkModelExists())
+			return;
+		
+		Model model = null;
+		try
+		{
+			model = lobby.getModel();
 		}
+		catch(ModelNotSetException e)
+		{
+			System.out.println(e);
+			return;
+		}
+		ArrayList<ModelBlock> blocks = new ArrayList<>(model.getBlocks());
+		ColladaLoader.export(blocks);
     }
     
     public void saveProject(int slotNumber)

@@ -22,7 +22,7 @@ public class TransformationCalculator
 	        Matrix proposedR = Matrix.multiply(usv[2], usv[0].transpose());
 	        
 	        double det = Matrix.determinant(proposedR);
-	        if(det <= -1)
+	        if(det < 0)
 	        {
 	        	System.out.println("DETERMINANT: "+det);
 	        	System.out.println("R: "+proposedR);
