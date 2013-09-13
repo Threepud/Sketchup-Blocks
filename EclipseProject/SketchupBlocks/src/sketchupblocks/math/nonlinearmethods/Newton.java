@@ -34,12 +34,20 @@ public class Newton
                 Matrix LHS = G.calcJ(x);
                 Matrix RHS = Matrix.scalar(-1, G.calcF(x));
                 Matrix y = LinearSystemSolver.solve(LHS, RHS.toArray());
-                
-                x = Matrix.add(x, y);
+                try
+                {
+                	x = Matrix.add(x, y);
+                }
+                catch(Exception e)
+                {
+                	e.printStackTrace();
+                    System.out.println("x: "+x);
+                    System.out.println("y: "+y);
+                }
                 
                 if (y.norm() < TOL)
                 {
-                	if (Settings.verbose > 2)
+                	if (Settings.verbose < 0)
                 	{
 	                    System.out.println("Success! "+k);
 	                    System.out.println("Error: "+G.calcG(x));
@@ -48,7 +56,7 @@ public class Newton
                 }
             k++;
             }
-            if (Settings.verbose > 0)
+            if (Settings.verbose  < 0)
             {
             	System.out.println("Max iterations exceeded in Newton Method");
             }

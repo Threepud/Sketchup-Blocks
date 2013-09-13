@@ -24,10 +24,15 @@ public class ModelTransformationCalculator
 					Vec3[] modelFidCoords = new Vec3[positions.length];
 					for (int k = 0; k < modelFidCoords.length; k++)
 					{
-						modelFidCoords[k] = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[k]]);
+						modelFidCoords[k] = sBlock.fiducialCoordinates[fidIDs[k]];
+						System.out.println("Getting coord for "+fidIDs[k]);
+						System.out.println(modelFidCoords[k]);
+						System.out.println(positions[k]);
 					}
 					
 					Matrix[] transformMatrices = TransformationCalculator.calculateTransformationMatrices(modelFidCoords, positions);
+					//System.out.println("ROTATION: "+transformMatrices[0]);
+					//System.out.println("TRANSLATION: "+transformMatrices[1]);
 					return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
 					/*Matrix m = Matrix.multiply(transformMatrices[1],  Matrix.identity(4)); 
 					if (Settings.verbose > 3)
@@ -131,7 +136,7 @@ public class ModelTransformationCalculator
 		}
 		catch(Exception e)
 		{
-			System.out.println("Error:"+e);
+			e.printStackTrace();
 		}
 		return null;
 	}

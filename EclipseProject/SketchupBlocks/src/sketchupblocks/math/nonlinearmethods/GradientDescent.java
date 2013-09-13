@@ -14,12 +14,13 @@ import sketchupblocks.math.Matrix;
 
 public class GradientDescent 
 {
-    static double TOL = 0.0001;
+    static double TOL = 0.001;
     static int maxIter = 100;
     
     public static Matrix go(double[] x0, ErrorFunction G)
     {
         int k = 0;
+        double g = -1;
         Matrix x = new Matrix(x0);
         try
         {
@@ -31,7 +32,7 @@ public class GradientDescent
                 
                 if (z0 == 0)
                 {
-                	if (Settings.verbose >0)
+                	if (Settings.verbose < 0)
 	            	{
 	                    System.out.println("Zero gradient");
 	                    System.out.println("Error: "+g1);
@@ -51,12 +52,13 @@ public class GradientDescent
                     //System.out.println("Yay");
                     if (alpha3 < TOL/2.0)
                     {
-                    	if (Settings.verbose >0)
+                    	/*if (Settings.verbose< 0)
                     	{
 	                        System.out.println("No likely improvement.");
 	                        System.out.println("Error: "+g1);
                     	}
-                        return x;
+                        return x;*/
+                    	break;
                     }
                 }
                     
@@ -70,7 +72,6 @@ public class GradientDescent
                 double alpha0 = 0.5*(alpha2 - h1/h3);
                 double g0 = G.calcG(Matrix.subtract(x, Matrix.scalar(alpha0, z)));
 
-                double g;
                 double alpha;
                 if (g0 > g3)
                 {
@@ -85,21 +86,22 @@ public class GradientDescent
 
                 x = Matrix.subtract(x, Matrix.scalar(alpha, z));
 
-                if (Math.abs(g - g1) < TOL)
+                /*if (Math.abs(g - g1) < TOL)
                 {
-                	if (Settings.verbose >0)
+                	if (Settings.verbose < 0)
 	            	{
-	                    System.out.println("Success!");
+	                    System.out.println("Success! TOL: "+TOL+" value: "+Math.abs(g - g1));
 	                    System.out.println("Error: "+g);
 	            	}
                     return x;
-                }
+                }*/
                 k++;
             }
 
-        	if (Settings.verbose >0)
+        	if (Settings.verbose < 0)
         	{
         		System.out.println("Max iterations exceeded");
+                System.out.println("Error: "+g);
         	}
             return x;
         }

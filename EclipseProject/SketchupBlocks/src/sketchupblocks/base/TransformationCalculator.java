@@ -21,8 +21,11 @@ public class TransformationCalculator
 	        
 	        Matrix proposedR = Matrix.multiply(usv[2], usv[0].transpose());
 	        
-	        if(Matrix.determinant(proposedR) < 0)
+	        double det = Matrix.determinant(proposedR);
+	        if(det <= -1)
 	        {
+	        	System.out.println("DETERMINANT: "+det);
+	        	System.out.println("R: "+proposedR);
 	            int COLUMN_THREE = 2;
 	            for (int k = 0; k < proposedR.rows; k++)
 	            {
