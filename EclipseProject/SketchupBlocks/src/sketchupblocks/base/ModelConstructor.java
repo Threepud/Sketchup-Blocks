@@ -259,7 +259,7 @@ public class ModelConstructor implements Runnable
 			}
 			String[] IDP = new String[numFiducials];
 			for(int a = 0; a < IDP.length; ++a)
-				IDP[a] = ""+fids[a].fiducialsID;
+				IDP[a] = fids[a].camID + "," + fids[a].fiducialsID;
 			sessMan.debugPoints(IDP, fiducialWorld);
 			
 			

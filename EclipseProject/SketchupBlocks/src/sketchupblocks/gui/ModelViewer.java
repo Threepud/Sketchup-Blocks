@@ -2,6 +2,8 @@ package sketchupblocks.gui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+
 import processing.core.*;
 import processing.event.*;
 import sketchupblocks.base.CameraEvent;
@@ -51,7 +53,7 @@ public class ModelViewer implements ModelChangeListener
 	
 	//fiducial debug lines
 	private boolean showDebugLines = false;
-	private HashMap<String, Line> debugLines = new HashMap<>();
+	private ConcurrentHashMap<String, Line> debugLines = new ConcurrentHashMap<>();
 	private int lineLength = 80;
 	private int lineRate = 1;
 	private boolean lineShorter = false;
@@ -59,7 +61,7 @@ public class ModelViewer implements ModelChangeListener
 	
 	//fiducial debug points
 	private boolean showDebugPoints = false;
-	private HashMap<String, Vec3> debugPointsMap = new HashMap<>();
+	private ConcurrentHashMap<String, Vec3> debugPointsMap = new ConcurrentHashMap<>();
 	
 	//debug model
 	private boolean showModel = true;
@@ -183,16 +185,17 @@ public class ModelViewer implements ModelChangeListener
 				      (float)currentCamera.at.x, (float)currentCamera.at.y, (float)currentCamera.at.z,
 				      (float)currentCamera.up.x, (float)currentCamera.up.y, (float)currentCamera.up.z);
 		
-		final float fov = PConstants.PI/3;
+		final float fov = PApplet.radians(68.5f);
 		final float cameraZ = (float)(window.height/2.0) / (float)Math.tan(fov/2.0);
-		final float aspectR = (float)window.width / (float)window.height;
+		//final float aspectR = (float)window.width / (float)window.height;
+		final float aspectR = 1280.0f / 720.0f;
 		window.perspective(fov, aspectR, cameraZ/100.0f, cameraZ*100.0f);
 		
 		window.directionalLight(150, 150, 150, 0.2f, 0.8f, 0f);
 		window.pointLight(200, 200, 200, 100, -1000, 400);
 		window.ambientLight(50, 50, 50);
 		
-		window.background(50);
+		window.background(100);
 		
 		drawDebugLines();
 		drawDebugPoints();
@@ -273,15 +276,35 @@ public class ModelViewer implements ModelChangeListener
 		{
 			window.noStroke();
 			window.fill(0, 255, 0);
-			for(Vec3 point: debugPointsMap.values())
+			
+			ArrayList<Vec3> points = new ArrayList<>(debugPointsMap.values());
+			ArrayList<String> IDS = new ArrayList<>(debugPointsMap.keySet());
+			for(int x = 0; x < points.size(); ++x)
 			{
-				window.pushMatrix();
+				Vec3 point = null;
 				
-				point = Vec3.scalar(10, point);
-				window.translate((float)point.y, (float)-point.z, (float)point.x);
-				window.sphere(5);
+				if(selectCamera == 0)
+				{
+					point = points.get(x);
+				}
+				else
+				{
+					String temp = IDS.get(x);
+					String id = (temp.split(","))[0];
+					if((Integer.parseInt(id)) == selectCamera - 1)
+						point = points.get(x);
+				}
 				
-				window.popMatrix();
+				if(point != null)
+				{
+					window.pushMatrix();
+					
+					point = Vec3.scalar(10, point);
+					window.translate((float)point.y, (float)-point.z, (float)point.x);
+					window.sphere(5);
+					
+					window.popMatrix();
+				}
 			}
 			window.fill(255);
 		}
@@ -299,15 +322,33 @@ public class ModelViewer implements ModelChangeListener
 		if(showDebugLines)
 		{
 			window.stroke(255, 0, 0);
-			for(Line line: debugLines.values())
+			ArrayList<Line> lines = new ArrayList<>(debugLines.values());
+			ArrayList<String> IDS = new ArrayList<>(debugLines.keySet());
+			for(int x = 0; x < lines.size(); ++x)
 			{
-				Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
-				Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
+				Line line = null;
+				if(selectCamera == 0)
+				{
+					line = lines.get(x);
+				}
+				else
+				{
+					String temp = IDS.get(x);
+					String id = (temp.split(","))[0];
+					if((Integer.parseInt(id)) == selectCamera - 1)
+						line = lines.get(x);
+				}
 				
-				start = Vec3.scalar(10, start);
-				end = Vec3.scalar(lineLength * 10, end);
-				end = Vec3.add(start, end);
-				window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+				if(line != null)
+				{
+					Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
+					Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
+					
+					start = Vec3.scalar(10, start);
+					end = Vec3.scalar(lineLength * 10, end);
+					end = Vec3.add(start, end);
+					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+				}
 			}
 		}
 		window.popMatrix();
@@ -372,7 +413,7 @@ public class ModelViewer implements ModelChangeListener
 	{
 		public void keyEvent(final KeyEvent e) 
 		{
-			if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() <= (49 + Settings.numCameras)))
+			if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() < (49 + Settings.numCameras)))
 			{
 				if(e.getKeyCode() == 192)
 					selectCamera = 0;
