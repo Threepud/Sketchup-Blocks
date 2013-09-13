@@ -11,24 +11,40 @@ import sketchupblocks.math.nonlinearmethods.SIS;
 
 public class Calibrator 
 {
-	boolean calibrated[] = new boolean[Settings.numCameras];
-	
-	public double [][][] calibrationDetails = new double[Settings.numCameras][4][2];
-	boolean [][] haveBlockDetails = new boolean[Settings.numCameras][4] ;
-	public Vec3 [] cameraPositions= new Vec3[Settings.numCameras];
-	
+	public boolean[] calibrated;
+	public double[][][] calibrationDetails;
+	public boolean[][] haveBlockDetails;
+	public Vec3[] cameraPositions;
 	
 	public Calibrator()
 	{
+		//Unit tests need this check
+		if(Settings.numCameras == 0)
+		{
+			Settings.readSettings("Settings.xml");
+			if(Settings.numCameras == 0)
+			{
+				System.out.println("ERROR: Settings, no cameras set.");
+				System.exit(-1);
+			}
+		}
+		
+		calibrated = new boolean[Settings.numCameras];
+		calibrationDetails = new double[Settings.numCameras][4][2];
+		haveBlockDetails = new boolean[Settings.numCameras][4];
+		cameraPositions= new Vec3[Settings.numCameras];
+		
 		for (int k = 0; k < calibrated.length; k++)
 		{
 			calibrated[k] = false;
 		}
 		for(int l = 0 ; l < haveBlockDetails.length ; l++)
+		{
 			for(int k = 0 ; k < haveBlockDetails[l].length ; k++)
 			{
 				haveBlockDetails[l][k] = false;
 			}
+		}
 	}
 	
 	public boolean[] getCalibrated()

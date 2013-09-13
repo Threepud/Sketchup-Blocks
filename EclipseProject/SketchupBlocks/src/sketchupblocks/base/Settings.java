@@ -44,7 +44,7 @@ public class Settings
 		readSettings(fileName);
 	}
 	
-	private void readSettings(String fileName)
+	public static void readSettings(String fileName)
 	{
 		XML settings = null;
 		try 

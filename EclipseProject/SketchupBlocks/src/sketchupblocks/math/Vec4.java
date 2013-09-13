@@ -39,6 +39,14 @@ public class Vec4
     	w = 0;
     }
     
+    public Vec4(Vec4 v)
+    {
+    	x = v.x;
+    	y = v.y;
+    	z = v.z;
+    	w = v.w;
+    }
+    
     public static double dot(Vec4 one, Vec4 two)
     {
         return (one.x * two.x + one.y * two.y + one.z * two.z + one.w*two.w);

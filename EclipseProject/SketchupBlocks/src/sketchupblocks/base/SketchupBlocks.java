@@ -9,7 +9,6 @@ public class SketchupBlocks extends PApplet
 	private static final long serialVersionUID = 1L;
 	
 	private static SessionManager sessMan;
-	private static Settings settings;
 	
 	private static boolean created = false;
 	private static long startTime;
@@ -24,7 +23,7 @@ public class SketchupBlocks extends PApplet
 			frame.setResizable(false);
 		}
 		
-		settings = new Settings("Settings.xml");
+		Settings.readSettings("Settings.xml");
 		sessMan = new SessionManager(this);
 		startTime = System.currentTimeMillis();
 	}

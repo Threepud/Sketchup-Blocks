@@ -6,8 +6,6 @@ public class Vec3
     public double y;
     public double z;
 
-
-
     public Vec3()
     {
         x = 0;
@@ -27,6 +25,13 @@ public class Vec3
         x = xyz[0];
         y = xyz[1];
         z = xyz[2];
+    }
+    
+    public Vec3(Vec3 oldVec)
+    {
+    	x = oldVec.x;
+    	y = oldVec.y;
+    	z = oldVec.z;
     }
 
     public static Vec3 midpoint(Vec3 one, Vec3 two)
