@@ -14,8 +14,28 @@ class Exporter
 		eddy = _lobby;
 	}
 	
+	public boolean checkModelExists()
+    {
+    	try 
+		{
+			Model tempModel;
+			tempModel = eddy.getModel();
+			ArrayList<ModelBlock> tempArr = new ArrayList<>(tempModel.getBlocks());
+			
+			return !tempArr.isEmpty();
+		}
+		catch (ModelNotSetException e) 
+		{
+			System.out.println(e);
+			return false;
+		}
+    }
+	
 	public void export() throws ModelNotSetException
 	{
+		if(!checkModelExists())
+			return;
+		
 		Model model = null;
 		try
 		{
