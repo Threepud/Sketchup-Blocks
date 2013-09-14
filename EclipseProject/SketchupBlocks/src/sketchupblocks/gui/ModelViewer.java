@@ -11,6 +11,7 @@ import sketchupblocks.base.ColladaLoader;
 import sketchupblocks.base.Model;
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
+import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.BlockNoTypeException;
@@ -158,7 +159,7 @@ public class ModelViewer implements ModelChangeListener
 	    }
 	}
 	  
-	public void fireModelChangeEvent(ModelBlock change) throws BlockNoTypeException
+	public void fireModelChangeEvent(ModelBlock change)
 	{
 		if(change.type == ModelBlock.ChangeType.UPDATE)
 			blockMap.put(new Integer(change.smartBlock.blockId), change);
