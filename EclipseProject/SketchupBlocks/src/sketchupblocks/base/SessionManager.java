@@ -11,8 +11,7 @@ import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.gui.Menu;
 import sketchupblocks.gui.ModelViewer;
 import sketchupblocks.math.Vec3;
-import sketchupblocks.network.Lobby;
-import sketchupblocks.network.LocalLobby;
+import sketchupblocks.network.*;
 import sketchupblocks.recording.Feeder;
 import sketchupblocks.math.Line;
 
@@ -22,6 +21,7 @@ public class SessionManager
 	private ModelConstructor jimmy;
 	private Exporter kreshnik;
 	private Lobby lobby;
+	private Server server;
 	private ModelViewer sarah;
 	private ModelLoader modelLoader;
 	private BlockDatabase blockDB;
@@ -29,12 +29,18 @@ public class SessionManager
 	private String[] dbPaths;
 	private Vec3 [] cameraPositions;
 	
+	private short serverPort = 5555;
+	private boolean spectating = false;
+	
 	public SessionManager(PApplet _parent)
 	{
 		parent = _parent;
 		
 		lobby = new LocalLobby();
 		lobby.setModel(new Model());
+		
+		server = new Server(lobby, serverPort);
+		server.run();
 		
 		sarah = new ModelViewer();
 		try 
@@ -138,7 +144,6 @@ public class SessionManager
     
     public void updateCalibratedCameras(boolean[] calibrated)
     {
-    	//TODO: Replace with listener stuff...
     	menu.updateCalibratedCameras(calibrated);
     }
     
@@ -188,16 +193,6 @@ public class SessionManager
     	modelLoader.setLobby(lobby);
     }
     
-    public void loadProject(int slotNumber)
-    {
-      
-    }
-    
-    public void newProject()
-    {
-      
-    }
-    
     public boolean checkModelExists()
     {
     	try 
@@ -234,13 +229,32 @@ public class SessionManager
 		ColladaLoader.export(blocks);
     }
     
-    public void saveProject(int slotNumber)
-    {
-    }
-    
     public void spectate(UserBlock  user)
     {
-      
+    	if(spectating)
+    	{
+    		((NetworkedLobby)lobby).stopLobby();
+    		lobby = new LocalLobby();
+    		lobby.setModel(new Model());
+    		
+    		lobby.registerChangeListener(sarah);
+    		lobby.registerChangeListener(server);
+    		
+    		server.run();
+    	}
+    	else
+    	{
+    		server.stopServer();
+        	
+        	lobby = new NetworkedLobby("10.0.0.4", serverPort);
+        	lobby.setModel(new Model());
+        	
+        	lobby.registerChangeListener(sarah);
+        	
+        	((NetworkedLobby)lobby).run();
+    	}
+    	
+    	spectating = !spectating;
     }
     
     public void debugLines(String[] IDS, Line[] lines)
