@@ -162,6 +162,7 @@ public class Menu
 	public void drawMenuOverlay()
 	{
 		window.camera();
+		window.perspective();
 		window.noLights();
 		window.hint(PConstants.DISABLE_DEPTH_TEST);
 		
