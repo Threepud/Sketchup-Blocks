@@ -27,9 +27,13 @@ public class Menu
 	
 	//popup
 	private boolean showNoticePopup = true;
-	private boolean showLoadingPopup = false;
-	private boolean exportPopup = false;
 	private boolean calibratePopup = true;
+	private boolean connectPopup = false;
+	
+	private boolean showLoadingPopup = false;
+	//TODO: implement loading rings
+	private boolean exportPopup = false;
+	
 	private PFont headingFont;
 	private PFont subFont;
 	private int popupBaseWidth = 350;
@@ -56,9 +60,10 @@ public class Menu
 
 	//Particle Swarm
 	private PVector[] currentLocation;
-	private PVector targetLocation;
+	private PVector[] targetLocation;
 	private PVector[] currentDirection;
 	private PVector[] targetDirection;
+	private boolean[] checkpoints;
 	private int[] velocity;
 	int particleCount = 100 * Settings.numCameras;
 	private int[] colourIndex;
@@ -86,6 +91,7 @@ public class Menu
 		currentDirection = new PVector[particleCount];
 		targetDirection = new PVector[particleCount];
 		colourIndex = new int[particleCount];
+		checkpoints = new boolean[particleCount];
 		for(int x = 0; x < particleCount; ++x)
 		{
 			currentLocation[x] = new PVector
@@ -99,8 +105,13 @@ public class Menu
 				colourIndex[x] = x % Settings.numCameras;
 			else
 				colourIndex[x] = x % randomColours.length;
+			
+			checkpoints[x] = ranGenny.nextBoolean();
 		}
-		targetLocation = new PVector(window.width / 2, window.height / 2);
+		targetLocation = new PVector[3];
+		targetLocation[0] = new PVector(window.width / 2, window.height / 2);
+		targetLocation[1] = new PVector(targetLocation[0].x - 50, window.height / 2);
+		targetLocation[2] = new PVector(targetLocation[0].x + 50, window.height / 2);
 		
 		velocity = new int[Settings.numCameras];
 		int vel = 2;
@@ -215,7 +226,11 @@ public class Menu
 			
 			drawPopupBase();
 			
-			drawPopupHeader("Calibrating");
+			if(calibratePopup)
+				drawPopupHeader("Calibrating");
+			else if(connectPopup)
+				drawPopupHeader("Connecting");
+			
 			drawParticles();
 		}
 	}
@@ -234,7 +249,27 @@ public class Menu
 			);
 			
 			//get target direction
-			targetDirection[x] = PVector.sub(targetLocation, currentLocation[x]);
+			PVector target = null;
+			if(calibratePopup)
+				target = targetLocation[0];
+			else if(connectPopup)
+			{
+				if(checkpoints[x])
+					target = targetLocation[1];
+				else
+					target = targetLocation[2];
+			}
+			else
+				return;
+			
+			//check distance if connecting
+			if(connectPopup)
+			{
+				if(PVector.dist(target, currentLocation[x]) < 5.0f)
+					checkpoints[x] = !checkpoints[x];
+			}
+			
+			targetDirection[x] = PVector.sub(target, currentLocation[x]);
 			targetDirection[x].normalize();
 			
 			//update current direction
@@ -242,7 +277,10 @@ public class Menu
 			if(!calibratedCams[x % Settings.numCameras])
 			{
 				PVector noise = PVector.random2D();
-				noise.mult(1.4f);
+				if(connectPopup)
+					noise.mult(0.5f);
+				else
+					noise.mult(1.4f);
 				currentDirection[x].add(noise);
 			}
 			currentDirection[x].normalize();
