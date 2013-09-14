@@ -11,7 +11,7 @@ import sketchupblocks.base.ModelChangeListener;
 class Server extends Thread implements ModelChangeListener 
 {
 	private int port;
-	private ServerSocket listner;
+	private ServerSocket listener;
 	private Lobby lobby;
 	private ArrayList<Socket> clients;
   
@@ -21,7 +21,7 @@ class Server extends Thread implements ModelChangeListener
 		port = _port;
 		try
 		{
-			listner = new ServerSocket(port);
+			listener = new ServerSocket(port);
 		}
 		catch(Exception e)
 		{
@@ -37,19 +37,19 @@ class Server extends Thread implements ModelChangeListener
 	void fireModelChangeEvent(ModelBlock change)
 	{
 		//relay to each client
-		Socket [] connections = new Socket[0];
+		Socket[] connections = new Socket[0];
 		connections = clients.toArray(connections);
 		
 		for(int k = 0 ; k < connections.length ; k++)
 		{
 			try
 			{
-			ObjectOutputStream out = new ObjectOutputStream(connections[k].getOutputStream());
-			out.writeObject(change);
+				ObjectOutputStream out = new ObjectOutputStream(connections[k].getOutputStream());
+				out.writeObject(change);
 			}
 			catch(Exception e)
 			{
-				
+				e.printStackTrace();
 			}
 		}
 		
@@ -61,12 +61,11 @@ class Server extends Thread implements ModelChangeListener
 		while(true)
 		try
 		{
-		clients.add(listner.accept());
+			clients.add(listener.accept());
 		}
 		catch(Exception e)
 		{
-			
+			e.printStackTrace();
 		}
-	
 	}
 }
