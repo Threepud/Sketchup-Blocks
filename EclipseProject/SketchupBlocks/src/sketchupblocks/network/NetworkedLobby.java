@@ -39,9 +39,9 @@ public class NetworkedLobby extends Thread implements Lobby
 		return model;
 	}
 
-	public void setModel(Model model)
+	public void setModel(Model _model)
 	{
-
+		model = _model;
 	}
 
 	public void registerChangeListener(ModelChangeListener listener)
