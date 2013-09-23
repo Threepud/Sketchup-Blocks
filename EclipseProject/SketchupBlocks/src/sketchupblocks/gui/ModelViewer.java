@@ -28,7 +28,6 @@ public class ModelViewer implements ModelChangeListener
 	private Camera userCamera;
 	private Camera[] systemCameras;
 	private Camera currentCamera;
-	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
 	private int selectCamera = 0;
 	
 	//fiducial
@@ -137,7 +136,6 @@ public class ModelViewer implements ModelChangeListener
 	public void setWindow(PApplet _window)
 	{
 		window = _window;
-		window.registerMethod("keyEvent", modelViewerEventListener);
 		
 		tilesTexture = window.loadImage("./images/FloorTile.png");
 	}
@@ -411,99 +409,96 @@ public class ModelViewer implements ModelChangeListener
 		userCamera.eye.y = cameraHeight;
 	}
 	
-	protected class ModelViewerEventListener
+	public void setKeyboardInput(KeyEvent e)
 	{
-		public void keyEvent(final KeyEvent e) 
+		if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() < (49 + Settings.numCameras)))
 		{
-			if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() < (49 + Settings.numCameras)))
-			{
-				if(e.getKeyCode() == 192)
-					selectCamera = 0;
-				else
-					selectCamera = e.getKeyCode() - 48;
-				switchCamera();
-			}
-			//zoom in
-			else if(e.getKeyCode() == 38)
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					zoomIn = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					zoomIn = false;
-			}
-			//zoom out
-			else if(e.getKeyCode() == 40)
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					zoomOut = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					zoomOut = false;
-			}
-			//right
-			else if(e.getKeyCode() == 39)
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					rotateRight = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					rotateRight = false;
-			}
-			//left
-			else if(e.getKeyCode() == 37)
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					rotateLeft = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					rotateLeft = false;
-			}
-			else if(e.getKey() == 'e')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					ColladaLoader.export(new ArrayList<ModelBlock>(blockMap.values()));
-			}
-			else if(e.getKey() == 'm')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					showModel = !showModel;
-			}
-			else if(e.getKey() == 'm')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					showModel = !showModel;
-			}
-			else if(e.getKey() == 'n')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					transparentModel = !transparentModel;
-			}
-			else if(e.getKey() == 'l')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					showDebugLines = !showDebugLines;
-			}
-			else if(e.getKey() == 'p')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					showDebugPoints = !showDebugPoints;
-			}
-			else if(e.getKey() == 't')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					alphaBlendFloor = !alphaBlendFloor;
-			}
-			else if(e.getKey() == '[')
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					lineShorter = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					lineShorter = false;
-			}
-			else if(e.getKey() == ']')
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					lineLonger = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					lineLonger = false;
-			}
+			if(e.getKeyCode() == 192)
+				selectCamera = 0;
+			else
+				selectCamera = e.getKeyCode() - 48;
+			switchCamera();
+		}
+		//zoom in
+		else if(e.getKeyCode() == 38)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				zoomIn = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				zoomIn = false;
+		}
+		//zoom out
+		else if(e.getKeyCode() == 40)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				zoomOut = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				zoomOut = false;
+		}
+		//right
+		else if(e.getKeyCode() == 39)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				rotateRight = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				rotateRight = false;
+		}
+		//left
+		else if(e.getKeyCode() == 37)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				rotateLeft = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				rotateLeft = false;
+		}
+		else if(e.getKey() == 'e')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				ColladaLoader.export(new ArrayList<ModelBlock>(blockMap.values()));
+		}
+		else if(e.getKey() == 'm')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				showModel = !showModel;
+		}
+		else if(e.getKey() == 'm')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				showModel = !showModel;
+		}
+		else if(e.getKey() == 'n')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				transparentModel = !transparentModel;
+		}
+		else if(e.getKey() == 'l')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				showDebugLines = !showDebugLines;
+		}
+		else if(e.getKey() == 'p')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				showDebugPoints = !showDebugPoints;
+		}
+		else if(e.getKey() == 't')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				alphaBlendFloor = !alphaBlendFloor;
+		}
+		else if(e.getKey() == '[')
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				lineShorter = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				lineShorter = false;
+		}
+		else if(e.getKey() == ']')
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				lineLonger = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				lineLonger = false;
 		}
 	}
 }

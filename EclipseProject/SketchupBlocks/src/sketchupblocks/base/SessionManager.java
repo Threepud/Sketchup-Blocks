@@ -3,6 +3,7 @@ package sketchupblocks.base;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
+import processing.event.KeyEvent;
 import sketchupblocks.database.Block;
 import sketchupblocks.database.BlockDatabase;
 import sketchupblocks.database.SmartBlock;
@@ -29,12 +30,15 @@ public class SessionManager
 	private String[] dbPaths;
 	private Vec3 [] cameraPositions;
 	
+	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
+	
 	private short serverPort = 5555;
 	private boolean spectating = false;
 	
 	public SessionManager(PApplet _parent)
 	{
 		parent = _parent;
+		parent.registerMethod("keyEvent", modelViewerEventListener);
 		
 		lobby = new LocalLobby();
 		lobby.setModel(new Model());
@@ -272,4 +276,24 @@ public class SessionManager
     	sarah.drawModel();
     	menu.drawMenuOverlay();
     }
+    
+    private void viewerFeedKeyboard(KeyEvent event)
+    {
+    	sarah.setKeyboardInput(event);
+    }
+    
+    //keyboard listener
+    protected class ModelViewerEventListener
+	{
+		public void keyEvent(final KeyEvent e) 
+		{
+			if(e.getKey() == 's')
+				spectate(null);
+			else
+			{
+				//most input is fed to the model viewer
+				viewerFeedKeyboard(e);
+			}
+		}
+	}
 }
