@@ -1,8 +1,10 @@
 package sketchupblocks.database;
 
+import java.io.Serializable;
+
 import sketchupblocks.math.Vec3;
 
-public class Block
+public class Block implements Serializable
 {
 	public enum BlockType
 	{

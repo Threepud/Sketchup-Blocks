@@ -1,9 +1,11 @@
 package sketchupblocks.math;
+import java.io.Serializable;
+
 import sketchupblocks.exception.UnexpectedNonSquareMatrixException;
 import sketchupblocks.exception.UnexpectedVectorConversionException;
 import sketchupblocks.exception.UnexpectedArrayConversionException;
 
-public class Matrix 
+public class Matrix implements Serializable
 {
     public double[][] data;
     public int rows;

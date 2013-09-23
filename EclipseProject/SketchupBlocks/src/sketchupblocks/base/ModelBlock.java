@@ -1,11 +1,13 @@
 package sketchupblocks.base;
 
+import java.io.Serializable;
+
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.Matrix;
 
-public class ModelBlock
+public class ModelBlock implements Serializable
 {
-	public enum ChangeType
+	public enum ChangeType implements Serializable
 	{
 		UPDATE,
 		REMOVE
