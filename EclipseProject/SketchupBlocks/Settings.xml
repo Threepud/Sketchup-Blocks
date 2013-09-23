@@ -42,4 +42,8 @@
 		<RecordingInputFilename>debugOutput(JustSomeData)/output</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
+	<Network>
+		<HostPort>5555</HostPort>
+		<ConnectPort>5555</ConnectPort>
+	</Network>
 </Settings>
