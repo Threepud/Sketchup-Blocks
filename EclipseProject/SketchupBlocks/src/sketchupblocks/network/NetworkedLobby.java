@@ -1,6 +1,7 @@
 package sketchupblocks.network;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import sketchupblocks.base.Model;
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
 import sketchupblocks.exception.ModelNotSetException;
+import sketchupblocks.gui.Menu;
 
 
 public class NetworkedLobby extends Thread implements Lobby
@@ -17,10 +19,12 @@ public class NetworkedLobby extends Thread implements Lobby
 	private Model model;
 	private ArrayList<ModelChangeListener> modelChangeListeners = new ArrayList<ModelChangeListener>();
 	private boolean online = true;
+	private Menu menu;
 
-	public NetworkedLobby(String server, int port) throws Exception
+	public NetworkedLobby(String server, int port, Menu _menu) throws Exception
 	{
 		connection = new Socket(server,port);
+		menu = _menu;
 	}
 
 	public void updateModel(ModelBlock modelBlock)
@@ -53,11 +57,32 @@ public class NetworkedLobby extends Thread implements Lobby
 	@Override
 	public void run()
 	{
+		InputStream is = null;
+		ObjectInputStream inp = null;
+		try 
+		{
+			is = connection.getInputStream();
+			inp = new ObjectInputStream(is);
+		}
+		catch (IOException e1) 
+		{
+			System.out.println(e1);
+			try 
+			{
+				online = false;
+				connection.close();
+				return;
+			}
+			catch (IOException e) 
+			{
+				System.out.println(e1);
+			}
+		}
+		
 		while(online)
 		{
 			try
 			{
-				ObjectInputStream inp = new ObjectInputStream(connection.getInputStream());
 				ModelBlock modelBlock = (ModelBlock) inp.readObject();
 				model.addModelBlock(modelBlock);
 
