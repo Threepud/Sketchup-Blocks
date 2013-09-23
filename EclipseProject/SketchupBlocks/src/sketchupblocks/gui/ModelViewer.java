@@ -11,10 +11,8 @@ import sketchupblocks.base.ColladaLoader;
 import sketchupblocks.base.Model;
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
-import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
 import sketchupblocks.database.SmartBlock;
-import sketchupblocks.exception.BlockNoTypeException;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
@@ -91,6 +89,13 @@ public class ModelViewer implements ModelChangeListener
 		}
 		
 		currentCamera = userCamera;
+	}
+	
+	public void clearModel()
+	{
+		blockMap.clear();
+		debugLines.clear();
+		debugPointsMap.clear();
 	}
 	
 	public void updateSystemCameraPosition(int cameraId, Vec3 pos)
