@@ -1,9 +1,5 @@
 package sketchupblocks.base;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.channels.Channel;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
@@ -36,7 +32,6 @@ public class SessionManager
 	
 	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
 	
-	private short serverPort = 5555;
 	private boolean spectating = false;
 	
 	public SessionManager(PApplet _parent)
@@ -49,12 +44,12 @@ public class SessionManager
 		
 		try
 		{
-			server = new Server(lobby, serverPort);
+			server = new Server(lobby, Settings.hostPort);
 		}
 		catch(Exception e)
 		{
 			System.out.println(e);
-			//System.exit(-1);
+			System.exit(-1);
 		}
 		server.start();
 		
@@ -252,36 +247,67 @@ public class SessionManager
     		((NetworkedLobby)lobby).stopLobby();
     		lobby = null;
     		lobby = new LocalLobby();
+    		sarah.clearModel();
     		lobby.setModel(new Model());
     		
     		lobby.registerChangeListener(sarah);
-    		lobby.registerChangeListener(server);
     		
-    		server.start();
-    	}
-    	else
-    	{
-			server.stopServer();
-			
     		try
     		{
-    			NetworkedLobby temp = new NetworkedLobby("192.168.137.82", serverPort); 
-    			lobby = temp;
+    			server = new Server(lobby, Settings.hostPort);
     		}
     		catch(Exception e)
     		{
     			System.out.println(e);
-    			return;
+    			System.exit(-1);
     		}
+    		server.start();
     		
-        	lobby.setModel(new Model());
-        	
-        	lobby.registerChangeListener(sarah);
-        	
-        	((NetworkedLobby)lobby).start();
+    		spectating = !spectating;
+    		
+    		if(Settings.verbose >= 3)
+    			System.out.println("Disconnected.");
     	}
-    	
-    	spectating = !spectating;
+    	else
+    	{
+    		Thread t = new Thread()
+    		{
+    			public void run()
+    			{
+    				try
+    	    		{
+    					menu.connectingPopup(true);
+    					
+    	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.1", Settings.connectPort); 
+    	    			lobby = temp;
+    	    			
+    	    			server.stopServer();
+    	    			server = null;
+    	        		
+    	    			sarah.clearModel();
+    	            	lobby.setModel(new Model());
+    	            	lobby.registerChangeListener(sarah);
+    	            	((NetworkedLobby)lobby).start();
+    	            	
+    	            	spectating = !spectating;
+    	            	
+    	            	menu.connectingPopup(true);
+    	            	
+    	            	if(Settings.verbose >= 3)
+    	        			System.out.println("Connected.");
+    	    		}
+    	    		catch(Exception e)
+    	    		{
+    	    			menu.connectingPopup(false);
+    	    			
+    	    			System.out.println(e);
+    	    			return;
+    	    		}
+    			}
+    		};
+    		
+    		t.start();
+    	}
     }
     
     public void debugLines(String[] IDS, Line[] lines)
