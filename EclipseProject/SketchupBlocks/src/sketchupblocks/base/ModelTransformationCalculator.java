@@ -96,7 +96,7 @@ public class ModelTransformationCalculator
 				for (int i = 0; i < 2; i++)
 					rotation[i] = Matrix.multiply(toDWorld, new Vec4(rotation[i])).toVec3();
 				
-				RotationMatrix4D rTry = new RotationMatrix4D(0);
+				RotationMatrix4D rTry = new RotationMatrix4D(0, Matrix.Axis.Z_AXIS);
 				Vec4[] tryUps = new Vec4[2];
 				double [] scores = new double[360];
 				//Now we rotate them iteratively

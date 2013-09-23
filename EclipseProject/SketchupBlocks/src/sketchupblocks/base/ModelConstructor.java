@@ -247,7 +247,7 @@ public class ModelConstructor implements Runnable
 			for(int k = 0 ; k < numFiducials ; k++)
 			{
 				fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation);	
+				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation, Matrix.Axis.Z_AXIS);	
 				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
 				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
 			}
