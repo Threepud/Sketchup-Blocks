@@ -4,6 +4,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 import sketchupblocks.base.ModelBlock;
@@ -90,5 +91,14 @@ public class Server extends Thread implements ModelChangeListener
 	public void stopServer()
 	{
 		online = false;
+		try 
+		{
+			if(!listener.isClosed())
+				listener.close();
+		} 
+		catch (IOException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package sketchupblocks.network;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -76,5 +77,14 @@ public class NetworkedLobby extends Thread implements Lobby
 	public void stopLobby()
 	{
 		online = false;
+		try 
+		{
+			if(!connection.isClosed())
+				connection.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
