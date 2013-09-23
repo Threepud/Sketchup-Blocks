@@ -7,6 +7,10 @@ import sketchupblocks.exception.UnexpectedArrayConversionException;
 
 public class Matrix implements Serializable
 {
+	public enum Axis
+	{
+		X_AXIS, Y_AXIS, Z_AXIS
+	}
     public double[][] data;
     public int rows;
     public int cols;
