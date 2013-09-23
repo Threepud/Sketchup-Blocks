@@ -84,7 +84,7 @@ public class NetworkedLobby extends Thread implements Lobby
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			System.out.println(e);
 		}
 	}
 }

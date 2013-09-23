@@ -8,7 +8,6 @@ import processing.core.PFont;
 import processing.core.PImage;
 import processing.core.PShape;
 import processing.core.PVector;
-import processing.event.KeyEvent;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.SessionManager;
@@ -170,6 +169,19 @@ public class Menu
 				default:
 					System.err.println("Command not yet supported.");
 			}
+		}
+	}
+	
+	public void checkCalibrated()
+	{
+		if(!calibrated)
+		{
+			showNoticePopup = true;
+			calibratePopup = true;
+			
+			connectPopup = false;
+			connectionFailed = false;
+			connectionEstablished = false;
 		}
 	}
 	

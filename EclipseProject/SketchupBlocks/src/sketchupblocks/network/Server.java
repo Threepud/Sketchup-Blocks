@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
+import sketchupblocks.base.Settings;
 
 public class Server extends Thread implements ModelChangeListener 
 {
@@ -43,23 +44,27 @@ public class Server extends Thread implements ModelChangeListener
 		Socket[] connections = new Socket[0];
 		connections = clients.toArray(connections);
 		
-		for(int k = 0 ; k < connections.length ; k++)
+		for(int k = connections.length - 1 ; k >= 0; k--)
 		{
-			sendData(connections[k], change);
+			try 
+			{
+				sendData(connections[k], change);
+			}
+			catch (Exception e) 
+			{
+				System.out.println(e);
+				if(Settings.verbose >= 3)
+					System.out.println("Closing connection to client: " + k);
+				
+				clients.remove(k);
+			}
 		}
 	}
 	
-	private void sendData(Socket socket, ModelBlock block)
+	private void sendData(Socket socket, ModelBlock block) throws Exception
 	{
-		try
-		{
-			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-			out.writeObject(block);
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
+		ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+		out.writeObject(block);
 	}
 	
 	@Override
@@ -75,10 +80,29 @@ public class Server extends Thread implements ModelChangeListener
 				//check for late registeration - flush model to client
 				if(!blockMap.isEmpty())
 				{
-					for(ModelBlock block: blockMap.values())
+					Thread t = new Thread()
 					{
-						sendData(clients.get(clients.size() - 1), block);
-					}
+						public void run()
+						{
+							for(ModelBlock block: blockMap.values())
+							{
+								try 
+								{
+									sendData(clients.get(clients.size() - 1), block);
+								}
+								catch (Exception e) 
+								{
+									System.out.println(e);
+									if(Settings.verbose >= 3)
+										System.out.println("Closing connection to client: " + (clients.size() - 1));
+									
+									clients.remove(clients.size() - 1);
+								}
+							}
+						}
+					};
+					
+					t.start();
 				}
 			}
 			catch(Exception e)
@@ -98,7 +122,7 @@ public class Server extends Thread implements ModelChangeListener
 		} 
 		catch (IOException e) 
 		{
-			e.printStackTrace();
+			System.out.println(e);
 		}
 	}
 }

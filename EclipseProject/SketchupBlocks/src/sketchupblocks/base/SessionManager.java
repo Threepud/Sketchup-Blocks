@@ -106,7 +106,7 @@ public class SessionManager
     		{
     			sarah.rotateView(cameraEvent);
     		}
-    		else if(((CommandBlock) block).type == CommandBlock.CommandType.CALIBRATE)
+    		else if(((CommandBlock) block).type == CommandBlock.CommandType.CALIBRATE && !spectating)
     		{
     			InputBlock iblock = new InputBlock(block, cameraEvent);
         		jimmy.receiveBlock(iblock);
@@ -116,7 +116,7 @@ public class SessionManager
     			menu.handleInput((CommandBlock)block, cameraEvent);
     		}
     	}
-    	else if (block instanceof SmartBlock)
+    	else if (block instanceof SmartBlock && !spectating)
     	{
     		if (Settings.verbose >= 3)
     		{
@@ -125,6 +125,11 @@ public class SessionManager
     		}
     		InputBlock iblock = new InputBlock(block, cameraEvent);
 			jimmy.receiveBlock(iblock);
+    	}
+    	else if(spectating)
+    	{
+    		if(Settings.verbose >= 1)
+    			System.out.println("Spectating. No live data accepted.");
     	}
     	else
     	{
@@ -262,6 +267,8 @@ public class SessionManager
     			System.exit(-1);
     		}
     		server.start();
+    		
+    		menu.checkCalibrated();
     		
     		spectating = !spectating;
     		
