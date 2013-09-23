@@ -34,6 +34,10 @@ public class Settings
 	public static String recordingInputFileName;
 	public static boolean timeDelay;
 	
+	//Network
+	public static short hostPort;
+	public static short connectPort;
+	
 	public Settings()
 	{
 		readSettings("Settings.xml");
@@ -149,6 +153,14 @@ public class Settings
 		liveData = Boolean.parseBoolean(liveDataNode.getContent());
 		recordingInputFileName = recordingInputFilenameNode.getContent();
 		timeDelay = Boolean.parseBoolean(timeDelayNode.getContent());
+		
+		//Network
+		XML network = settings.getChild("Network");
+		XML hostPortNode = network.getChild("HostPort");
+		XML connectPortNode = network.getChild("ConnectPort");
+		
+		hostPort = Short.parseShort(hostPortNode.getContent());
+		connectPort = Short.parseShort(connectPortNode.getContent());
 	}
 	
 	public static class CameraSettings
