@@ -18,20 +18,13 @@ public class Server extends Thread implements ModelChangeListener
 	private boolean online = true;
 	private ConcurrentHashMap<Integer,ModelBlock> blockMap;
   
-	public Server(Lobby _lobby, int _port)
+	public Server(Lobby _lobby, int _port) throws Exception
 	{
 		lobby = _lobby;
 		port = _port;
-		try
-		{
-			listener = new ServerSocket(port);
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+		listener = new ServerSocket(port);
 		
-		clients = new ArrayList<Socket>();
+		clients = new ArrayList<>();
 		lobby.registerChangeListener(this);
 		
 		blockMap = new ConcurrentHashMap<>();
@@ -72,23 +65,25 @@ public class Server extends Thread implements ModelChangeListener
 	public void run()
 	{
 		while(online)
-		try
 		{
-			clients.add(listener.accept());
-			
-			//TODO: replace to run in separate thread
-			//check for late registeration - flush model to client
-			if(!blockMap.isEmpty())
+			try
 			{
-				for(ModelBlock block: blockMap.values())
+				clients.add(listener.accept());
+				
+				//TODO: replace to run in separate thread
+				//check for late registeration - flush model to client
+				if(!blockMap.isEmpty())
 				{
-					sendData(clients.get(clients.size() - 1), block);
+					for(ModelBlock block: blockMap.values())
+					{
+						sendData(clients.get(clients.size() - 1), block);
+					}
 				}
 			}
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
+			catch(Exception e)
+			{
+				System.out.println(e);
+			}
 		}
 	}
 	

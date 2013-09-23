@@ -1,5 +1,9 @@
 package sketchupblocks.base;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.Channel;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
@@ -43,8 +47,16 @@ public class SessionManager
 		lobby = new LocalLobby();
 		lobby.setModel(new Model());
 		
-		server = new Server(lobby, serverPort);
-		server.run();
+		try
+		{
+			server = new Server(lobby, serverPort);
+		}
+		catch(Exception e)
+		{
+			System.out.println(e);
+			//System.exit(-1);
+		}
+		server.start();
 		
 		sarah = new ModelViewer();
 		try 
@@ -238,24 +250,35 @@ public class SessionManager
     	if(spectating)
     	{
     		((NetworkedLobby)lobby).stopLobby();
+    		lobby = null;
     		lobby = new LocalLobby();
     		lobby.setModel(new Model());
     		
     		lobby.registerChangeListener(sarah);
     		lobby.registerChangeListener(server);
     		
-    		server.run();
+    		server.start();
     	}
     	else
     	{
-    		server.stopServer();
-        	
-        	lobby = new NetworkedLobby("10.0.0.4", serverPort);
+			server.stopServer();
+			
+    		try
+    		{
+    			NetworkedLobby temp = new NetworkedLobby("192.168.137.82", serverPort); 
+    			lobby = temp;
+    		}
+    		catch(Exception e)
+    		{
+    			System.out.println(e);
+    			return;
+    		}
+    		
         	lobby.setModel(new Model());
         	
         	lobby.registerChangeListener(sarah);
         	
-        	((NetworkedLobby)lobby).run();
+        	((NetworkedLobby)lobby).start();
     	}
     	
     	spectating = !spectating;
@@ -288,12 +311,10 @@ public class SessionManager
 		public void keyEvent(final KeyEvent e) 
 		{
 			if(e.getKey() == 's')
-				spectate(null);
-			else
-			{
-				//most input is fed to the model viewer
-				viewerFeedKeyboard(e);
-			}
+				if(e.getAction() == KeyEvent.RELEASE)
+					spectate(null);
+			
+			viewerFeedKeyboard(e);
 		}
 	}
 }

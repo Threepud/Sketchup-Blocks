@@ -17,17 +17,9 @@ public class NetworkedLobby extends Thread implements Lobby
 	private ArrayList<ModelChangeListener> modelChangeListeners = new ArrayList<ModelChangeListener>();
 	private boolean online = true;
 
-	public NetworkedLobby(String server, int port)
+	public NetworkedLobby(String server, int port) throws Exception
 	{
-		try
-		{
-			connection = new Socket(server,port);
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-
+		connection = new Socket(server,port);
 	}
 
 	public void updateModel(ModelBlock modelBlock)

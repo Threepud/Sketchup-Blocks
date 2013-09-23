@@ -38,7 +38,7 @@
 		<ProgressBarRotationSpeed>1000</ProgressBarRotationSpeed>
 	</GUI>
 	<DebugRecording>
-		<LiveData>false</LiveData>
+		<LiveData>true</LiveData>
 		<RecordingInputFilename>debugOutput(JustSomeData)/output</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
