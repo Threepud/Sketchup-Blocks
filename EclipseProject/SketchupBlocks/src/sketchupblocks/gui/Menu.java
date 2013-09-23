@@ -8,11 +8,11 @@ import processing.core.PFont;
 import processing.core.PImage;
 import processing.core.PShape;
 import processing.core.PVector;
+import processing.event.KeyEvent;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
-import sketchupblocks.math.Matrix;
 
 public class Menu 
 {
@@ -28,7 +28,10 @@ public class Menu
 	//popup
 	private boolean showNoticePopup = true;
 	private boolean calibratePopup = true;
+	
 	private boolean connectPopup = false;
+	private boolean connectionEstablished = false;
+	private boolean connectionFailed = false;
 	
 	private boolean showLoadingPopup = false;
 	//TODO: implement loading rings
@@ -56,7 +59,7 @@ public class Menu
 	private boolean[] calibratedCams;
 	private boolean calibrated = false;
 	private long calibratePopupTTL = 3500;
-	private long calibrateStartTime;
+	private long noticeStartTime;
 
 	//Particle Swarm
 	private PVector[] currentLocation;
@@ -110,8 +113,8 @@ public class Menu
 		}
 		targetLocation = new PVector[3];
 		targetLocation[0] = new PVector(window.width / 2, window.height / 2);
-		targetLocation[1] = new PVector(targetLocation[0].x - 50, window.height / 2);
-		targetLocation[2] = new PVector(targetLocation[0].x + 50, window.height / 2);
+		targetLocation[1] = new PVector(targetLocation[0].x - 70, window.height / 2);
+		targetLocation[2] = new PVector(targetLocation[0].x + 70, window.height / 2);
 		
 		velocity = new int[Settings.numCameras];
 		int vel = 2;
@@ -133,7 +136,7 @@ public class Menu
 		}
 		
 		calibrated = true;
-		calibrateStartTime = System.currentTimeMillis();
+		noticeStartTime = System.currentTimeMillis();
 	}
 	
 	public void handleInput(CommandBlock cBlock, CameraEvent cEvent)
@@ -167,6 +170,31 @@ public class Menu
 				default:
 					System.err.println("Command not yet supported.");
 			}
+		}
+	}
+	
+	public void connectingPopup(boolean status)
+	{
+		//try connecting
+		if(!connectPopup)
+		{
+			if(calibratePopup)
+				calibratePopup = false;
+			else
+				showNoticePopup = true;
+			
+			connectPopup = true;
+		}
+		else
+		{
+			//connection unsuccessful
+			if(!status)
+				connectionFailed = true;
+			//connection successful
+			else
+				connectionEstablished = true;
+			
+			noticeStartTime = System.currentTimeMillis();
 		}
 	}
 	
@@ -208,15 +236,21 @@ public class Menu
 	{
 		if(showNoticePopup)
 		{
-			if(calibrated)
+			if(calibrated || connectionEstablished || connectionFailed)
 			{
-				if(System.currentTimeMillis() - calibrateStartTime > calibratePopupTTL)
+				if(System.currentTimeMillis() - noticeStartTime > calibratePopupTTL)
 				{
 					showNoticePopup = false;
 					
 					if(calibratePopup)
 					{
 						calibratePopup = false;
+					}
+					else if(connectionEstablished || connectionFailed)
+					{
+						connectPopup = false;
+						connectionEstablished = false;
+						connectionFailed = false;
 					}
 					
 					popupStart = -1;
@@ -228,8 +262,12 @@ public class Menu
 			
 			if(calibratePopup)
 				drawPopupHeader("Calibrating");
-			else if(connectPopup)
+			else if(connectPopup && !connectionEstablished && connectionFailed)
+				drawPopupHeader("Connection Failed");
+			else if(connectPopup && !connectionEstablished)
 				drawPopupHeader("Connecting");
+			else if(connectPopup && connectionEstablished)
+				drawPopupHeader("Connected");
 			
 			drawParticles();
 		}
@@ -241,12 +279,33 @@ public class Menu
 		
 		for(int x = 0; x < particleCount; ++x)
 		{
-			window.fill
-			(
-					randomColours[colourIndex[x]][0],
-					randomColours[colourIndex[x]][1],
-					randomColours[colourIndex[x]][2]
-			);
+			if(calibratePopup)
+			{
+				window.fill
+				(
+						randomColours[colourIndex[x]][0],
+						randomColours[colourIndex[x]][1],
+						randomColours[colourIndex[x]][2]
+				);
+			}
+			else if(connectPopup && !connectionEstablished && connectionFailed)
+			{
+				if(x % 2 == 0)
+					window.fill(0);
+				else
+					window.fill(255, 0, 0);
+			}
+			else if(connectPopup && !connectionEstablished)
+				window.fill(255);
+			else if(connectPopup && connectionEstablished)
+			{
+				window.fill
+				(
+						randomColours[colourIndex[x]][0],
+						randomColours[colourIndex[x]][1],
+						randomColours[colourIndex[x]][2]
+				);
+			}
 			
 			//get target direction
 			PVector target = null;
@@ -274,7 +333,7 @@ public class Menu
 			
 			//update current direction
 			currentDirection[x] = PVector.add(currentDirection[x], targetDirection[x]);
-			if(!calibratedCams[x % Settings.numCameras])
+			if(!calibratedCams[x % Settings.numCameras] || (connectPopup && !connectionEstablished))
 			{
 				PVector noise = PVector.random2D();
 				if(connectPopup)
@@ -285,7 +344,9 @@ public class Menu
 			}
 			currentDirection[x].normalize();
 			
-			if(calibratedCams[x % Settings.numCameras])
+			if(connectPopup)
+				currentDirection[x].mult(2);
+			else if(calibratedCams[x % Settings.numCameras])
 				currentDirection[x].mult(velocity[x % Settings.numCameras]);
 			else
 				currentDirection[x].mult(3);
@@ -365,59 +426,7 @@ public class Menu
 		window.textAlign(PConstants.CENTER);
 		window.text(message, window.width / 2, (window.height / 2) - 20);
 	}
-	/*
-	public void drawSidebar()
-	{
-		if(!slideDone)
-		{
-			if(calibrated)
-			{
-				if(!slideStart)
-				{
-					sidebarStartTime = System.currentTimeMillis();
-					slideStart = true;
-				}
-				
-				if(-slide > sidebarWidth)
-					slideDone = true;
-				else if(System.currentTimeMillis() - sidebarStartTime > sidebarTTL)
-					slide--;
-			}
-			
-			window.textFont(sideFont);
-			
-			//draw sidebar base
-			window.fill(255);
-			window.noStroke();
-			window.rectMode(PConstants.CENTER);
-			window.rect(slide + (sidebarWidth / 2) - 10, (sidebarHeight / 2) - 10, sidebarWidth, sidebarHeight);
-			
-			for(int x = 0; x < camBases.length; ++x)
-			{
-				PShape quad = camBases[x];
-				
-				if(slide != 0)
-					quad.translate(-1, 0);
-				
-				if(calibratedCams[x])
-					quad.setTexture(done);
-				else
-					quad.setTexture(busy);
-				
-				quad.setTextureMode(PConstants.NORMAL);
-				quad.setTextureUV(0, quad.width, quad.height);
-				
-				quad.setFill(window.color(255));
-				quad.setStroke(window.color(255));
-				window.shape(quad);
-				
-				window.stroke(100);
-				window.fill(0);
-				window.text((x + 1), slide + quad.getVertexX(0), quad.getVertexY(0) + 10);
-			}
-		}
-	}
-	*/
+	
 	private void drawProgressBar()
 	{
 		//draw progress bar
