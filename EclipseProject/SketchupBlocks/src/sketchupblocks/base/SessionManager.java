@@ -33,6 +33,7 @@ public class SessionManager
 	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
 	
 	private boolean spectating = false;
+	private boolean connecting = false;
 	
 	public SessionManager(PApplet _parent)
 	{
@@ -277,6 +278,11 @@ public class SessionManager
     	}
     	else
     	{
+    		if(!spectating && connecting)
+    			return;
+    		
+    		connecting = true;
+    		
     		Thread t = new Thread()
     		{
     			public void run()
@@ -285,7 +291,7 @@ public class SessionManager
     	    		{
     					menu.connectingPopup(true);
     					
-    	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.1", Settings.connectPort); 
+    	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.1", Settings.connectPort, menu); 
     	    			lobby = temp;
     	    			
     	    			server.stopServer();
@@ -297,6 +303,7 @@ public class SessionManager
     	            	((NetworkedLobby)lobby).start();
     	            	
     	            	spectating = !spectating;
+    	            	connecting = !connecting;
     	            	
     	            	menu.connectingPopup(true);
     	            	
