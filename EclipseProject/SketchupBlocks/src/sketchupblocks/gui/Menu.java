@@ -1,11 +1,13 @@
 package sketchupblocks.gui;
 
 import java.util.ArrayList;
+
 import processing.core.PApplet;
 import processing.core.PConstants;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.Logger;
+import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
 
@@ -42,9 +44,12 @@ public class Menu
 		displayList.add(new CalibratePopup(window));
 	}
 	
-	public void updateCalibratedCameras(boolean[] _calibrated)
+	private void updateCalibratedCameras()
 	{
-		calibratedCams = _calibrated;
+		for(int x = 0; x < calibratedCams.length; ++x)
+		{
+			calibratedCams[x] = RuntimeData.isCameraCalibrated(x);
+		}
 		
 		for(boolean bool: calibratedCams)
 		{
@@ -156,6 +161,8 @@ public class Menu
 				{
 					if(!c.died)
 					{
+						updateCalibratedCameras();
+						
 						c.updateCalibratedCameras(calibratedCams);
 						if(calibrated)
 						{
