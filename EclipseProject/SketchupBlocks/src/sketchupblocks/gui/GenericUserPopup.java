@@ -1,5 +1,7 @@
 package sketchupblocks.gui;
 
+import java.util.Random;
+
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
@@ -41,6 +43,9 @@ public class GenericUserPopup implements Popup
 		
 		headingFont = window.createFont("Arial", 40, true);
 		subFont = window.createFont("Arial", 30);
+		
+		Random genny = new Random();
+		randomIndex = genny.nextInt(randomColours.length);
 	}
 	
 	@Override
