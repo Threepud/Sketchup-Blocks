@@ -17,7 +17,7 @@ public class ConnectingPopup implements Popup
 	protected String baseString = "Connecting";
 	
 	//core
-	private long ttl = 2000;
+	private long ttl = 3000;
 	private long poisonStamp;
 	private boolean poisonFed = false;
 	private boolean success = false;
@@ -44,8 +44,9 @@ public class ConnectingPopup implements Popup
 	private PVector[] targetDirection;
 	private boolean[] checkpoints;
 	private int[] velocity;
-	int particleCount = 100 * Settings.numCameras;
+	int particleCount = 300;
 	private int[] colourIndex;
+	private int[] whiteOffset;
 	
 	public ConnectingPopup(PApplet _window)
 	{
@@ -60,6 +61,7 @@ public class ConnectingPopup implements Popup
 		currentDirection = new PVector[particleCount];
 		targetDirection = new PVector[particleCount];
 		colourIndex = new int[particleCount];
+		whiteOffset = new int[particleCount];
 		checkpoints = new boolean[particleCount];
 		for(int x = 0; x < particleCount; ++x)
 		{
@@ -70,10 +72,12 @@ public class ConnectingPopup implements Popup
 			);
 			currentDirection[x] = new PVector(ranGenny.nextFloat(), ranGenny.nextFloat());
 			targetDirection[x] = new PVector();
-			if(Settings.numCameras < randomColours.length)
-				colourIndex[x] = x % Settings.numCameras;
+			if(3 < randomColours.length)
+				colourIndex[x] = x % 3;
 			else
 				colourIndex[x] = x % randomColours.length;
+			
+			whiteOffset[x] = ranGenny.nextInt(50);
 			
 			checkpoints[x] = ranGenny.nextBoolean();
 		}
@@ -82,7 +86,7 @@ public class ConnectingPopup implements Popup
 		targetLocation[1] = new PVector(targetLocation[0].x - 70, window.height / 2);
 		targetLocation[2] = new PVector(targetLocation[0].x + 70, window.height / 2);
 		
-		velocity = new int[Settings.numCameras];
+		velocity = new int[3];
 		int vel = 2;
 		for(int x = 0; x < velocity.length; ++x)
 		{
@@ -178,7 +182,7 @@ public class ConnectingPopup implements Popup
 				);
 			}
 			else if(!poisonFed)
-				window.fill(255);
+				window.fill(255 - whiteOffset[x]);
 			
 			//get target direction
 			PVector target = null;
@@ -196,12 +200,20 @@ public class ConnectingPopup implements Popup
 			
 			//update current direction
 			currentDirection[x] = PVector.add(currentDirection[x], targetDirection[x]);
-			if(!poisonFed)
+			if(poisonFed && !success)
+			{
+				PVector noise = PVector.random2D();
+				noise.mult(2.0f);
+				currentDirection[x].add(noise);
+			}
+			else if(!poisonFed)
 			{
 				PVector noise = PVector.random2D();
 				noise.mult(0.5f);
 				currentDirection[x].add(noise);
 			}
+			
+				
 			currentDirection[x].normalize();
 			currentDirection[x].mult(2);
 			currentLocation[x] = PVector.add(currentLocation[x], currentDirection[x]);
