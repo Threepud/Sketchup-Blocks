@@ -57,32 +57,12 @@ public class NetworkedLobby extends Thread implements Lobby
 	@Override
 	public void run()
 	{
-		InputStream is = null;
-		ObjectInputStream inp = null;
-		try 
-		{
-			is = connection.getInputStream();
-			inp = new ObjectInputStream(is);
-		}
-		catch (IOException e1) 
-		{
-			System.out.println(e1);
-			try 
-			{
-				online = false;
-				connection.close();
-				return;
-			}
-			catch (IOException e) 
-			{
-				System.out.println(e1);
-			}
-		}
-		
 		while(online)
 		{
 			try
 			{
+				InputStream is = connection.getInputStream();
+				ObjectInputStream inp = new ObjectInputStream(is);
 				ModelBlock modelBlock = (ModelBlock) inp.readObject();
 				model.addModelBlock(modelBlock);
 
@@ -94,7 +74,17 @@ public class NetworkedLobby extends Thread implements Lobby
 			}
 			catch(Exception e)
 			{
-				System.out.println(e);
+				e.printStackTrace();
+				try 
+				{
+					online = false;
+					connection.close();
+					return;
+				}
+				catch (IOException e1) 
+				{
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
@@ -109,7 +99,7 @@ public class NetworkedLobby extends Thread implements Lobby
 		}
 		catch (IOException e)
 		{
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 }
