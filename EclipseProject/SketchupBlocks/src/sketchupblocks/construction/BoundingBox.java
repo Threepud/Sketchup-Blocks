@@ -16,7 +16,7 @@ public class BoundingBox
 	
 	public static BoundingBox generateBoundingBox(ModelBlock mb)
 	{
-		double[] max = new double[]{Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE};
+		double[] max = new double[]{-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE};
 		double[] min = new double[]{Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE};
 		
 		Vec3[] vertices = Matrix.multiply(mb.transformationMatrix, new Matrix(mb.smartBlock.vertices, true)).toVec3Array();
