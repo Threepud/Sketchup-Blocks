@@ -63,8 +63,11 @@ public class Server extends Thread implements ModelChangeListener
 	
 	private void sendData(Socket socket, ModelBlock block) throws Exception
 	{
-		ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-		out.writeObject(block);
+		synchronized(socket)
+		{
+			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+			out.writeObject(block);
+		}
 	}
 	
 	@Override
@@ -76,8 +79,6 @@ public class Server extends Thread implements ModelChangeListener
 			{
 				clients.add(listener.accept());
 				
-				//TODO: replace to run in separate thread
-				//check for late registeration - flush model to client
 				if(!blockMap.isEmpty())
 				{
 					Thread t = new Thread()
@@ -107,7 +108,7 @@ public class Server extends Thread implements ModelChangeListener
 			}
 			catch(Exception e)
 			{
-				System.out.println(e);
+				e.printStackTrace();
 			}
 		}
 	}
