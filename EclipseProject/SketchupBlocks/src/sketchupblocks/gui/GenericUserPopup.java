@@ -15,7 +15,7 @@ public class GenericUserPopup implements Popup
 	
 	//core
 	private long poisonStamp;
-	private boolean poisonFed = false;
+	public boolean died = false;
 	
 	//popup base
 	private PFont headingFont;
@@ -53,7 +53,6 @@ public class GenericUserPopup implements Popup
 	public void feedPoison() 
 	{
 		poisonStamp = System.currentTimeMillis();
-		poisonFed = true;
 	}
 
 	@Override
@@ -63,7 +62,7 @@ public class GenericUserPopup implements Popup
 		{
 			if(System.currentTimeMillis() - poisonStamp > Settings.commandWaitTime)
 			{
-				active = false;
+				died = true;
 				return;
 			}
 			

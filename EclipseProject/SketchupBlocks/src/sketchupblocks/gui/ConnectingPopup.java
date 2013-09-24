@@ -17,10 +17,11 @@ public class ConnectingPopup implements Popup
 	protected String baseString = "Connecting";
 	
 	//core
-	private long ttl = 1000;
+	private long ttl = 2000;
 	private long poisonStamp;
 	private boolean poisonFed = false;
 	private boolean success = false;
+	public boolean died = false;
 	
 	//popup base
 	private PFont headingFont;
@@ -99,8 +100,11 @@ public class ConnectingPopup implements Popup
 	@Override
 	public void feedPoison() 
 	{
-		poisonStamp = System.currentTimeMillis();
-		poisonFed = true;
+		if(!poisonFed)
+		{
+			poisonStamp = System.currentTimeMillis();
+			poisonFed = true;
+		}
 	}
 	
 	public void setStatus(boolean status)
@@ -117,7 +121,7 @@ public class ConnectingPopup implements Popup
 			{
 				if(System.currentTimeMillis() - poisonStamp > ttl)
 				{
-					active = false;
+					died = true;
 					return;
 				}
 			}

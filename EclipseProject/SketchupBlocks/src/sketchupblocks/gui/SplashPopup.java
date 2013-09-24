@@ -14,6 +14,7 @@ public class SplashPopup implements Popup
 	
 	//core
 	private long poisonStamp;
+	public boolean died = false;
 	
 	//splash
 	private PImage splashImage;
@@ -46,7 +47,7 @@ public class SplashPopup implements Popup
 		{
 			if(System.currentTimeMillis() - poisonStamp > Settings.splashTTL)
 			{
-				active = false;
+				died = true;
 				return;
 			}
 			

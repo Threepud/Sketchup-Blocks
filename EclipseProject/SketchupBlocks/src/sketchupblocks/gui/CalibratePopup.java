@@ -18,6 +18,7 @@ public class CalibratePopup implements Popup
 	private long ttl = 3500;
 	private long poisonStamp;
 	private boolean poisonFed = false;
+	public boolean died = false;
 	
 	private boolean[] calibratedCameras;
 	
@@ -91,8 +92,11 @@ public class CalibratePopup implements Popup
 	@Override
 	public void feedPoison() 
 	{
-		poisonStamp = System.currentTimeMillis();
-		poisonFed = true;
+		if(!poisonFed)
+		{
+			poisonStamp = System.currentTimeMillis();
+			poisonFed = true;
+		}
 	}
 	
 	public void updateCalibratedCameras(boolean[] _calibratedCameras)
@@ -109,7 +113,7 @@ public class CalibratePopup implements Popup
 			{
 				if(System.currentTimeMillis() - poisonStamp > ttl)
 				{
-					active = false;
+					died = true;
 					return;
 				}
 			}
