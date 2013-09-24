@@ -42,7 +42,6 @@ public class Menu
 			displayList.add(new SplashPopup(window));
 		
 		displayList.add(new CalibratePopup(window));
-		//displayList.add(new WarningPopup(window, "No Model Found"));
 	}
 	
 	private void updateCalibratedCameras()
@@ -186,9 +185,7 @@ public class Menu
 						c.draw();
 					}
 					else
-					{
 						displayList.remove(0);
-					}
 				}
 			}
 			else if(displayList.get(0) instanceof ReconnectPopup)
@@ -213,9 +210,7 @@ public class Menu
 						c.draw();
 					}
 					else
-					{
 						displayList.remove(0);
-					}
 				}
 			}
 			else if(displayList.get(0) instanceof ConnectingPopup)
@@ -240,9 +235,7 @@ public class Menu
 						c.draw();
 					}
 					else
-					{
 						displayList.remove(0);
-					}
 				}
 			}
 			else if(displayList.get(0) instanceof UserPopup)
@@ -256,13 +249,9 @@ public class Menu
 				else
 				{
 					if(!c.died)
-					{
 						c.draw();	
-					}
 					else
-					{
 						displayList.remove(0);
-					}
 				}
 			}
 			else if(displayList.get(0) instanceof SplashPopup)
@@ -276,13 +265,9 @@ public class Menu
 				else
 				{
 					if(!c.died)
-					{
 						c.draw();
-					}
 					else
-					{
 						displayList.remove(0);
-					}
 				}
 			}
 			else if(displayList.get(0) instanceof WarningPopup)
@@ -296,13 +281,9 @@ public class Menu
 				else
 				{
 					if(!c.died)
-					{
 						c.draw();
-					}
 					else
-					{
 						displayList.remove(0);
-					}
 				}
 			}
 		}

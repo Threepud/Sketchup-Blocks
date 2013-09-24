@@ -26,7 +26,8 @@ public class GenericUserPopup implements Popup
 	private int popupBaseHeight = 270;
 	private float barRadius = 70;
 	private int rotationSpeed = Settings.progressBarRotationSpeed;
-	private int randomIndex = -1;
+	private int[] randomIndex;
+	private int turn = 0;
 	private int[][] randomColours = 
 		{
 			{255, 32, 0},
@@ -45,7 +46,14 @@ public class GenericUserPopup implements Popup
 		subFont = window.createFont("Arial", 30);
 		
 		Random genny = new Random();
-		randomIndex = genny.nextInt(randomColours.length);
+		randomIndex = new int[3];
+		randomIndex[0] = genny.nextInt(randomColours.length);
+		randomIndex[1] = genny.nextInt(randomColours.length);
+		while(randomIndex[1] == randomIndex[0])
+			randomIndex[1] = genny.nextInt(randomColours.length);
+		randomIndex[2] = genny.nextInt(randomColours.length);
+		while(randomIndex[2] == randomIndex[1] || randomIndex[2] == randomIndex[0])
+			randomIndex[2] = genny.nextInt(randomColours.length);
 	}
 	
 	@Override
@@ -107,49 +115,33 @@ public class GenericUserPopup implements Popup
 		//draw progress bar
 		window.noFill();
 		
-		//get random colour
-		window.stroke(randomColours[randomIndex][0],
-					  randomColours[randomIndex][1], 
-					  randomColours[randomIndex][2]);
 		window.strokeWeight(3);
 		float angle = PConstants.PI * 2 * 
 				(float)(System.currentTimeMillis() - poisonStamp) / (float)rotationSpeed;
 		
-		//arcs 1
-		window.arc(window.width / 2, (window.height / 2) + 60, 
-				   barRadius * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)),
-				   barRadius * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)), 
-			       (float)((-PConstants.PI / 6.0) + angle), 
-				   (float)((PConstants.PI / 6.0) + angle));
-		window.arc(window.width / 2, (window.height / 2) + 60,
-				   barRadius * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)),
-				   barRadius * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)), 
-				   (float)((-PConstants.PI / 6.0) + angle + PConstants.PI), 
-				   (float)((PConstants.PI / 6.0) + angle + PConstants.PI));
-		
-		//arcs2
-		window.arc(window.width / 2, (window.height / 2) + 60, 
-				   (barRadius + 1) * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)),
-				   (barRadius + 1) * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)), 
-			       (float)((-PConstants.PI / 6.0) - angle), 
-				   (float)((PConstants.PI / 6.0) - angle));
-		window.arc(window.width / 2, (window.height / 2) + 60,
-				   (barRadius + 1) * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)),
-				   (barRadius + 1) * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)), 
-				   (float)((-PConstants.PI / 6.0) - angle + PConstants.PI), 
-				   (float)((PConstants.PI / 6.0) - angle + PConstants.PI));
-		
-		//arcs2
-		window.arc(window.width / 2, (window.height / 2) + 60, 
-				   (barRadius + 2) * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)),
-				   (barRadius + 2) * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)), 
-			       (float)((-PConstants.PI / 6.0) + angle), 
-				   (float)((PConstants.PI / 6.0) + angle));
-		window.arc(window.width / 2, (window.height / 2) + 60,
-				   (barRadius + 2) * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)),
-				   (barRadius + 2) * (1 - ((float)(System.currentTimeMillis() - poisonStamp) / (float)Settings.commandWaitTime)), 
-				   (float)((-PConstants.PI / 6.0) + angle + PConstants.PI), 
-				   (float)((PConstants.PI / 6.0) + angle + PConstants.PI));
+		turn = (int)(System.currentTimeMillis() - poisonStamp) / 1000;
+		for(int x = 0; x < 3; ++x)
+		{
+			window.stroke(randomColours[randomIndex[x]][0],
+						  randomColours[randomIndex[x]][1], 
+						  randomColours[randomIndex[x]][2]);
+			
+			//arcs 1
+			if(x >= turn)
+			{
+				float radius = (barRadius + (10 * x)) * (1 - (x == turn ? ((float)(System.currentTimeMillis() - poisonStamp) % (Settings.commandWaitTime / 3) / (float)(Settings.commandWaitTime / 3)) : 0));
+				window.arc(window.width / 2, (window.height / 2) + 60, 
+						   radius,
+						   radius, 
+					       x % 2 == 0 ? (float)((-PConstants.PI / 6.0) + angle) : (float)((-PConstants.PI / 6.0) - angle), 
+						   x % 2 == 0 ? (float)((PConstants.PI / 6.0) + angle) : (float)((PConstants.PI / 6.0) - angle));
+				window.arc(window.width / 2, (window.height / 2) + 60,
+						   radius,
+						   radius, 
+						   x % 2 == 0 ? (float)((-PConstants.PI / 6.0) + angle + PConstants.PI) : (float)((-PConstants.PI / 6.0) - angle - PConstants.PI), 
+						   x % 2 == 0 ? (float)((PConstants.PI / 6.0) + angle + PConstants.PI) : (float)((PConstants.PI / 6.0) - angle - PConstants.PI));
+			}
+		}
 		
 		window.strokeWeight(1);
 	}
