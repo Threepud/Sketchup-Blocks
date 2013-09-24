@@ -101,6 +101,7 @@ public class NetworkedLobby extends Thread implements Lobby
 							{
 								connection = new Socket(server,port);
 								menu.updateNetworkStatus(true);
+								sessMan.clearState();
 								online = true;
 							} 
 							catch (Exception e) 
