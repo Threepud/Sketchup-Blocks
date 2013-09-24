@@ -289,7 +289,7 @@ public class SessionManager
     			{
     				try
     	    		{
-    					menu.connectingPopup(true);
+    					menu.createConnectPopup();
     					
     	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.1", Settings.connectPort, menu); 
     	    			lobby = temp;
@@ -303,16 +303,17 @@ public class SessionManager
     	            	((NetworkedLobby)lobby).start();
     	            	
     	            	spectating = !spectating;
-    	            	connecting = !connecting;
+    	            	connecting = false;
     	            	
-    	            	menu.connectingPopup(true);
+    	            	menu.updateNetworkStatus(true);
     	            	
     	            	if(Settings.verbose >= 3)
     	        			System.out.println("Connected.");
     	    		}
     	    		catch(Exception e)
     	    		{
-    	    			menu.connectingPopup(false);
+    	    			menu.updateNetworkStatus(false);
+    	    			connecting = false;
     	    			
     	    			System.out.println(e);
     	    			return;
