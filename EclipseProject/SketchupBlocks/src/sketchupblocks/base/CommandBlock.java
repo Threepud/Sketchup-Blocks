@@ -4,7 +4,9 @@ import sketchupblocks.database.Block;
 
 public class CommandBlock extends Block
 {
-    public enum CommandType
+	private static final long serialVersionUID = 1L;
+
+	public enum CommandType
     {
     	LOAD("LOAD"),
     	NEW("NEW"),
