@@ -221,7 +221,7 @@ public class MatrixTest
 		}
 	}
 
-	@Test
+	@Test (expected = RuntimeException.class)
 	public void testMatrixMultiplication()
 	{
 		//Square-square
@@ -243,7 +243,7 @@ public class MatrixTest
 		assertTrue("Incorrect square-rectangular multiplication", matchMatrices(ss, ssC));
 		
 		//Invalid multiplication
-		assertTrue("Muliplication should be invalid", Matrix.multiply(rectangle, square) == null);
+		 Matrix.multiply(rectangle, square) ;
 	}
 	
 	@Test

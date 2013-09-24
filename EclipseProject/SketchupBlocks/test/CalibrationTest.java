@@ -16,6 +16,7 @@ import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.InputBlock;
 import sketchupblocks.base.RuntimeData;
+import sketchupblocks.base.Settings;
 import sketchupblocks.calibrator.Calibrator;
 import sketchupblocks.database.Block;
 import sketchupblocks.math.Vec3;
@@ -38,6 +39,8 @@ public class CalibrationTest
 	public void setupBeforeClass()
 	{
 		//Edit settings to one camera
+		
+		
 		XML settings = null;
 		try 
 		{
@@ -56,7 +59,8 @@ public class CalibrationTest
 		numCameras.setContent("1");
 		
 		settings.save(new File("Settings.xml"), "");
-		
+		Settings.readSettings("Settings.xml");
+		RuntimeData.init();
 		//Create callibrator with new Settings.xml
 		cally = new Calibrator();
 	}
