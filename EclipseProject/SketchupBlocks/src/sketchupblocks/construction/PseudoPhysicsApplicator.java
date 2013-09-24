@@ -12,7 +12,6 @@ public class PseudoPhysicsApplicator
 	private double maxErrorMargin = 0.1;
 	private double minErrorMargin = 0.01;
 	private double stepSize = 0.001;
-	private Vec3 NegZ = new Vec3(0, 0, -1);
 	private int MaxIter = 200; 
 	
 	
@@ -23,63 +22,26 @@ public class PseudoPhysicsApplicator
 	
 	public void applyPseudoPhysics(ModelBlock m)
 	{
-		//We will first need to know what is below a particular shape so that we know how to rotate it so that its bottom face is 'flat' on the shape below.
-		//First of all, how do we find the shape below it?
-		//We translate it to the appropriate spot. Then, we compare its xy-range to all the other blocks in the model, starting with the most _recent_.
-		//If the xy-ranges overlap, we save how much it overlaps by.
-		//Once we're done, we observe which one has the most overlap and assume that our block is on top of that one.
-		//Note that the construction floor will also have to be represented somehow. Otherwise slanted objects might not be handled correctly.
-		//Now we know what the final z-co-ordinates must be (the height of the top face). We also know the normal of the face below us...
+		ModelBlock mBelow = EnvironmentAnalyzer.getModelBlockBelow(m);
+		Face topFace = EnvironmentAnalyzer.getFacingFace(mBelow, new Vec3(0, 0, 1)); //This face has already been rotated.
+		Vec3 surfaceNormal = topFace.normal();
+		Face bottomFace = EnvironmentAnalyzer.getFacingFace(m, surfaceNormal);
 		
-		//Make the shape 'flat' via rotations
+		Matrix calculatedRotationMatrix = EnvironmentAnalyzer.extractRotationMatrix(m.transformationMatrix); //Get rotation already applied to bottomFace.
 		
-		//Assume fiducials are in same order as faces.
-		Face[] worldFaces = new Face[m.smartBlock.faces.length];
-		Vec3[] fidPos = new Vec3[m.smartBlock.fiducialCoordinates.length];
+		double smallestDot = Vec3.dot(surfaceNormal, bottomFace.normal());
 		
-		double smallestDot = Double.MAX_VALUE;
-		int smallestDotIndex = -1; 
-		
-		Matrix rotationMatrix = extractRotationMatrix(m.transformationMatrix);
-		
-		
-		for (int k = 0; k < worldFaces.length; k++)
-		{
-			//Convert the corners of every face into a matrix (of column vectors).
-			//Then multiply these matrices with the current rotation matrix.
-			//These will be the corners for the new, transformed faces
-			//Check if it is the bottom one by finding the one that is the closest to parallel.
-			worldFaces[k] = new Face(Matrix.multiply(rotationMatrix, new Matrix(m.smartBlock.faces[k].corners, true)).toVec3Array());
-			fidPos[k] = Matrix.multiply(rotationMatrix, m.smartBlock.fiducialCoordinates[k]);
-			double dotWithNegZ = Vec3.dot(worldFaces[k].normal(), NegZ);
-			if (dotWithNegZ < smallestDot)
-			{
-				smallestDot = dotWithNegZ;
-				smallestDotIndex = k;
-			}
-		}
-		
-		
-		if (smallestDotIndex == -1)
-		{
-			System.out.println("This shouldn't happen!!!!!!!!!!!!!!!!!! Thank Elre for this cryptic message");
-			System.out.println("In any ordered set, there should be a smallest element. Especially if the set is finite");
-			System.exit(-1);
-		}
-		
-		Face bottomFace = worldFaces[smallestDotIndex];
-		Matrix finalRotationMatrix = rotationMatrix;
 		if (smallestDot < maxErrorMargin && smallestDot > minErrorMargin)
 		{
 			//Fix minor rotations;
 			//First we need to find the direction to rotate in for the x and then the y axes.
-			RotationMatrix3D minXRot = findMinimalRot(bottomFace, Matrix.Axis.X_AXIS);
+			RotationMatrix3D minXRot = findMinimalRot(bottomFace, Matrix.Axis.X_AXIS, surfaceNormal);
 			bottomFace = new Face(Matrix.multiply(minXRot, new Matrix(bottomFace.corners, true)).toVec3Array());
-			RotationMatrix3D minYRot = findMinimalRot(bottomFace, Matrix.Axis.Y_AXIS);
+			RotationMatrix3D minYRot = findMinimalRot(bottomFace, Matrix.Axis.Y_AXIS, surfaceNormal);
 			bottomFace = new Face(Matrix.multiply(minYRot, new Matrix(bottomFace.corners, true)).toVec3Array());
 			System.out.println("This should be approximately the negative Z axis: "+bottomFace.normal());
 			
-			finalRotationMatrix = Matrix.multiply(minYRot, Matrix.multiply(minXRot, rotationMatrix));
+			calculatedRotationMatrix = Matrix.multiply(minYRot, Matrix.multiply(minXRot, calculatedRotationMatrix));
 		}
 		
 		//Translate the model down to the height of the face just below.
@@ -89,7 +51,7 @@ public class PseudoPhysicsApplicator
 		eddy.updateModel(m);
 	}
 	
-	private RotationMatrix3D findMinimalRot(Face bottomFace, Matrix.Axis axis)
+	private RotationMatrix3D findMinimalRot(Face bottomFace, Matrix.Axis axis, Vec3 surfaceNormal)
 	{
 		
 		RotationMatrix3D result = new RotationMatrix3D(0, axis);
@@ -100,9 +62,9 @@ public class PseudoPhysicsApplicator
 		
 		//Find direction:
 		result.updateTheta(localStep);
-		double positiveDot = Vec3.dot(Matrix.multiply(result,  bottomFace.normal()), NegZ);
+		double positiveDot = Vec3.dot(Matrix.multiply(result,  bottomFace.normal()), surfaceNormal);
 		result.updateTheta(-1*localStep);
-		double negativeDot = Vec3.dot(Matrix.multiply(result, bottomFace.normal()), NegZ);
+		double negativeDot = Vec3.dot(Matrix.multiply(result, bottomFace.normal()), surfaceNormal);
 		if (Math.abs(negativeDot) < Math.abs(positiveDot))
 		{
 			localStep *= -1;
@@ -121,7 +83,7 @@ public class PseudoPhysicsApplicator
 			currentTheta += localStep*0.5;
 			result.updateTheta(currentTheta);
 			prevDot = currDot;
-			currDot = Vec3.dot(Matrix.multiply(result,  bottomFace.normal()), NegZ);
+			currDot = Vec3.dot(Matrix.multiply(result,  bottomFace.normal()), surfaceNormal);
 			count++;
 		}
 		currentTheta -= localStep*2;
@@ -129,21 +91,6 @@ public class PseudoPhysicsApplicator
 		return result;
 	}
 	
-	private Matrix extractRotationMatrix(Matrix mat)
-	{
-		if (!mat.isSquare())
-			throw new RuntimeException("Cannot extract rotation matrix");
-		int offset = mat.cols < 3 ? 0 : 1;
-		double[][] data = new double[mat.rows- offset][mat.cols- offset];
-		for (int k = 0; k < mat.rows - offset; k++)
-		{
-			for (int i = 0; i < mat.cols - offset; i++)
-			{
-				data[k][i] = mat.data[k][i];
-			}
-		}
-		return new Matrix(data);
-	}
 	
 	public void setErrorMargin(double _maxErrorMargin, double _minErrorMargin)
 	{
