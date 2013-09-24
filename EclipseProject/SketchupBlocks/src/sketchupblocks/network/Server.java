@@ -93,11 +93,14 @@ public class Server extends Thread implements ModelChangeListener
 								}
 								catch (Exception e) 
 								{
-									System.out.println(e);
-									if(Settings.verbose >= 3)
-										System.out.println("Closing connection to client: " + (clients.size() - 1));
-									
-									clients.remove(clients.size() - 1);
+									if(online)
+									{
+										System.out.println(e);
+										if(Settings.verbose >= 3)
+											System.out.println("Closing connection to client: " + (clients.size() - 1));
+										
+										clients.remove(clients.size() - 1);
+									}
 								}
 							}
 						}
@@ -108,7 +111,8 @@ public class Server extends Thread implements ModelChangeListener
 			}
 			catch(Exception e)
 			{
-				e.printStackTrace();
+				if(online)
+					e.printStackTrace();
 			}
 		}
 	}

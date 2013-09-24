@@ -84,45 +84,49 @@ public class NetworkedLobby extends Thread implements Lobby
 			}
 			catch(Exception e)
 			{
-				e.printStackTrace();
+				if(online)
+					e.printStackTrace();
 				try 
 				{
-					online = false;
-					connection.close();
-					
-					//reconnect here
-					menu.createReconnectPopup();
-					
-					Thread t = new Thread()
+					if(online)
 					{
-						public void run()
-						{
-							try 
-							{
-								connection = new Socket(server,port);
-								menu.updateNetworkStatus(true);
-								sessMan.clearState();
-								online = true;
-							} 
-							catch (Exception e) 
-							{
-								e.printStackTrace();
-								menu.updateNetworkStatus(false);
-								sessMan.spectate(null);
-							}
-						}
-					};
-					
-					t.start();
-					
-					try 
-					{
-						t.join();
-					} 
-					catch (InterruptedException e1) 
-					{
-						e1.printStackTrace();
 						online = false;
+						connection.close();
+						
+						//reconnect here
+						menu.createReconnectPopup();
+						
+						Thread t = new Thread()
+						{
+							public void run()
+							{
+								try 
+								{
+									connection = new Socket(server,port);
+									menu.updateNetworkStatus(true);
+									sessMan.clearState();
+									online = true;
+								} 
+								catch (Exception e) 
+								{
+									e.printStackTrace();
+									menu.updateNetworkStatus(false);
+									sessMan.spectate(null);
+								}
+							}
+						};
+						
+						t.start();
+						
+						try 
+						{
+							t.join();
+						} 
+						catch (InterruptedException e1) 
+						{
+							e1.printStackTrace();
+							online = false;
+						}
 					}
 				}
 				catch (IOException e1) 
