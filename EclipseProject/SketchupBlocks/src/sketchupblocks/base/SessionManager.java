@@ -64,8 +64,6 @@ public class SessionManager
 			sarah.setWindow(parent);
 			menu = new Menu(this, parent);
 			
-			lobby.registerChangeListener(sarah);
-			
 			jimmy = new ModelConstructor(this);
 			jimmy.setLobby(lobby);
 			
@@ -146,6 +144,11 @@ public class SessionManager
 				((Feeder)wimpie[k]).start();
 			}
 		}
+    }
+    
+    public void clearState()
+    {
+    	lobby.setModel(new Model());
     }
     
     public void updateCameraPosition(int cameraID)
@@ -236,10 +239,16 @@ public class SessionManager
     		((NetworkedLobby)lobby).stopLobby();
     		lobby = null;
     		lobby = new LocalLobby();
-    		sarah.clearModel();
     		lobby.setModel(new Model());
-    		
-    		lobby.registerChangeListener(sarah);
+    		try 
+    		{
+				sarah.setLobby(lobby);
+			} 
+    		catch (Exception e1) 
+    		{
+				e1.printStackTrace();
+				System.exit(-1);
+			}
     		
     		try
     		{
@@ -281,9 +290,8 @@ public class SessionManager
     	    			server.stopServer();
     	    			server = null;
     	        		
-    	    			sarah.clearModel();
     	            	lobby.setModel(new Model());
-    	            	lobby.registerChangeListener(sarah);
+    	            	sarah.setLobby(lobby);
     	            	((NetworkedLobby)lobby).start();
     	            	
     	            	spectating = !spectating;
@@ -298,6 +306,7 @@ public class SessionManager
     	    		{
     	    			menu.updateNetworkStatus(false);
     	    			connecting = false;
+    	    			menu.checkCalibrated();
     	    			
     	    			System.out.println(e);
     	    			return;
