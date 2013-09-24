@@ -261,6 +261,7 @@ public class SessionManager
     		}
     		server.start();
     		
+    		menu.forceStopConnectPopup();
     		menu.checkCalibrated();
     		
     		spectating = !spectating;
@@ -284,7 +285,7 @@ public class SessionManager
     	    		{
     					menu.createConnectPopup();
     					
-    	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.82", Settings.connectPort, menu, sessionManager); 
+    	    			NetworkedLobby temp = new NetworkedLobby("10.0.0.3", Settings.connectPort, menu, sessionManager); 
     	    			lobby = temp;
     	    			
     	    			server.stopServer();
