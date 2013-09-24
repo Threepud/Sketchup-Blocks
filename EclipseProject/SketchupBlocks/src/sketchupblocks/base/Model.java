@@ -1,27 +1,27 @@
 package sketchupblocks.base;
 
-import java.util.HashMap;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 
 import sketchupblocks.construction.ModelBlock;
 
 public class Model
 {
 	private String id;
-	private HashMap<Integer,ModelBlock> blockMap;
+	private ConcurrentHashMap<Integer,ModelBlock> blockMap;
 	public static int classIdCounter = 0 ;
 	  
 	public Model()
 	{
 		id = new Integer(classIdCounter++).toString();
-		blockMap = new HashMap<Integer,ModelBlock>();
+		blockMap = new ConcurrentHashMap<Integer,ModelBlock>();
 	}
 	
 	public Model(Model oldModel)
 	{
 		id = new String(oldModel.id);
 		
-		blockMap = new HashMap<>();
+		blockMap = new ConcurrentHashMap<>();
 		blockMap.putAll(oldModel.blockMap);
 	}
 	  
