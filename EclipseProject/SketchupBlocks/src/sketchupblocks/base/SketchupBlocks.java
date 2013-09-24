@@ -1,8 +1,6 @@
 package sketchupblocks.base;
 
 import processing.core.*;
-import sketchupblocks.recording.Feeder;
-import sketchupblocks.recording.Recorder;
 
 public class SketchupBlocks extends PApplet 
 {
