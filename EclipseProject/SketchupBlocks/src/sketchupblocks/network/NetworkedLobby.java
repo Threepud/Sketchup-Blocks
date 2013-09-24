@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import sketchupblocks.base.Model;
-import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
 import sketchupblocks.base.SessionManager;
+import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.gui.Menu;
 

@@ -1,4 +1,5 @@
 package sketchupblocks.math;
+
 import java.io.Serializable;
 
 import sketchupblocks.exception.UnexpectedNonSquareMatrixException;
@@ -132,10 +133,10 @@ public class Matrix implements Serializable
         }
     }
     
-    public static double determinant(Matrix m) throws UnexpectedNonSquareMatrixException
+    public static double determinant(Matrix m)
     {
     	if (!m.isSquare())
-    		throw new UnexpectedNonSquareMatrixException("Cannot calculate determinant of nonsquare matrix");
+    		throw new RuntimeException("Cannot calculate determinant of nonsquare matrix");
     	if (m.rows == 1 && m.cols == 1)
     	{
     		return m.data[0][0];
@@ -176,10 +177,10 @@ public class Matrix implements Serializable
     	return new Matrix(d);
     }
     
-    public Matrix padMatrix() throws UnexpectedNonSquareMatrixException
+    public Matrix padMatrix()
     {
     	if(!isSquare())
-    		throw new UnexpectedNonSquareMatrixException("I'm really not that square.");
+    		throw new RuntimeException("Cannot pad nonsquare matrix");
     	
     	Matrix result = new Matrix(rows + 1, cols + 1);
     	for(int x = 0; x < cols; ++x)
@@ -199,10 +200,10 @@ public class Matrix implements Serializable
     }
     
     
-    public Matrix getInverse() throws UnexpectedNonSquareMatrixException, UnexpectedArrayConversionException
+    public Matrix getInverse()
     {
     	if (!isSquare())
-    		throw new UnexpectedNonSquareMatrixException("Cannot invert a nonsquare matrix");
+    		throw new RuntimeException("Cannot invert a nonsquare matrix");
     	
     	double[][] d = new double[rows][rows];
     	Matrix[] lup = LUDecomposer.decompose(this);
@@ -223,10 +224,7 @@ public class Matrix implements Serializable
     public static Matrix add(Matrix A, Matrix B)
     {
         if (A.cols != B.cols || A.rows != B.rows)
-        {
-            System.out.println("Cannot add these matrices");
-            throw new RuntimeException();
-        }
+        	throw new RuntimeException("Cannot addd matrices of non-equal dimension");
         
         double[][] data = new double[A.rows][A.cols];
         
@@ -243,10 +241,7 @@ public class Matrix implements Serializable
     public static Matrix subtract(Matrix A, Matrix B)
     {
         if (A.cols != B.cols || A.rows != B.rows)
-        {
-            System.out.println("Cannot subtract these matrices");
-            throw new RuntimeException();
-        }
+        	throw new RuntimeException("Cannot addd matrices of non-equal dimension");
         
         double[][] data = new double[A.rows][A.cols];
         
@@ -264,8 +259,7 @@ public class Matrix implements Serializable
     {
         if (cols != 1)
         {
-            System.out.println("Norm for multi-col matrix is not supported");
-            throw new RuntimeException();
+            throw new RuntimeException("Norm for multi-col matrix is not supported");
         }
         double sum = 0;
         for (int k = 0; k < rows; k++)
@@ -273,11 +267,11 @@ public class Matrix implements Serializable
         return Math.sqrt(sum);
     }
     
-    public double[] toArray() throws UnexpectedArrayConversionException
+    public double[] toArray()
     {
         if (cols != 1)
         {
-             throw new UnexpectedArrayConversionException("Cannot convert matrix to Array");
+             throw new RuntimeException("Cannot convert matrix to Array");
         }
         double[] res = new double[rows];
         for (int k = 0; k < rows; k++)
@@ -287,11 +281,11 @@ public class Matrix implements Serializable
         return res;
     }
     
-	 public Vec3 toVec3() throws UnexpectedVectorConversionException 
+	 public Vec3 toVec3()
 	 {
 	     if (cols != 1 || rows < 3)
 	     {
-			throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3");
+			throw new RuntimeException("Cannot convert matrix to vec3");
 	    	 
 	     }
 	     else
@@ -301,11 +295,11 @@ public class Matrix implements Serializable
 	     }
 	 }
 	
-	 public Vec4 toVec4() throws UnexpectedVectorConversionException
+	 public Vec4 toVec4()
 	 {
 	     if (cols != 1 || rows != 4)
 	     {
-	         throw new UnexpectedVectorConversionException("Cannot convert matrix to vec4");
+	         throw new RuntimeException("Cannot convert matrix to vec4");
 	     }
 	     else
 	     {
@@ -314,11 +308,11 @@ public class Matrix implements Serializable
 	     }
 	 }
 	
-	public Vec3[] toVec3Array() throws UnexpectedVectorConversionException
+	public Vec3[] toVec3Array()
 	{
 	    if (rows != 3)
 	    {
-	        throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3Array");
+	        throw new RuntimeException("Cannot convert matrix to vec3Array");
 	    }
 	
 	    Vec3[] res = new Vec3[cols];
@@ -335,8 +329,7 @@ public class Matrix implements Serializable
 	{
 		if (m1.cols != 3)
 		{
-			System.out.println("Error!! Cannot multiply with vec3 "+m1.cols);
-			throw new RuntimeException();
+			throw new RuntimeException("Error!! Cannot multiply with vec3 "+m1.cols);
 		}
 		
 		double[] vdata = v.toArray();
@@ -359,8 +352,7 @@ public class Matrix implements Serializable
 	{
 		if (m1.cols != 4)
 		{
-			System.out.println("Error!! Cannot multiply with vec4 "+m1.cols);
-			throw new RuntimeException();
+			throw new RuntimeException("Error!! Cannot multiply with vec4 "+m1.cols);
 		}
 		
 		double[] vdata = v.toArray();
@@ -383,15 +375,7 @@ public class Matrix implements Serializable
 	    {
 	        if (m1.cols != m2.rows)
 	        {
-	            System.out.println("Invalid multiplication\nm1.cols: "+m1.cols+"\tm2.rows: "+m2.rows);
-	            try
-	            {
-	            	throw new RuntimeException();
-	            }
-	            catch(Exception e)
-	            {
-	            	e.printStackTrace();
-	            }
+	            throw new RuntimeException("Invalid multiplication\nm1.cols: "+m1.cols+"\tm2.rows: "+m2.rows);
 		    }
 		    Matrix res = new Matrix(m1.rows, m2.cols);
 		

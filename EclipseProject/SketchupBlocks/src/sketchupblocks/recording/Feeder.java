@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import processing.core.PApplet;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.Interpreter;
+import sketchupblocks.base.Logger;
 import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
 
@@ -100,7 +101,6 @@ class Firer extends Thread
 			}
 			
 		}
-		if (Settings.verbose > 2)
-			System.out.println(cameraID+" is done");
+		Logger.log(cameraID+" is done", 10);
 	}
 }

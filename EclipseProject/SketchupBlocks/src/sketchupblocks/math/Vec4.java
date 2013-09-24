@@ -52,16 +52,6 @@ public class Vec4
         return (one.x * two.x + one.y * two.y + one.z * two.z + one.w*two.w);
     }
 
-    /*public static Vec4 cross(Vec4 one, Vec4 two)
-    {
-            double newX = one.y * two.z - one.z * two.y;
-            double newY = one.z * two.x - one.x * two.z;
-            double newZ = one.x * two.y - one.y * two.x;
-            double newW = one.w 
-
-            return new Vec4(newX, newY, newZ);
-    }*/
-
     public static Vec4 normalize(Vec4 one)
     {
         double magnitude = Math.sqrt(one.x * one.x + one.y * one.y + one.z * one.z + one.w* one.w);

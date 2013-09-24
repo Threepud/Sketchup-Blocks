@@ -2,6 +2,7 @@ package sketchupblocks.base;
 
 import java.util.ArrayList;
 
+import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.network.Lobby;
 

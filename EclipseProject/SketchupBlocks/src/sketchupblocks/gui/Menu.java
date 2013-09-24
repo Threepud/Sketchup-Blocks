@@ -5,6 +5,7 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.CommandBlock;
+import sketchupblocks.base.Logger;
 import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
 
@@ -101,7 +102,7 @@ public class Menu
 				case SPECTATE:
 					break;
 				default:
-					System.err.println("Command not yet supported.");
+					Logger.log("Unsupported command", 1);
 			}
 		}
 	}

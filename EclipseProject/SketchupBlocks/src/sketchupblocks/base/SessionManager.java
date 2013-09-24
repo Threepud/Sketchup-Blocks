@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import processing.core.PApplet;
 import processing.event.KeyEvent;
+import sketchupblocks.construction.ModelBlock;
+import sketchupblocks.construction.ModelConstructor;
 import sketchupblocks.database.Block;
 import sketchupblocks.database.BlockDatabase;
 import sketchupblocks.database.SmartBlock;
@@ -55,31 +57,23 @@ public class SessionManager
 		server.start();
 		
 		sarah = new ModelViewer();
+		
 		try 
 		{
 			sarah.setLobby(lobby);
-		} 
-		catch (Exception e1) 
-		{
-			System.out.println("The catz of the universe hate our programmer guts. (Just the programmer guts)");
-			e1.printStackTrace();
-			System.exit(-1);
-		}
-		sarah.setWindow(parent);
-		menu = new Menu(this, parent);
+			sarah.setWindow(parent);
+			menu = new Menu(this, parent);
+			
+			lobby.registerChangeListener(sarah);
+			
+			jimmy = new ModelConstructor(this);
+			jimmy.setLobby(lobby);
+			
+			dbPaths = new String[3];
+			dbPaths[0] = "./dbs/SmartBlock.dat";
+			dbPaths[1] = "./dbs/CommandBlock.dat";
+			dbPaths[2] = "./dbs/UserBlock.dat";
 		
-		lobby.registerChangeListener(sarah);
-		
-		jimmy = new ModelConstructor(this);
-		jimmy.setLobby(lobby);
-		
-		dbPaths = new String[3];
-		dbPaths[0] = "./dbs/SmartBlock.dat";
-		dbPaths[1] = "./dbs/CommandBlock.dat";
-		dbPaths[2] = "./dbs/UserBlock.dat";
-		
-    	try 
-    	{
 			blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
 		} 
     	catch (Exception e) 
@@ -94,14 +88,14 @@ public class SessionManager
     {
     	//We still require some sort of menu traversal scheme...
     	Block block = blockDB.findBlock(cameraEvent.fiducialID);
+    	
     	if(block instanceof UserBlock)
     	{
     		System.out.println("This feature is not yet supported");
     	}
     	else if (block instanceof CommandBlock)
     	{
-    		if (Settings.verbose >= 3)
-    			System.out.println("--Recognized command block--");
+    		Logger.log("--Recognized command block--", 99);
     		//Rotate model viewer
     		if(((CommandBlock) block).type == CommandBlock.CommandType.ROTATE)
     		{
@@ -119,11 +113,7 @@ public class SessionManager
     	}
     	else if (block instanceof SmartBlock && !spectating)
     	{
-    		if (Settings.verbose >= 3)
-    		{
-    			System.out.println("--Recognized smart block--");
-    			System.out.println("Camera ID: " + cameraEvent.cameraID);
-    		}
+    		Logger.log("--Recognized smart block--\n"+"Camera ID: " + cameraEvent.cameraID, 98);
     		InputBlock iblock = new InputBlock(block, cameraEvent);
 			jimmy.receiveBlock(iblock);
     	}
@@ -134,8 +124,7 @@ public class SessionManager
     	}
     	else
     	{
-    		if (Settings.verbose >= 1)
-    			System.out.println("--Unrecognized block!!--"+ cameraEvent.fiducialID);
+    		Logger.log("--Unrecognized block!!--"+ cameraEvent.fiducialID, 10);
     	}
     }
     
@@ -159,16 +148,10 @@ public class SessionManager
 		}
     }
     
-    public void updateCalibratedCameras(boolean[] calibrated)
+    public void updateCameraPosition(int cameraID)
     {
-    	menu.updateCalibratedCameras(calibrated);
-    }
-    
-    public void updateCameraPosition(int cameraID, Vec3 camPosition)
-    {
-    	cameraPositions[cameraID] = camPosition;
     	if(sarah != null)
-    		sarah.updateSystemCameraPosition(cameraID, camPosition);
+    		sarah.updateSystemCameraPosition(cameraID);
     	
     }
     
@@ -199,7 +182,7 @@ public class SessionManager
     	for(int k = 0 ; k < cameraPositions.length ; k++)
     	{
 	    	if(cameraPositions[k] != null)
-	    		sarah.updateSystemCameraPosition(k, cameraPositions[k]);
+	    		sarah.updateSystemCameraPosition(k);
     	}
     	
     }
@@ -222,7 +205,7 @@ public class SessionManager
 		}
 		catch (ModelNotSetException e) 
 		{
-			System.out.println(e);
+			e.printStackTrace();
 			return false;
 		}
     }
@@ -239,7 +222,7 @@ public class SessionManager
 		}
 		catch(ModelNotSetException e)
 		{
-			System.out.println(e);
+			e.printStackTrace();
 			return;
 		}
 		ArrayList<ModelBlock> blocks = new ArrayList<>(model.getBlocks());

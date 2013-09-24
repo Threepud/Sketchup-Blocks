@@ -1,5 +1,4 @@
 package sketchupblocks.calibrator;
-import java.util.Date;
 
 public class ParticleSystem
 {
@@ -49,7 +48,7 @@ public class ParticleSystem
 					else
 					{ // Star
 						double [] bestNow = Particle.cloneDA(particles[0].bestPosition);
-						double bestScoreNow  = bestScoreNow = particles[0].bestScore;
+						double bestScoreNow  =  particles[0].bestScore;
 						
 						for(int k = 0 ; k < particles.length; k++) // for every particle find its local best
 							if(particles[k].bestScore > bestScoreNow)
@@ -63,15 +62,12 @@ public class ParticleSystem
 						bestScore[0] = bestScoreNow;
 					}
 				
-				int bestIndex = -1;
 				double bestScoreSearch = -Double.MAX_VALUE;
 				for(int k = 0 ; k < particles.length; k++)
 					if(scores[k].score >= bestScoreSearch)
 					{
 						bestScoreSearch = scores[k].score;
-						bestIndex = k;
 					}
-				
 				
 				//update positions
 				for(int p = 0 ; p < particles.length; p++)
@@ -91,21 +87,5 @@ public class ParticleSystem
 			    }
 	
 	return result;
-	}
-	
-	private double highest(double [] arr)
-	{
-		double h = arr[0];
-		for(int k = 0 ; k < arr.length ; k++)
-			h = h > arr[k] ? h : arr[k] ;
-		return h;
-	}
-
-	private double highest(EvalResults [] arr)
-	{
-		double h = arr[0].score;
-		for(int k = 0 ; k < arr.length ; k++)
-			h = h > arr[k].score ? h : arr[k].score ;
-		return h;
 	}
 }

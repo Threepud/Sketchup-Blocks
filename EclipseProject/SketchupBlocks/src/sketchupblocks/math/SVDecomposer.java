@@ -12,10 +12,10 @@ import sketchupblocks.exception.NoConvergenceException;
  */
 public class SVDecomposer 
 {
+	public static int MaxIter = 30;
     //Return U, W, V
     public static Matrix[] decompose(Matrix A) throws NoConvergenceException
     {
-        Matrix oldA = new Matrix(A.data.clone());
         A = prep(A);
         
         //Now A can be treated as a Matrix with 1-based indexing.
@@ -206,11 +206,9 @@ public class SVDecomposer
                         }
                         break;
                 }
-                if (its == 30) 
+                if (its == MaxIter) 
                 {
-                    System.out.println("no convergence in 30 svdcmp iterations");
-                    System.out.println(oldA);
-                    throw new NoConvergenceException("No Convergence in 30 svdcmp Iterations");
+                    throw new RuntimeException("No Convergence in 30 svdcmp Iterations");
                 }
                 x = w[l];// Shift from bottom 2-by-2 minor.
                 nm = k-1;
@@ -279,11 +277,7 @@ public class SVDecomposer
         V = unprep(V);
         A = unprep(A);
         
-        Matrix[] res = new Matrix[]{A, W, V};
-        /*System.out.println("U = "+A);
-        System.out.println("S = "+W);
-        System.out.println("V = "+V);*/
-        return res;
+        return new Matrix[]{A, W, V};
         
     }
     

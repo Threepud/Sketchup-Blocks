@@ -4,17 +4,17 @@ public class Face
 {
 	public Vec3[] corners;
 	
-	public Face(Vec3[] _corners) throws Exception
+	public Face(Vec3[] _corners)
 	{
 		corners = _corners;
 		if (corners.length < 2)
-			throw new Exception("Invalid face specification");
+			throw new RuntimeException("Invalid face specification");
 	}
 	
-	public Vec3 normal() throws Exception
+	public Vec3 normal()
 	{
 		if (corners.length < 3)
-			throw new Exception("Invalid face specification");
+			throw new RuntimeException("Invalid face specification");
 		
 		Vec3 oneToTwo = Vec3.subtract(corners[0], corners[1]);
 		Vec3 oneToThree = Vec3.subtract(corners[0], corners[2]);

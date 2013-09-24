@@ -22,6 +22,7 @@ public class SketchupBlocks extends PApplet
 		}
 		
 		Settings.readSettings("Settings.xml");
+		RuntimeData.init();
 		sessMan = new SessionManager(this);
 		startTime = System.currentTimeMillis();
 	}

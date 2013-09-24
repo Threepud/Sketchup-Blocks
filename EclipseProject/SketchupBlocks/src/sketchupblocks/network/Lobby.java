@@ -1,7 +1,7 @@
 package sketchupblocks.network;
 import sketchupblocks.base.Model;
-import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
+import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.exception.ModelNotSetException;
 
 public interface Lobby

@@ -7,9 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
 import sketchupblocks.base.Settings;
+import sketchupblocks.construction.ModelBlock;
 
 public class Server extends Thread implements ModelChangeListener 
 {

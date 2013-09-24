@@ -22,7 +22,7 @@ public class CP extends Function
     }
     
     @Override
-    public Matrix calcF(Matrix inputs) throws Exception 
+    public Matrix calcF(Matrix inputs)
     {
         double[] cPos = extractInput(inputs);
         double[][] data = new double[numEquations][1];
@@ -41,7 +41,7 @@ public class CP extends Function
     }
 
     @Override
-    public Matrix calcJ(Matrix inputs) throws Exception 
+    public Matrix calcJ(Matrix inputs)
     {
         double[] cPos = extractInput(inputs);
         double[][] data = new double[numEquations][cPos.length];

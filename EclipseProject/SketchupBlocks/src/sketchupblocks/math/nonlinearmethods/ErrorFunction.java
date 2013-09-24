@@ -16,10 +16,9 @@ public class ErrorFunction extends Function
         f = _f;
     }
     
-    public double calcG(Matrix inputs) throws Exception
+    public double calcG(Matrix inputs)
     {
         Matrix fout = f.calcF(inputs);
-        //System.out.println("Fout: "+fout);
         double res = 0;
         
         for (int k = 0; k < fout.rows; k++)
@@ -27,7 +26,7 @@ public class ErrorFunction extends Function
         return res;
     }
     
-    public Matrix calcDelG(Matrix inputs) throws Exception
+    public Matrix calcDelG(Matrix inputs)
     {
         Matrix J = f.calcJ(inputs);
         Matrix F = f.calcF(inputs);
@@ -35,13 +34,13 @@ public class ErrorFunction extends Function
     }
     
     @Override
-    public Matrix calcF(Matrix inputs) throws Exception
+    public Matrix calcF(Matrix inputs)
     {
         return f.calcF(inputs);
     }
 
     @Override
-    public Matrix calcJ(Matrix inputs) throws Exception
+    public Matrix calcJ(Matrix inputs)
     {
         return f.calcJ(inputs);
     }

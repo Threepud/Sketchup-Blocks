@@ -1,6 +1,5 @@
 package sketchupblocks.math;
 
-import sketchupblocks.exception.UnexpectedArrayConversionException;
 
 public class LUDecomposer 
  {
@@ -11,8 +10,7 @@ public class LUDecomposer
     		throw new NullPointerException();
     	if (!a.isSquare())
     	{
-    		System.out.println("Cannot decompose nonsquare matrix.");
-    		return null;
+    		throw new RuntimeException("Cannot decompose nonsquare matrix.");
     	}
         int n = a.cols;
         double[][] lu = a.data;
@@ -135,7 +133,7 @@ public class LUDecomposer
         return new Matrix(udata);
     }
     
-    public static double[] solve(double[] b, Matrix[] LUP) throws UnexpectedArrayConversionException
+    public static double[] solve(double[] b, Matrix[] LUP)
     {
         if (!LUP[0].isSquare() || !LUP[1].isSquare() || !LUP[2].isSquare() || b.length != LUP[0].rows)
         {
@@ -148,7 +146,7 @@ public class LUDecomposer
     }
     
     
-    private static double[] forwardSub(double[] b, Matrix L, Matrix P) throws UnexpectedArrayConversionException
+    private static double[] forwardSub(double[] b, Matrix L, Matrix P)
     {
         int n = b.length;
         

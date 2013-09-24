@@ -3,8 +3,8 @@ package sketchupblocks.network;
 import java.util.ArrayList;
 
 import sketchupblocks.base.Model;
-import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
+import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.exception.ModelNotSetException;
 
 public class LocalLobby implements Lobby

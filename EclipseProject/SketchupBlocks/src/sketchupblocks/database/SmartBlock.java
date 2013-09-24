@@ -13,11 +13,6 @@ public class SmartBlock extends Block implements Serializable
 	public Vec3[] vertices;
 	public int[] indices;
 	public Face[] faces;
-
-	/*public boolean areOppositeFidicials(int fiducialID, int fiducialID2) 
-	{
-		return false;
-	}*/
 	
 	
 }

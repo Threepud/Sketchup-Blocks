@@ -14,6 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import processing.data.XML;
+import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;

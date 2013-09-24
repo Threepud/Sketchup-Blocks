@@ -24,7 +24,7 @@ public class BPos extends Function
     }
 
     @Override
-    public Matrix calcF(Matrix inputs) throws Exception
+    public Matrix calcF(Matrix inputs)
     {
         double[] lambdas = extractInput(inputs);
         
@@ -44,13 +44,11 @@ public class BPos extends Function
                 res[num++] = sum;
             }
         }
-        //System.out.println("Returning F: ");
-        //System.out.println(new Matrix(res));
         return new Matrix(res);
     }
     
     @Override
-    public Matrix calcJ(Matrix inputs) throws Exception 
+    public Matrix calcJ(Matrix inputs)
     {
         double[] lambdas = extractInput(inputs);
         
@@ -76,14 +74,11 @@ public class BPos extends Function
                 num++;
             }
         }
-        //System.out.println("Returning J: ");
-        //System.out.println(new Matrix(res));
         return new Matrix(res);
     }
     
     private Vec3 evalPoint(int k, int i, double[] lambdas)
     {
-    	//System.out.println(lambdas.length);
         Vec3 res = Vec3.subtract(camPos[k], camPos[i]);
         res = Vec3.add(res, Vec3.scalar(lambdas[k], dirs[k]));
         res = Vec3.add(res, Vec3.scalar(-lambdas[i], dirs[i]));

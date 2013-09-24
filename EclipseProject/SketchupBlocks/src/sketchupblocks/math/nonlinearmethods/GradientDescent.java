@@ -4,7 +4,7 @@
  */
 package sketchupblocks.math.nonlinearmethods;
 
-import sketchupblocks.base.Settings;
+import sketchupblocks.base.Logger;
 import sketchupblocks.math.Matrix;
 
 /**
@@ -32,11 +32,7 @@ public class GradientDescent
                 
                 if (z0 == 0)
                 {
-                	if (Settings.verbose < 0)
-	            	{
-	                    System.out.println("Zero gradient");
-	                    System.out.println("Error: "+g1);
-	            	}
+                	Logger.log("Zero gradient\n"+"Error: "+g1, 1);
                     return x;
                 }
                 
@@ -49,14 +45,9 @@ public class GradientDescent
                 {
                     alpha3 = alpha3/2.0;
                     g3 = G.calcG(Matrix.subtract(x, Matrix.scalar(alpha3, z)));
-                    //System.out.println("Yay");
                     if (alpha3 < TOL/2.0)
                     {
-                    	/*if (Settings.verbose< 0)
-                    	{
-	                        System.out.println("No likely improvement.");
-	                        System.out.println("Error: "+g1);
-                    	}
+                    	/*Logger.log("No likely improvement\n"+"Error: "+g1, 1);
                         return x;*/
                     	break;
                     }
@@ -87,22 +78,13 @@ public class GradientDescent
                 x = Matrix.subtract(x, Matrix.scalar(alpha, z));
 
                 /*if (Math.abs(g - g1) < TOL)
-                {
-                	if (Settings.verbose < 0)
-	            	{
-	                    System.out.println("Success! TOL: "+TOL+" value: "+Math.abs(g - g1));
-	                    System.out.println("Error: "+g);
-	            	}
-                    return x;
+                {	
+                	/*Logger.log("Success! TOL: "+TOL+" value: "+Math.abs(g - g1\n"+"Error: "+g, 1);
+                        return x;
                 }*/
                 k++;
             }
-
-        	if (Settings.verbose < 0)
-        	{
-        		System.out.println("Max iterations exceeded");
-                System.out.println("Error: "+g);
-        	}
+            Logger.log("Max iterations exceeded\n"+"Error: "+g, 1);
             return x;
         }
         catch(Exception e)

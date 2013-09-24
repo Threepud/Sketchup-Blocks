@@ -4,7 +4,7 @@
  */
 package sketchupblocks.math.nonlinearmethods;
 
-import sketchupblocks.base.Settings;
+import sketchupblocks.base.Logger;
 import sketchupblocks.math.LinearSystemSolver;
 import sketchupblocks.math.Matrix;
 
@@ -41,25 +41,18 @@ public class Newton
                 catch(Exception e)
                 {
                 	e.printStackTrace();
-                    System.out.println("x: "+x);
-                    System.out.println("y: "+y);
+                	Logger.log("x: "+x+"\ny: "+y, 1);
                 }
                 
                 if (y.norm() < TOL)
                 {
-                	if (Settings.verbose < 0)
-                	{
-	                    System.out.println("Success! "+k);
-	                    System.out.println("Error: "+G.calcG(x));
-                	}
+                	Logger.log("Success! "+k+"\nError: "+G.calcG(x), 20);
                     return x;
                 }
-            k++;
+                k++;
             }
-            if (Settings.verbose  < 0)
-            {
-            	System.out.println("Max iterations exceeded in Newton Method");
-            }
+            
+            Logger.log("Max iterations exceeded in Newton Method", 1);
             return x;
             
         }

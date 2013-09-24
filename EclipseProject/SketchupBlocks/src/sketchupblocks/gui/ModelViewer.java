@@ -8,10 +8,12 @@ import processing.core.*;
 import processing.event.*;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.ColladaLoader;
+import sketchupblocks.base.Logger;
 import sketchupblocks.base.Model;
-import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
+import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
+import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
@@ -98,11 +100,12 @@ public class ModelViewer implements ModelChangeListener
 		debugPointsMap.clear();
 	}
 	
-	public void updateSystemCameraPosition(int cameraId, Vec3 pos)
+	public void updateSystemCameraPosition(int camID)
 	{
-		systemCameras[cameraId].eye.x = pos.y * 10.2;
-		systemCameras[cameraId].eye.y = -pos.z * 10.2;
-		systemCameras[cameraId].eye.z = pos.x * 10.2;
+		Vec3 pos = RuntimeData.getCameraPosition(camID);
+		systemCameras[camID].eye.x = pos.y * 10.2;
+		systemCameras[camID].eye.y = -pos.z * 10.2;
+		systemCameras[camID].eye.z = pos.x * 10.2;
 	}
 	
 	public void setSystemCamera(int index, Camera newCamera)
@@ -114,7 +117,7 @@ public class ModelViewer implements ModelChangeListener
 	{
 		if(IDS.length != lines.length)
 		{
-			System.out.println("ERROR: Debug lines, lengths don't match.");
+			Logger.log("ERROR: Debug lines, lengths don't match.", 2);
 			return;
 		}
 		
@@ -128,7 +131,7 @@ public class ModelViewer implements ModelChangeListener
 	{
 		if(IDS.length != points.length)
 		{
-			System.out.println("ERROR: Debug points, lengths don't match.");
+			Logger.log("ERROR: Debug lines, lengths don't match.", 2);
 			return;
 		}
 		
@@ -148,18 +151,11 @@ public class ModelViewer implements ModelChangeListener
 	public void setLobby(Lobby _lobby) throws Exception
 	{
 	    lobby = _lobby;
-	    try
-	    {
-		    Model model = lobby.getModel();
-	    	ArrayList<ModelBlock> blockList = new ArrayList<>(model.getBlocks());
-	    	blockMap = new HashMap<>();
-	    	for(ModelBlock mBlock: blockList)
-	    		blockMap.put(new Integer(mBlock.smartBlock.blockId), mBlock);
-	    }
-	    catch(Exception e)
-	    {
-	    	throw e;
-	    }
+	    Model model = lobby.getModel();
+    	ArrayList<ModelBlock> blockList = new ArrayList<>(model.getBlocks());
+    	blockMap = new HashMap<>();
+    	for(ModelBlock mBlock: blockList)
+    		blockMap.put(new Integer(mBlock.smartBlock.blockId), mBlock);
 	}
 	  
 	public void fireModelChangeEvent(ModelBlock change)
@@ -253,15 +249,15 @@ public class ModelViewer implements ModelChangeListener
 			//draw block list
 			for(ModelBlock block: new ArrayList<ModelBlock>(blockMap.values()))
 			{
-				if(block.type == ModelBlock.ChangeType.REMOVE)
-					System.out.println("Drawing removed block!");
+				if (block.type == ModelBlock.ChangeType.REMOVE)
+					Logger.log("Drawing removed block!", 1);
 				
 				SmartBlock smartBlock = block.smartBlock;
 				window.beginShape(PConstants.TRIANGLES);
 				for(int x = 0; x < smartBlock.indices.length; ++x)
 				{
 					Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
-					//System.out.println(block.transformationMatrix);
+					
 					vertex = Matrix.multiply(block.transformationMatrix, vertex.padVec3()).toVec3();
 					window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
 				}

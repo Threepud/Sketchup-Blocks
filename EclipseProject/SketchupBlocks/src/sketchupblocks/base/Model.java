@@ -3,6 +3,8 @@ package sketchupblocks.base;
 import java.util.HashMap;
 import java.util.Collection;
 
+import sketchupblocks.construction.ModelBlock;
+
 public class Model
 {
 	private String id;

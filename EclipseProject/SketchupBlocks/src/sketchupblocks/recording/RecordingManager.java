@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 import processing.core.PApplet;
+import sketchupblocks.base.Logger;
 import sketchupblocks.base.Settings;
 
 public class RecordingManager extends PApplet
@@ -22,7 +23,7 @@ public class RecordingManager extends PApplet
 	{
 		settings = new Settings("Settings.xml");
 		recorders = new Recorder[Settings.numCameras];
-		System.out.println("Num recorders created; "+recorders.length+" "+Settings.numCameras);
+		Logger.log("Num recorders created; "+recorders.length+" "+Settings.numCameras, 10);
 		for (int k = 0; k < recorders.length; k++)
 		{
 			recorders[k] = new Recorder(Settings.cameraSettings[k].port, this, k);
@@ -32,7 +33,7 @@ public class RecordingManager extends PApplet
 		{
 			recorders[k].startRecording();
 		}
-		System.out.println("Started recording");
+		Logger.log("Started recording", 1);
 		timeStarted = new Date();
 	}
 	
@@ -40,6 +41,7 @@ public class RecordingManager extends PApplet
 	{
 		String[] arguments = {"--present"};
 		PApplet.main("sketchupblocks.recording.RecordingManager", arguments);
+		
 		if (!timedRecording)
 		{
 			Scanner in = new Scanner(System.in);
@@ -49,7 +51,7 @@ public class RecordingManager extends PApplet
 			{
 				recorders[k].stopRecording();
 			}
-			System.out.println("Stopped recording");
+			Logger.log("Stopped recording", 1);
 			in.close();
 		}
 		else
@@ -62,7 +64,7 @@ public class RecordingManager extends PApplet
 			{
 				recorders[k].stopRecording();
 			}
-			System.out.println("Stopped recording");
+			Logger.log("Stopped recording", 1);
 			
 		}
 	}

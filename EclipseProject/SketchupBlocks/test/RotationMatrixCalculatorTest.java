@@ -2,7 +2,7 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
-import sketchupblocks.base.TransformationCalculator;
+import sketchupblocks.construction.TransformationCalculator;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Matrix;
 
