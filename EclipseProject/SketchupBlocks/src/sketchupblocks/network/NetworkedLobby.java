@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import sketchupblocks.base.Model;
 import sketchupblocks.base.ModelBlock;
 import sketchupblocks.base.ModelChangeListener;
+import sketchupblocks.base.SessionManager;
 import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.gui.Menu;
 
@@ -20,11 +22,20 @@ public class NetworkedLobby extends Thread implements Lobby
 	private ArrayList<ModelChangeListener> modelChangeListeners = new ArrayList<ModelChangeListener>();
 	private boolean online = true;
 	private Menu menu;
+	private SessionManager sessMan;
+	
+	//save this for later reconnection
+	private String server;
+	private int port;
 
-	public NetworkedLobby(String server, int port, Menu _menu) throws Exception
+	public NetworkedLobby(String _server, int _port, Menu _menu, SessionManager _sessMan) throws Exception
 	{
+		server = _server;
+		port = _port;
+		
 		connection = new Socket(server,port);
 		menu = _menu;
+		sessMan = _sessMan;
 	}
 
 	public void updateModel(ModelBlock modelBlock)
@@ -79,7 +90,40 @@ public class NetworkedLobby extends Thread implements Lobby
 				{
 					online = false;
 					connection.close();
-					return;
+					
+					//reconnect here
+					menu.createReconnectPopup();
+					
+					Thread t = new Thread()
+					{
+						public void run()
+						{
+							try 
+							{
+								connection = new Socket(server,port);
+								menu.updateNetworkStatus(true);
+								online = true;
+							} 
+							catch (Exception e) 
+							{
+								e.printStackTrace();
+								menu.updateNetworkStatus(false);
+								sessMan.spectate(null);
+							}
+						}
+					};
+					
+					t.start();
+					
+					try 
+					{
+						t.join();
+					} 
+					catch (InterruptedException e1) 
+					{
+						e1.printStackTrace();
+						online = false;
+					}
 				}
 				catch (IOException e1) 
 				{

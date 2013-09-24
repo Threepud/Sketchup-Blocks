@@ -282,6 +282,7 @@ public class SessionManager
     			return;
     		
     		connecting = true;
+    		final SessionManager sessionManager = this;
     		
     		Thread t = new Thread()
     		{
@@ -291,7 +292,7 @@ public class SessionManager
     	    		{
     					menu.createConnectPopup();
     					
-    	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.1", Settings.connectPort, menu); 
+    	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.82", Settings.connectPort, menu, sessionManager); 
     	    			lobby = temp;
     	    			
     	    			server.stopServer();
