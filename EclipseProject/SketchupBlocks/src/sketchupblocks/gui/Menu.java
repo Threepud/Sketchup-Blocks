@@ -114,7 +114,10 @@ public class Menu
 	
 	public void checkCalibrated()
 	{
-		
+		if(!RuntimeData.isSystemCalibrated())
+		{
+			displayList.add(new CalibratePopup(window));
+		}
 	}
 	
 	public void createConnectPopup()
