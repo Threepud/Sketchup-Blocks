@@ -1,14 +1,8 @@
 package sketchupblocks.gui;
 
 import java.util.ArrayList;
-import java.util.Random;
-
 import processing.core.PApplet;
 import processing.core.PConstants;
-import processing.core.PFont;
-import processing.core.PImage;
-import processing.core.PShape;
-import processing.core.PVector;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.SessionManager;
@@ -19,9 +13,13 @@ public class Menu
 	private SessionManager sessMan;
 	private PApplet window;
 	
+	//Network
+	private boolean networkUpdate = false;
+	private boolean networkStatus = false;
+	
 	//Calibration
 	private boolean[] calibratedCams;
-	private boolean calibrated;
+	private boolean calibrated = false;
 	
 	private ArrayList<Popup> displayList;
 	
@@ -36,6 +34,10 @@ public class Menu
 			calibratedCams[x] = false;
 		
 		displayList = new ArrayList<>();
+		
+		if(Settings.showSplash)
+			displayList.add(new SplashPopup(window));
+		
 		displayList.add(new CalibratePopup(window));
 	}
 	
@@ -88,14 +90,28 @@ public class Menu
 		
 	}
 	
-	public void reconnectingPopup(boolean status)
+	public void createConnectPopup()
 	{
+		if(!displayList.isEmpty())
+		{
+			if(displayList.get(0) instanceof CalibratePopup)
+			{
+				displayList.remove(0);
+			}
+		}
 		
+		displayList.add(new ConnectingPopup(window));
 	}
 	
-	public void connectingPopup(boolean status)
+	public void createReconnectPopup()
 	{
-		
+		displayList.add(new ReconnectPopup(window));
+	}
+	
+	public void updateNetworkStatus(boolean status)
+	{
+		networkUpdate = true;
+		networkStatus = status;
 	}
 	
 	public void drawMenuOverlay()
@@ -109,11 +125,122 @@ public class Menu
 		{
 			if(displayList.get(0) instanceof CalibratePopup)
 			{
-				
+				CalibratePopup c = (CalibratePopup)displayList.get(0);
+				if(!c.active)
+				{
+					c.activate();
+				}
+				else
+				{
+					if(!c.died)
+					{
+						c.updateCalibratedCameras(calibratedCams);
+						if(calibrated)
+						{
+							c.feedPoison();
+						}
+						
+						c.draw();
+					}
+					else
+					{
+						displayList.remove(0);
+					}
+				}
 			}
 			else if(displayList.get(0) instanceof ReconnectPopup)
 			{
-				
+				ReconnectPopup c = (ReconnectPopup)displayList.get(0);
+				if(!c.active)
+				{
+					c.activate();
+				}
+				else
+				{
+					if(!c.died)
+					{
+						if(networkUpdate)
+						{
+							c.setStatus(networkStatus);
+							c.feedPoison();
+							
+							networkUpdate = false;
+						}
+						
+						c.draw();
+					}
+					else
+					{
+						displayList.remove(0);
+					}
+				}
+			}
+			else if(displayList.get(0) instanceof ConnectingPopup)
+			{
+				ConnectingPopup c = (ConnectingPopup)displayList.get(0);
+				if(!c.active)
+				{
+					c.activate();
+				}
+				else
+				{
+					if(!c.died)
+					{
+						if(networkUpdate)
+						{
+							c.setStatus(networkStatus);
+							c.feedPoison();
+							
+							networkUpdate = false;
+						}
+						
+						c.draw();
+					}
+					else
+					{
+						displayList.remove(0);
+					}
+				}
+			}
+			else if(displayList.get(0) instanceof UserPopup)
+			{
+				UserPopup c = (UserPopup)displayList.get(0);
+				if(!c.active)
+				{
+					c.activate();
+					c.feedPoison();
+				}
+				else
+				{
+					if(!c.died)
+					{
+						c.draw();	
+					}
+					else
+					{
+						displayList.remove(0);
+					}
+				}
+			}
+			else if(displayList.get(0) instanceof SplashPopup)
+			{
+				SplashPopup c = (SplashPopup)displayList.get(0);
+				if(!c.active)
+				{
+					c.activate();
+					c.feedPoison();
+				}
+				else
+				{
+					if(!c.died)
+					{
+						c.draw();
+					}
+					else
+					{
+						displayList.remove(0);
+					}
+				}
 			}
 		}
 		
