@@ -8,7 +8,7 @@ import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
 import sketchupblocks.database.Block;
-import sketchupblocks.database.Logger;
+import sketchupblocks.base.Logger;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Vec3;

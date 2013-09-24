@@ -2,7 +2,7 @@ package sketchupblocks.calibrator;
 import sketchupblocks.base.InputBlock;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
-import sketchupblocks.database.Logger;
+import sketchupblocks.base.Logger;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.nonlinearmethods.CP;
 import sketchupblocks.math.nonlinearmethods.ErrorFunction;

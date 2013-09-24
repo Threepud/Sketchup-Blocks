@@ -10,6 +10,7 @@ import sketchupblocks.database.*;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.InputBlock;
+import sketchupblocks.base.Logger;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
