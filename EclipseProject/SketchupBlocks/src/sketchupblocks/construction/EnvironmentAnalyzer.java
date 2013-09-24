@@ -1,6 +1,8 @@
 package sketchupblocks.construction;
 
 import java.util.Collection;
+
+import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
 public class EnvironmentAnalyzer 
@@ -42,5 +44,15 @@ public class EnvironmentAnalyzer
 	{
 
 		return null;
+	}
+	
+	/*
+	 * Return an array of blocks a line passes through.
+	 * 
+	 */
+	public static ModelBlock [] getIntersectingModels(Vec3 start, Vec3 end)
+	{
+	return null;	
+	
 	}
 }
