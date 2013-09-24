@@ -1,6 +1,5 @@
 package sketchupblocks.construction;
 
-import sketchupblocks.exception.UnexpectedNonSquareMatrixException;
 import sketchupblocks.math.Face;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.RotationMatrix3D;
