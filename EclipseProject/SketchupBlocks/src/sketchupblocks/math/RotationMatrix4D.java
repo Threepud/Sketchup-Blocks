@@ -2,6 +2,7 @@ package sketchupblocks.math;
 
 public class RotationMatrix4D extends Matrix 
 {
+	private static final long serialVersionUID = 1L;
 	Axis axis;
 	public RotationMatrix4D()
 	{

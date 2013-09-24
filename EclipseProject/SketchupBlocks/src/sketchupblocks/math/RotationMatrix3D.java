@@ -6,6 +6,7 @@ package sketchupblocks.math;
  */
 public class RotationMatrix3D extends Matrix
 {
+	private static final long serialVersionUID = 1L;
 	private Axis axis;
     public RotationMatrix3D(double theta, Axis _axis)
     {

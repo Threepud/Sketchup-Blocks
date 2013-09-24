@@ -2,12 +2,11 @@ package sketchupblocks.math;
 
 import java.io.Serializable;
 
-import sketchupblocks.exception.UnexpectedNonSquareMatrixException;
-import sketchupblocks.exception.UnexpectedVectorConversionException;
-import sketchupblocks.exception.UnexpectedArrayConversionException;
 
 public class Matrix implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	public enum Axis
 	{
 		X_AXIS, Y_AXIS, Z_AXIS
