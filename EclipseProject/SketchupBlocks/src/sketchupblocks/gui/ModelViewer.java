@@ -1,7 +1,6 @@
 package sketchupblocks.gui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import processing.core.*;
@@ -10,21 +9,20 @@ import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.ColladaLoader;
 import sketchupblocks.base.Logger;
 import sketchupblocks.base.Model;
-import sketchupblocks.base.ModelChangeListener;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
 import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.database.SmartBlock;
+import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
-public class ModelViewer implements ModelChangeListener
+public class ModelViewer
 {
 	private PApplet window;
 	private Lobby lobby;
-	private HashMap<Integer,ModelBlock> blockMap;
 	private Camera userCamera;
 	private Camera[] systemCameras;
 	private Camera currentCamera;
@@ -93,9 +91,8 @@ public class ModelViewer implements ModelChangeListener
 		currentCamera = userCamera;
 	}
 	
-	public void clearModel()
+	public void clearDebugData()
 	{
-		blockMap.clear();
 		debugLines.clear();
 		debugPointsMap.clear();
 	}
@@ -151,19 +148,6 @@ public class ModelViewer implements ModelChangeListener
 	public void setLobby(Lobby _lobby) throws Exception
 	{
 	    lobby = _lobby;
-	    Model model = lobby.getModel();
-    	ArrayList<ModelBlock> blockList = new ArrayList<>(model.getBlocks());
-    	blockMap = new HashMap<>();
-    	for(ModelBlock mBlock: blockList)
-    		blockMap.put(new Integer(mBlock.smartBlock.blockId), mBlock);
-	}
-	  
-	public void fireModelChangeEvent(ModelBlock change)
-	{
-		if(change.type == ModelBlock.ChangeType.UPDATE)
-			blockMap.put(new Integer(change.smartBlock.blockId), change);
-		else
-			blockMap.remove(new Integer(change.smartBlock.blockId));
 	}
 	
 	public void rotateView(CameraEvent event)
@@ -247,7 +231,17 @@ public class ModelViewer implements ModelChangeListener
 			window.scale(10, 10, 10);
 			
 			//draw block list
-			for(ModelBlock block: new ArrayList<ModelBlock>(blockMap.values()))
+			Model model;
+			try 
+			{
+				model = lobby.getModel();
+			} 
+			catch (ModelNotSetException e) 
+			{
+				e.printStackTrace();
+				return;
+			}
+			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
 			{
 				if (block.type == ModelBlock.ChangeType.REMOVE)
 					Logger.log("Drawing removed block!", 1);
@@ -455,7 +449,19 @@ public class ModelViewer implements ModelChangeListener
 		else if(e.getKey() == 'e')
 		{
 			if(e.getAction() == KeyEvent.RELEASE)
-				ColladaLoader.export(new ArrayList<ModelBlock>(blockMap.values()));
+			{
+				Model model;
+				try 
+				{
+					model = lobby.getModel();
+				}
+				catch (ModelNotSetException e1) 
+				{
+					e1.printStackTrace();
+					return;
+				}
+				ColladaLoader.export(new ArrayList<ModelBlock>(model.getBlocks()));
+			}
 		}
 		else if(e.getKey() == 'm')
 		{
