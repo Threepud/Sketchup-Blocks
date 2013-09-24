@@ -167,7 +167,7 @@ public class ModelConstructor implements Runnable
 			catch(Exception e)
 			{
 				e.printStackTrace();
-				//If the is a concurrent change an exception will be thrown. Then we simply try again.
+				//If there is a concurrent change, then an exception will be thrown and we simply try again.
 			}
 		}
 	}
