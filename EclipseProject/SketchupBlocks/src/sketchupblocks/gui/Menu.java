@@ -120,6 +120,17 @@ public class Menu
 		}
 	}
 	
+	public void forceStopConnectPopup()
+	{
+		if(!displayList.isEmpty())
+		{
+			if(displayList.get(0) instanceof ConnectingPopup)
+			{
+				displayList.remove(0);
+			}
+		}
+	}
+	
 	public void createConnectPopup()
 	{
 		if(!displayList.isEmpty())
