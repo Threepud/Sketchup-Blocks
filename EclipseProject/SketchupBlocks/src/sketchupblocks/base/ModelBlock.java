@@ -7,6 +7,8 @@ import sketchupblocks.math.Matrix;
 
 public class ModelBlock implements Serializable
 {
+	private static final long serialVersionUID = -4643734394368790618L;
+
 	public enum ChangeType implements Serializable
 	{
 		UPDATE,
