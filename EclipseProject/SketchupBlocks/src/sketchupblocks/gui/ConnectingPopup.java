@@ -6,7 +6,6 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
 import processing.core.PVector;
-import sketchupblocks.base.Settings;
 
 public class ConnectingPopup implements Popup 
 {
