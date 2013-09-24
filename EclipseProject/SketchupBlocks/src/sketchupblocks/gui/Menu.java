@@ -65,16 +65,37 @@ public class Menu
 					{
 						if(sessMan.checkModelExists())
 						{
-							//add to display list
+							if(!displayList.isEmpty())
+							{
+								if(displayList.get(displayList.size() - 1) instanceof UserPopup)
+								{
+									if(((UserPopup)displayList.get(displayList.size() - 1)).userMessage.equals("Export"))
+									{
+										return;
+									}
+								}
+							}
+							
+							displayList.add(new UserPopup(window, "Export"));
 						}
 						else
 						{
 							//show warning message
+							System.out.println("ERROR: No model avaliable.");
 						}
 					}
 					else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
 					{
-						//remove from display list
+						if(!displayList.isEmpty())
+						{
+							if(displayList.get(displayList.size() - 1) instanceof UserPopup)
+							{
+								if(((UserPopup)displayList.get(displayList.size() - 1)).userMessage.equals("Export"))
+								{
+									displayList.remove(displayList.size() - 1);
+								}
+							}
+						}
 					}
 					break;
 				case SPECTATE:
