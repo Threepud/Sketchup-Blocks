@@ -42,6 +42,7 @@ public class Menu
 			displayList.add(new SplashPopup(window));
 		
 		displayList.add(new CalibratePopup(window));
+		//displayList.add(new WarningPopup(window, "No Model Found"));
 	}
 	
 	private void updateCalibratedCameras()
@@ -86,8 +87,7 @@ public class Menu
 						}
 						else
 						{
-							//show warning message
-							System.out.println("ERROR: No model avaliable.");
+							displayList.add(new WarningPopup(window, "No Model Found"));
 						}
 					}
 					else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
@@ -268,6 +268,26 @@ public class Menu
 			else if(displayList.get(0) instanceof SplashPopup)
 			{
 				SplashPopup c = (SplashPopup)displayList.get(0);
+				if(!c.active)
+				{
+					c.activate();
+					c.feedPoison();
+				}
+				else
+				{
+					if(!c.died)
+					{
+						c.draw();
+					}
+					else
+					{
+						displayList.remove(0);
+					}
+				}
+			}
+			else if(displayList.get(0) instanceof WarningPopup)
+			{
+				WarningPopup c = (WarningPopup)displayList.get(0);
 				if(!c.active)
 				{
 					c.activate();
