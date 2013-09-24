@@ -1,4 +1,4 @@
-package sketchupblocks.base;
+package sketchupblocks.construction;
 
 import sketchupblocks.exception.UnexpectedNonSquareMatrixException;
 import sketchupblocks.math.Face;
@@ -22,10 +22,9 @@ public class PseudoPhysicsApplicator
 		eddy = _eddy;
 	}
 	
-	public void applyPseudoPhysics(ModelBlock m) throws Exception
+	public void applyPseudoPhysics(ModelBlock m)
 	{
 		//We will first need to know what is below a particular shape so that we know how to rotate it so that its bottom face is 'flat' on the shape below.
-		//For this, we could perhaps try to find the bottom shape's upper face? Or maybe we could ask its bounding box...?
 		//First of all, how do we find the shape below it?
 		//We translate it to the appropriate spot. Then, we compare its xy-range to all the other blocks in the model, starting with the most _recent_.
 		//If the xy-ranges overlap, we save how much it overlaps by.
@@ -91,7 +90,7 @@ public class PseudoPhysicsApplicator
 		eddy.updateModel(m);
 	}
 	
-	private RotationMatrix3D findMinimalRot(Face bottomFace, Matrix.Axis axis) throws Exception
+	private RotationMatrix3D findMinimalRot(Face bottomFace, Matrix.Axis axis)
 	{
 		
 		RotationMatrix3D result = new RotationMatrix3D(0, axis);
@@ -131,10 +130,10 @@ public class PseudoPhysicsApplicator
 		return result;
 	}
 	
-	private Matrix extractRotationMatrix(Matrix mat) throws UnexpectedNonSquareMatrixException
+	private Matrix extractRotationMatrix(Matrix mat)
 	{
 		if (!mat.isSquare())
-			throw new UnexpectedNonSquareMatrixException("Cannot extract rotation matrix");
+			throw new RuntimeException("Cannot extract rotation matrix");
 		int offset = mat.cols < 3 ? 0 : 1;
 		double[][] data = new double[mat.rows- offset][mat.cols- offset];
 		for (int k = 0; k < mat.rows - offset; k++)

@@ -1,4 +1,4 @@
-package sketchupblocks.base;
+package sketchupblocks.construction;
 
 import java.io.Serializable;
 

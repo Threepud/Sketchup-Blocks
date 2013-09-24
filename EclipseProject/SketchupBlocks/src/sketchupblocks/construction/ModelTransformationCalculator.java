@@ -1,18 +1,14 @@
-package sketchupblocks.base;
+package sketchupblocks.construction;
 
+import sketchupblocks.base.Logger;
 import sketchupblocks.database.SmartBlock;
-import sketchupblocks.math.Line;
-import sketchupblocks.math.LinearSystemSolver;
 import sketchupblocks.math.Matrix;
-import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.RotationMatrix4D;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.Vec4;
 
 public class ModelTransformationCalculator 
 {
-
-	private static double ERROR_MARGIN = 0.5; //Of square difference
 	
 	public static Matrix getModelTransformationMatrix(Vec3 [] rotation, SmartBlock sBlock, Vec3[] positions, Integer[] fidIDs)
 	{
@@ -25,19 +21,16 @@ public class ModelTransformationCalculator
 					for (int k = 0; k < modelFidCoords.length; k++)
 					{
 						modelFidCoords[k] = sBlock.fiducialCoordinates[fidIDs[k]];
-						System.out.println("Getting coord for "+fidIDs[k]);
-						System.out.println(modelFidCoords[k]);
-						System.out.println(positions[k]);
+						Logger.log("Getting coord for "+fidIDs[k], 30);
+						Logger.log(modelFidCoords[k].toString(), 30);
+						Logger.log(positions[k].toString(), 30);
 					}
 					
 					Matrix[] transformMatrices = TransformationCalculator.calculateTransformationMatrices(modelFidCoords, positions);
-					//System.out.println("ROTATION: "+transformMatrices[0]);
-					//System.out.println("TRANSLATION: "+transformMatrices[1]);
+					Logger.log("ROTATION: "+transformMatrices[0], 20);
+					Logger.log("TRANSLATION: "+transformMatrices[1], 20);
+					
 					return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
-					/*Matrix m = Matrix.multiply(transformMatrices[1],  Matrix.identity(4)); 
-					if (Settings.verbose > 3)
-						System.out.println("TRANSFORMATION: "+m);
-					return m;*/
 				}
 
 				Vec3 m1 = Vec3.scalar(-1, sBlock.fiducialCoordinates[fidIDs[0]]); 
@@ -141,7 +134,7 @@ public class ModelTransformationCalculator
 		return null;
 	}
 	
-	private static Vec3[] getOffsets(Vec3 dm, Vec3 d) throws Exception
+	private static Vec3[] getOffsets(Vec3 dm, Vec3 d)
 	{
 		Vec3[] result = new Vec3[2];
 		int index = 0;
@@ -161,7 +154,7 @@ public class ModelTransformationCalculator
 			result[index++] = Vec3.normalize(new Vec3(1, 1, -(d.x + d.y)/d.z));
 		}
 		else
-			throw new Exception("No offset can be calculated for given d's");
+			throw new RuntimeException("No offset can be calculated for given d's");
 		return result;
 	}
 	

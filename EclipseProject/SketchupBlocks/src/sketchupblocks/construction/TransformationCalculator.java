@@ -1,4 +1,5 @@
-package sketchupblocks.base;
+package sketchupblocks.construction;
+import sketchupblocks.base.Logger;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.SVDecomposer;
 import sketchupblocks.math.Vec3;
@@ -24,8 +25,8 @@ public class TransformationCalculator
 	        double det = Matrix.determinant(proposedR);
 	        if(det < 0)
 	        {
-	        	System.out.println("DETERMINANT: "+det);
-	        	System.out.println("R: "+proposedR);
+	        	Logger.log("DETERMINANT: "+det, 50);
+	        	Logger.log("R: "+proposedR, 50);
 	            int COLUMN_THREE = 2;
 	            for (int k = 0; k < proposedR.rows; k++)
 	            {
@@ -47,11 +48,9 @@ public class TransformationCalculator
 	        	data[k][3] = t.data[k][0];
 	        }
 	        t = new Matrix(data);
-	        if (Settings.verbose > 2)
-	        {
-		        System.out.println("Translation: "+t);
-		        System.out.println("Rotation: "+proposedR);
-	        }
+	        
+	        Logger.log("Translation: "+t, 20);
+	        Logger.log("Rotation: "+proposedR, 20);
 	        
 	       return new Matrix[]{proposedR, t};
 		}
