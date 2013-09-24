@@ -9,10 +9,18 @@ public class Model
 	private HashMap<Integer,ModelBlock> blockMap;
 	public static int classIdCounter = 0 ;
 	  
-	Model()
+	public Model()
 	{
 		id = new Integer(classIdCounter++).toString();
 		blockMap = new HashMap<Integer,ModelBlock>();
+	}
+	
+	public Model(Model oldModel)
+	{
+		id = new String(oldModel.id);
+		
+		blockMap = new HashMap<>();
+		blockMap.putAll(oldModel.blockMap);
 	}
 	  
 	public void addModelBlock(ModelBlock modelBlock)

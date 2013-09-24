@@ -3,6 +3,7 @@ package sketchupblocks.base;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
+import processing.event.KeyEvent;
 import sketchupblocks.database.Block;
 import sketchupblocks.database.BlockDatabase;
 import sketchupblocks.database.SmartBlock;
@@ -11,8 +12,7 @@ import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.gui.Menu;
 import sketchupblocks.gui.ModelViewer;
 import sketchupblocks.math.Vec3;
-import sketchupblocks.network.Lobby;
-import sketchupblocks.network.LocalLobby;
+import sketchupblocks.network.*;
 import sketchupblocks.recording.Feeder;
 import sketchupblocks.math.Line;
 
@@ -22,6 +22,7 @@ public class SessionManager
 	private ModelConstructor jimmy;
 	private Exporter kreshnik;
 	private Lobby lobby;
+	private Server server;
 	private ModelViewer sarah;
 	private ModelLoader modelLoader;
 	private BlockDatabase blockDB;
@@ -29,12 +30,29 @@ public class SessionManager
 	private String[] dbPaths;
 	private Vec3 [] cameraPositions;
 	
+	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
+	
+	private boolean spectating = false;
+	private boolean connecting = false;
+	
 	public SessionManager(PApplet _parent)
 	{
 		parent = _parent;
+		parent.registerMethod("keyEvent", modelViewerEventListener);
 		
 		lobby = new LocalLobby();
 		lobby.setModel(new Model());
+		
+		try
+		{
+			server = new Server(lobby, Settings.hostPort);
+		}
+		catch(Exception e)
+		{
+			System.out.println(e);
+			System.exit(-1);
+		}
+		server.start();
 		
 		sarah = new ModelViewer();
 		try 
@@ -89,7 +107,7 @@ public class SessionManager
     		{
     			sarah.rotateView(cameraEvent);
     		}
-    		else if(((CommandBlock) block).type == CommandBlock.CommandType.CALIBRATE)
+    		else if(((CommandBlock) block).type == CommandBlock.CommandType.CALIBRATE && !spectating)
     		{
     			InputBlock iblock = new InputBlock(block, cameraEvent);
         		jimmy.receiveBlock(iblock);
@@ -99,7 +117,7 @@ public class SessionManager
     			menu.handleInput((CommandBlock)block, cameraEvent);
     		}
     	}
-    	else if (block instanceof SmartBlock)
+    	else if (block instanceof SmartBlock && !spectating)
     	{
     		if (Settings.verbose >= 3)
     		{
@@ -108,6 +126,11 @@ public class SessionManager
     		}
     		InputBlock iblock = new InputBlock(block, cameraEvent);
 			jimmy.receiveBlock(iblock);
+    	}
+    	else if(spectating)
+    	{
+    		if(Settings.verbose >= 1)
+    			System.out.println("Spectating. No live data accepted.");
     	}
     	else
     	{
@@ -138,7 +161,6 @@ public class SessionManager
     
     public void updateCalibratedCameras(boolean[] calibrated)
     {
-    	//TODO: Replace with listener stuff...
     	menu.updateCalibratedCameras(calibrated);
     }
     
@@ -188,16 +210,6 @@ public class SessionManager
     	modelLoader.setLobby(lobby);
     }
     
-    public void loadProject(int slotNumber)
-    {
-      
-    }
-    
-    public void newProject()
-    {
-      
-    }
-    
     public boolean checkModelExists()
     {
     	try 
@@ -234,13 +246,83 @@ public class SessionManager
 		ColladaLoader.export(blocks);
     }
     
-    public void saveProject(int slotNumber)
-    {
-    }
-    
     public void spectate(UserBlock  user)
     {
-      
+    	if(spectating)
+    	{
+    		((NetworkedLobby)lobby).stopLobby();
+    		lobby = null;
+    		lobby = new LocalLobby();
+    		sarah.clearModel();
+    		lobby.setModel(new Model());
+    		
+    		lobby.registerChangeListener(sarah);
+    		
+    		try
+    		{
+    			server = new Server(lobby, Settings.hostPort);
+    		}
+    		catch(Exception e)
+    		{
+    			System.out.println(e);
+    			System.exit(-1);
+    		}
+    		server.start();
+    		
+    		menu.checkCalibrated();
+    		
+    		spectating = !spectating;
+    		
+    		if(Settings.verbose >= 3)
+    			System.out.println("Disconnected.");
+    	}
+    	else
+    	{
+    		if(!spectating && connecting)
+    			return;
+    		
+    		connecting = true;
+    		
+    		Thread t = new Thread()
+    		{
+    			public void run()
+    			{
+    				try
+    	    		{
+    					menu.createConnectPopup();
+    					
+    	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.1", Settings.connectPort, menu); 
+    	    			lobby = temp;
+    	    			
+    	    			server.stopServer();
+    	    			server = null;
+    	        		
+    	    			sarah.clearModel();
+    	            	lobby.setModel(new Model());
+    	            	lobby.registerChangeListener(sarah);
+    	            	((NetworkedLobby)lobby).start();
+    	            	
+    	            	spectating = !spectating;
+    	            	connecting = false;
+    	            	
+    	            	menu.updateNetworkStatus(true);
+    	            	
+    	            	if(Settings.verbose >= 3)
+    	        			System.out.println("Connected.");
+    	    		}
+    	    		catch(Exception e)
+    	    		{
+    	    			menu.updateNetworkStatus(false);
+    	    			connecting = false;
+    	    			
+    	    			System.out.println(e);
+    	    			return;
+    	    		}
+    			}
+    		};
+    		
+    		t.start();
+    	}
     }
     
     public void debugLines(String[] IDS, Line[] lines)
@@ -258,4 +340,22 @@ public class SessionManager
     	sarah.drawModel();
     	menu.drawMenuOverlay();
     }
+    
+    private void viewerFeedKeyboard(KeyEvent event)
+    {
+    	sarah.setKeyboardInput(event);
+    }
+    
+    //keyboard listener
+    protected class ModelViewerEventListener
+	{
+		public void keyEvent(final KeyEvent e) 
+		{
+			if(e.getKey() == 's')
+				if(e.getAction() == KeyEvent.RELEASE)
+					spectate(null);
+			
+			viewerFeedKeyboard(e);
+		}
+	}
 }

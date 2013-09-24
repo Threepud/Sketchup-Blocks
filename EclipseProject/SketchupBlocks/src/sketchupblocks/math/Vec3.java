@@ -1,6 +1,8 @@
 package sketchupblocks.math;
 
-public class Vec3 
+import java.io.Serializable;
+
+public class Vec3 implements Serializable
 {
     public double x;
     public double y;

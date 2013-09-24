@@ -1,8 +1,10 @@
 package sketchupblocks.database;
 
+import java.io.Serializable;
+
 import sketchupblocks.math.Vec3;
 
-public class SmartBlock extends Block
+public class SmartBlock extends Block implements Serializable
 {
 	public String name;
 	public Vec3[] vertices;
