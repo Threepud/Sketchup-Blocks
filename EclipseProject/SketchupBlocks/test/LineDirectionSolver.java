@@ -1,13 +1,7 @@
 
-import static org.junit.Assert.*;
 import org.junit.*;
-import org.junit.rules.ExpectedException;
 import org.junit.runners.*;
 import org.junit.runner.RunWith;
-
-import sketchupblocks.math.LUDecomposer;
-import sketchupblocks.math.LinearSystemSolver;
-import sketchupblocks.math.Vec3;
 
 /*
 Run with:

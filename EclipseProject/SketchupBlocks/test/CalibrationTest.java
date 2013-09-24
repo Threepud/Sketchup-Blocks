@@ -15,7 +15,7 @@ import processing.data.XML;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.InputBlock;
-import sketchupblocks.base.Settings;
+import sketchupblocks.base.RuntimeData;
 import sketchupblocks.calibrator.Calibrator;
 import sketchupblocks.database.Block;
 import sketchupblocks.math.Vec3;
@@ -87,7 +87,7 @@ public class CalibrationTest
 	@Test
 	public void testInitialNotCalibrated()
 	{
-		assertTrue(!cally.isCalibrated());
+		assertTrue(!RuntimeData.isSystemCalibrated());
 	}
 	
 	
@@ -192,8 +192,8 @@ public class CalibrationTest
 		{
 			e.printStackTrace();
 		}
-		assertTrue("Is not calibrated",cally.isCalibrated());
-	    Vec3 camPosition = cally.cameraPositions[0];
+		assertTrue("Is not calibrated", RuntimeData.isSystemCalibrated());
+	    Vec3 camPosition = RuntimeData.getCameraPosition(0);
 	    assertTrue("X component differs by "+Math.abs(camPosition.x - 20) ,Math.abs(camPosition.x - 20) < 5);
 	    assertTrue("Y component differs by "+Math.abs(camPosition.y - 20)   ,Math.abs(camPosition.y - 20) < 5);
 	    assertTrue("Z component differs by "+Math.abs(camPosition.z - 18)   ,Math.abs(camPosition.z - 18) < 5);

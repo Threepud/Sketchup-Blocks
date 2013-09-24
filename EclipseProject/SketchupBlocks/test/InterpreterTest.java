@@ -1,11 +1,8 @@
 
 import static org.junit.Assert.*;
 import org.junit.*;
-import org.junit.rules.ExpectedException;
 import org.junit.runners.*;
 import org.junit.runner.RunWith;
-
-import processing.core.PApplet;
 import sketchupblocks.base.Interpreter;
 
 /*

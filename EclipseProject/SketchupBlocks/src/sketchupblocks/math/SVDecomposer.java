@@ -4,8 +4,6 @@
  */
 package sketchupblocks.math;
 
-import sketchupblocks.exception.NoConvergenceException;
-
 /**
  *
  * @author cravingoxygen
@@ -14,7 +12,7 @@ public class SVDecomposer
 {
 	public static int MaxIter = 30;
     //Return U, W, V
-    public static Matrix[] decompose(Matrix A) throws NoConvergenceException
+    public static Matrix[] decompose(Matrix A)
     {
         A = prep(A);
         
