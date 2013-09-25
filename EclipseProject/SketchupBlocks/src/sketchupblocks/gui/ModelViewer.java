@@ -14,6 +14,7 @@ import sketchupblocks.base.Settings;
 import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.ModelNotSetException;
+import sketchupblocks.math.Face;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
@@ -67,6 +68,9 @@ public class ModelViewer
 	
 	//transparent construction floor
 	private boolean alphaBlendFloor = false;
+	
+	//debug faces
+	private boolean showDebugFaces = false;
 	
 	private PImage tilesTexture;
 	 
@@ -183,6 +187,7 @@ public class ModelViewer
 		
 		drawDebugLines();
 		drawDebugPoints();
+		drawDebugFaces();
 		drawBlocks();
 		drawConstructionFloor();
 	}
@@ -216,6 +221,109 @@ public class ModelViewer
 		window.endShape(PConstants.CLOSE);
 		
 		window.popMatrix();
+	}
+	
+	private void drawDebugLines()
+	{
+		if(lineShorter)
+			lineLength -= lineRate;
+		if(lineLonger)
+			lineLength += lineRate;
+		
+		window.pushMatrix();
+		window.scale(1f);
+		if(showDebugLines)
+		{
+			window.stroke(255, 0, 0);
+			ArrayList<Line> lines = new ArrayList<>(debugLines.values());
+			ArrayList<String> IDS = new ArrayList<>(debugLines.keySet());
+			for(int x = 0; x < lines.size(); ++x)
+			{
+				Line line = null;
+				if(selectCamera == 0)
+				{
+					line = lines.get(x);
+				}
+				else
+				{
+					String temp = IDS.get(x);
+					String id = (temp.split(","))[0];
+					if((Integer.parseInt(id)) == selectCamera - 1)
+						line = lines.get(x);
+				}
+				
+				if(line != null)
+				{
+					Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
+					Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
+					
+					start = Vec3.scalar(10, start);
+					end = Vec3.scalar(lineLength * 10, end);
+					end = Vec3.add(start, end);
+					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+				}
+			}
+		}
+		window.popMatrix();
+	}
+	
+	private void drawDebugPoints()
+	{
+		if(showDebugPoints)
+		{
+			window.noStroke();
+			window.fill(0, 255, 0);
+			
+			ArrayList<Vec3> points = new ArrayList<>(debugPointsMap.values());
+			ArrayList<String> IDS = new ArrayList<>(debugPointsMap.keySet());
+			for(int x = 0; x < points.size(); ++x)
+			{
+				Vec3 point = null;
+				
+				if(selectCamera == 0)
+				{
+					point = points.get(x);
+				}
+				else
+				{
+					String temp = IDS.get(x);
+					String id = (temp.split(","))[0];
+					if((Integer.parseInt(id)) == selectCamera - 1)
+						point = points.get(x);
+				}
+				
+				if(point != null)
+				{
+					window.pushMatrix();
+					
+					point = Vec3.scalar(10, point);
+					window.translate((float)point.y, (float)-point.z, (float)point.x);
+					window.sphere(5);
+					
+					window.popMatrix();
+				}
+			}
+			window.fill(255);
+		}
+	}
+	
+	private void drawDebugFaces()
+	{
+		if(showDebugFaces)
+		{
+			window.fill(0, 162, 237);
+			Face f = RuntimeData.topFace;
+			if(f != null)
+			{
+				for(int x = 0; x < f.corners.length; ++x)
+					window.vertex((float)f.corners[x].y, -(float)f.corners[x].z, (float)f.corners[x].x);
+			}
+			
+			window.fill(206, 27, 167);
+			f = RuntimeData.bottomFace;
+			for(int x = f.corners.length - 1; x >= 0; ++x)
+				window.vertex((float)f.corners[x].y, -(float)f.corners[x].z, (float)f.corners[x].x);
+		}
 	}
 	
 	private void drawBlocks()
@@ -265,90 +373,6 @@ public class ModelViewer
 		}
 	}
 	
-	private void drawDebugPoints()
-	{
-		if(showDebugPoints)
-		{
-			window.noStroke();
-			window.fill(0, 255, 0);
-			
-			ArrayList<Vec3> points = new ArrayList<>(debugPointsMap.values());
-			ArrayList<String> IDS = new ArrayList<>(debugPointsMap.keySet());
-			for(int x = 0; x < points.size(); ++x)
-			{
-				Vec3 point = null;
-				
-				if(selectCamera == 0)
-				{
-					point = points.get(x);
-				}
-				else
-				{
-					String temp = IDS.get(x);
-					String id = (temp.split(","))[0];
-					if((Integer.parseInt(id)) == selectCamera - 1)
-						point = points.get(x);
-				}
-				
-				if(point != null)
-				{
-					window.pushMatrix();
-					
-					point = Vec3.scalar(10, point);
-					window.translate((float)point.y, (float)-point.z, (float)point.x);
-					window.sphere(5);
-					
-					window.popMatrix();
-				}
-			}
-			window.fill(255);
-		}
-	}
-	
-	private void drawDebugLines()
-	{
-		if(lineShorter)
-			lineLength -= lineRate;
-		if(lineLonger)
-			lineLength += lineRate;
-		
-		window.pushMatrix();
-		window.scale(1f);
-		if(showDebugLines)
-		{
-			window.stroke(255, 0, 0);
-			ArrayList<Line> lines = new ArrayList<>(debugLines.values());
-			ArrayList<String> IDS = new ArrayList<>(debugLines.keySet());
-			for(int x = 0; x < lines.size(); ++x)
-			{
-				Line line = null;
-				if(selectCamera == 0)
-				{
-					line = lines.get(x);
-				}
-				else
-				{
-					String temp = IDS.get(x);
-					String id = (temp.split(","))[0];
-					if((Integer.parseInt(id)) == selectCamera - 1)
-						line = lines.get(x);
-				}
-				
-				if(line != null)
-				{
-					Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
-					Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
-					
-					start = Vec3.scalar(10, start);
-					end = Vec3.scalar(lineLength * 10, end);
-					end = Vec3.add(start, end);
-					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
-				}
-			}
-		}
-		window.popMatrix();
-	}
-
 	private void switchCamera()
 	{
 		if(selectCamera == 0)
@@ -468,11 +492,6 @@ public class ModelViewer
 			if(e.getAction() == KeyEvent.RELEASE)
 				showModel = !showModel;
 		}
-		else if(e.getKey() == 'm')
-		{
-			if(e.getAction() == KeyEvent.RELEASE)
-				showModel = !showModel;
-		}
 		else if(e.getKey() == 'n')
 		{
 			if(e.getAction() == KeyEvent.RELEASE)
@@ -506,6 +525,13 @@ public class ModelViewer
 				lineLonger = true;
 			else if(e.getAction() == KeyEvent.RELEASE)
 				lineLonger = false;
+		}
+		else if(e.getKey() == 'c')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+			{
+				showDebugFaces = !showDebugFaces;
+			}
 		}
 	}
 }
