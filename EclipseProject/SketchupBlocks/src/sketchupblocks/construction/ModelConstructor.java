@@ -113,6 +113,7 @@ public class ModelConstructor implements Runnable
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
 			BlockInfo.Fiducial fid = block.fiducialMap.get(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
 			fid.seen = false;
+			
 				if(fid.worldPosition == null)
 				{
 					//We have not yet procceded data.
@@ -142,6 +143,11 @@ public class ModelConstructor implements Runnable
 			if(Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.01 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.01) // Seen at the same place
 			{
 				fid.seen = true;
+				if(block.removed) // if all the fiducials are seen we add
+				{
+					block.removed = false;
+					eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, block.transform, ModelBlock.ChangeType.UPDATE));							
+				}
 				return true;
 			}		
 		}
