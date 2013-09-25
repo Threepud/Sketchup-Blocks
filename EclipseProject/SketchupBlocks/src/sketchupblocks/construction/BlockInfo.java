@@ -74,13 +74,15 @@ public class BlockInfo
 		public Date timestamp;
 		public double camViewX;
 		public double camViewY;
-		public boolean seen;
+		private boolean seen;
+		private Date lastSeen;
 		
 		public Vec3 worldPosition = null;
 		
 		public Fiducial(CameraEvent camE)
 		{
 			this(camE.fiducialID, camE.rotation, camE.x, camE.y, camE.cameraID);
+			seen = true;
 		}
 		
 		public Fiducial(int _fiducialsID, double rot, double _camViewX, double _camViewY, int _camID)
@@ -113,6 +115,34 @@ public class BlockInfo
 			
 			return new Line(RuntimeData.getCameraPosition(camID), lineDirection);
 		}
+		
+		public boolean isSeen()
+		{
+			return seen;
+		
+		}
+		
+		public void setSeen(boolean s)
+		{
+			seen = s;
+			if(seen == false)
+			{
+				lastSeen = new Date();
+			}
+		}
+		
+		public Date getLastSeen()
+		{
+			if(seen)
+			{
+				return new Date();
+			}
+			else
+			{
+				return lastSeen;
+			}			
+		}
+	
 	}
 	
 	protected class CamFidIdentifier
