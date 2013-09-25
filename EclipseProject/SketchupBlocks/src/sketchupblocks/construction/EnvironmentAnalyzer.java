@@ -1,9 +1,14 @@
 package sketchupblocks.construction;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import sketchupblocks.base.Logger;
+import sketchupblocks.base.Model;
+import sketchupblocks.database.SmartBlock;
+import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.math.Face;
+import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
@@ -143,7 +148,74 @@ public class EnvironmentAnalyzer
 	 */
 	public static ModelBlock [] getIntersectingModels(Vec3 start, Vec3 end)
 	{
-	return null;	
+		Model model;
+		try 
+		{
+			model = eddy.getModel();
+		} 
+		catch (ModelNotSetException e) 
+		{
+			e.printStackTrace();
+			return null;
+		}
+		
+		ArrayList<ModelBlock> result = new ArrayList<ModelBlock>();
+		Line theLine = new Line(start,Vec3.subtract(end, start));
+		
+		
+		for(ModelBlock mb : model.getBlocks())
+		{
+			for(int k = 0 ; k < mb.smartBlock.indices.length ; k+= 3)
+			{
+				Vec3 v0 = mb.smartBlock.vertices[mb.smartBlock.indices[k+0]];
+				Vec3 v1 = mb.smartBlock.vertices[mb.smartBlock.indices[k+1]];
+				Vec3 v2 = mb.smartBlock.vertices[mb.smartBlock.indices[k+2]];
+				if(rayIntersectsTriangle(theLine,v0,v1,v2))
+				{
+					result.add(mb);	
+					break; // it goes through at least one face so we are good.
+				}
+			
+			}
+			
+		}
+		
+		
+		 ModelBlock [] res = new  ModelBlock [0];
+	return result.toArray(res);	
+	}
 	
+	static boolean rayIntersectsTriangle(Line line, Vec3 v0,Vec3 v1,Vec3 v2)
+	{
+		Vec3 e1 = Vec3.subtract(v1, v0);
+		Vec3 e2 = Vec3.subtract(v2, v0);
+		
+		Vec3 h = Vec3.cross(line.direction, e2);
+		double a = Vec3.dot(e1, h);
+	   
+		if (a > -0.00001 && a < 0.00001)
+			return(false);
+		
+		double f = 1.0/a;
+		
+		Vec3 s = Vec3.subtract(line.point, v0);
+		double u = f * Vec3.dot(s, h);
+		
+		if (u < 0.0 || u > 1.0)
+			return(false);
+		
+		Vec3 q = Vec3.cross(s, e1);
+		double v = f*Vec3.dot(line.direction, q);
+		
+		if (v < 0.0 || u + v > 1.0)
+			return(false);
+		
+		double t = f * Vec3.dot(e2,q);		
+		
+		if (t > 0.00001) // ray intersection
+			return(true);
+		else // this means that there is a line intersection
+			 // but not a ray intersection
+			 return (false);
 	}
 }
