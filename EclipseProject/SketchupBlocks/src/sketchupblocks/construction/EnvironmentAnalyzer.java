@@ -190,9 +190,9 @@ public class EnvironmentAnalyzer
 		{
 			for(int k = 0 ; k < mb.smartBlock.indices.length ; k+= 3)
 			{
-				Vec3 v0 = mb.smartBlock.vertices[mb.smartBlock.indices[k+0]];
-				Vec3 v1 = mb.smartBlock.vertices[mb.smartBlock.indices[k+1]];
-				Vec3 v2 = mb.smartBlock.vertices[mb.smartBlock.indices[k+2]];
+				Vec3 v0 = Matrix.multiply(mb.transformationMatrix , mb.smartBlock.vertices[mb.smartBlock.indices[k+0]].padVec3()).toVec3();
+				Vec3 v1 = Matrix.multiply(mb.transformationMatrix , mb.smartBlock.vertices[mb.smartBlock.indices[k+1]].padVec3()).toVec3();
+				Vec3 v2 = Matrix.multiply(mb.transformationMatrix , mb.smartBlock.vertices[mb.smartBlock.indices[k+2]].padVec3()).toVec3();
 				if(rayIntersectsTriangle(theLine,v0,v1,v2))
 				{
 					result.add(mb);	
