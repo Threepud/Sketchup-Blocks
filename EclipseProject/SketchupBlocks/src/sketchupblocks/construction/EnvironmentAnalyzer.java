@@ -34,21 +34,31 @@ public class EnvironmentAnalyzer
 			
 			for (ModelBlock modelBlock : blocks)
 			{
-				BoundingBox modelBB = BoundingBox.generateBoundingBox(newBlock);
-
-				boolean overlap = checkXYOverlap(newBB, modelBB);
-				
-				if (overlap)
+				if (modelBlock.smartBlock.blockId != newBlock.smartBlock.blockId)
 				{
-					if (below != null && higherThan(modelBB, belowBB))
+					BoundingBox modelBB = BoundingBox.generateBoundingBox(newBlock);
+	
+					boolean overlap = checkXYOverlap(newBB, modelBB);
+					
+					if (overlap)
 					{
-						below = modelBlock;
-						belowBB = modelBB;
+						//System.out.println("There is overlap between "+modelBlock.smartBlock.blockId+" and the new block "+newBlock.smartBlock.blockId);
+						//System.out.println("("+newBB.min.x+","+newBB.min.y+") ("+newBB.max.x+","+newBB.max.y+") overlaps with +("+modelBB.min.x+","+modelBB.min.y+") ("+modelBB.max.x+","+modelBB.max.y+")");
+						if (below != null && higherThan(modelBB, belowBB))
+						{
+							below = modelBlock;
+							belowBB = modelBB;
+						}
+						else if (below == null)
+						{
+							below = modelBlock;
+							belowBB = modelBB;
+						}
 					}
-					else if (below == null)
+					else
 					{
-						below = modelBlock;
-						belowBB = modelBB;
+						//System.out.println("There is no overlap");
+						//System.out.println("("+newBB.min.x+","+newBB.min.y+") ("+newBB.max.x+","+newBB.max.y+") overlaps with +("+modelBB.min.x+","+modelBB.min.y+") ("+modelBB.max.x+","+modelBB.max.y+")");
 					}
 				}
 			}
@@ -65,8 +75,8 @@ public class EnvironmentAnalyzer
 	
 	public static Face getFacingFace(ModelBlock m, Vec3 surfaceNormal)
 	{
-		double smallestDot = Double.MAX_VALUE;
-		int smallestDotIndex = -1; 
+		double largestDot = -Double.MAX_VALUE;
+		int largestDotIndex = -1; 
 		Matrix rotationMatrix = extractRotationMatrix(m.transformationMatrix);
 
 		Face[] worldFaces = getFaces(m.smartBlock);
@@ -79,20 +89,20 @@ public class EnvironmentAnalyzer
 			//Check if it is the bottom one by finding the one that is the closest to parallel.
 			worldFaces[k] = new Face(Matrix.multiply(rotationMatrix, new Matrix(worldFaces[k].corners, true)).toVec3Array());
 			double dotWithSurfNorm = Vec3.dot(worldFaces[k].normal(), surfaceNormal);
-			if (dotWithSurfNorm < smallestDot)
+			if (dotWithSurfNorm > largestDot)
 			{
-				smallestDot = dotWithSurfNorm;
-				smallestDotIndex = k;
+				largestDot = dotWithSurfNorm;
+				largestDotIndex = k;
 			}
 		}
 		
-		if (smallestDotIndex == -1)
+		if (largestDotIndex == -1)
 		{
 			Logger.log("This shouldn't happen!!!!!!!!!!!!!!!!!! Thank Elre for this cryptic message\n"+"In any ordered set, there should be a smallest element. Especially if the set is finite", 1);
 			System.exit(-1);
 		}
 		
-		return worldFaces[smallestDotIndex];
+		return worldFaces[largestDotIndex];
 	}
 	
 	public static Matrix extractRotationMatrix(Matrix mat)
@@ -113,6 +123,7 @@ public class EnvironmentAnalyzer
 	
 	private static boolean checkXYOverlap(BoundingBox one, BoundingBox two)
 	{
+		
 		if (one.max.x < two.min.x)
 			return false;
 		if (one.min.x > two.max.x)
