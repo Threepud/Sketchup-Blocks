@@ -48,7 +48,10 @@ public class Menu
 		if(Settings.showSplash)
 			displayList.add(new SplashPopup(window));
 		
-		displayList.add(new CalibratePopup(window));
+		if(Settings.numCameras < 1)
+			displayList.add(new WarningPopup(window, "No Cameras Set"));
+		else
+			displayList.add(new CalibratePopup(window));
 	}
 	
 	private void updateCalibratedCameras()
@@ -161,7 +164,9 @@ public class Menu
 	
 	public void checkCalibrated()
 	{
-		if(!RuntimeData.isSystemCalibrated())
+		if(Settings.numCameras < 1)
+			displayList.add(new WarningPopup(window, "No Cameras Set"));
+		else if(!RuntimeData.isSystemCalibrated())
 		{
 			displayList.add(new CalibratePopup(window));
 		}
