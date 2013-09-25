@@ -1,9 +1,12 @@
 package sketchupblocks.construction;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 import sketchupblocks.database.SmartBlock;
+import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
+import sketchupblocks.math.Vec3;
 
 public class ModelBlock implements Serializable
 {
@@ -18,6 +21,8 @@ public class ModelBlock implements Serializable
 	public SmartBlock smartBlock;
 	public Matrix transformationMatrix;
 	public ChangeType type;
+	public HashMap<Integer, Line> debugLines = new HashMap<>();
+	public HashMap<Integer, Vec3> debugPoints = new HashMap<>();
 	
 	public ModelBlock()
 	{
