@@ -3,6 +3,7 @@ package sketchupblocks.construction;
 import java.util.Collection;
 
 import sketchupblocks.base.Logger;
+import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.Face;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
@@ -40,7 +41,7 @@ public class EnvironmentAnalyzer
 						below = modelBlock;
 						belowBB = modelBB;
 					}
-					else
+					else if (below == null)
 					{
 						below = modelBlock;
 						belowBB = modelBB;
@@ -64,7 +65,7 @@ public class EnvironmentAnalyzer
 		int smallestDotIndex = -1; 
 		Matrix rotationMatrix = extractRotationMatrix(m.transformationMatrix);
 
-		Face[] worldFaces = new Face[m.smartBlock.faces.length];
+		Face[] worldFaces = getFaces(m.smartBlock);
 		
 		for (int k = 0; k < worldFaces.length; k++)
 		{
@@ -72,7 +73,7 @@ public class EnvironmentAnalyzer
 			//Then multiply these matrices with the current rotation matrix.
 			//These will be the corners for the new, transformed faces
 			//Check if it is the bottom one by finding the one that is the closest to parallel.
-			worldFaces[k] = new Face(Matrix.multiply(rotationMatrix, new Matrix(m.smartBlock.faces[k].corners, true)).toVec3Array());
+			worldFaces[k] = new Face(Matrix.multiply(rotationMatrix, new Matrix(worldFaces[k].corners, true)).toVec3Array());
 			double dotWithSurfNorm = Vec3.dot(worldFaces[k].normal(), surfaceNormal);
 			if (dotWithSurfNorm < smallestDot)
 			{
@@ -135,6 +136,17 @@ public class EnvironmentAnalyzer
 		if (one.max.z > two.max.z)
 			return true;
 		return false;
+	}
+	
+	private static Face[] getFaces(SmartBlock block)
+	{
+		Face[] result = new Face[block.vertices.length/3];
+		int c = 0;
+		for (int k = 0; k < block.vertices.length; k += 3)
+		{
+			result[c++] = new Face(block.vertices[k+0], block.vertices[k+1], block.vertices[k+2]);
+		}
+		return result;
 	}
 	
 	/*
