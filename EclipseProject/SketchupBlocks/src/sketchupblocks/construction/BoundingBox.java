@@ -18,9 +18,6 @@ public class BoundingBox
 	{
 		double[] max = new double[]{-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE};
 		double[] min = new double[]{Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE};
-		//System.out.println("---------------------------------------------------------------------");
-		//System.out.println("GENERATING BOUNDING BOX FOR "+mb.smartBlock.blockId);
-		//System.out.println("transform: "+mb.transformationMatrix);
 		double[][] data = new double[4][mb.smartBlock.vertices.length];
 		for (int k = 0; k < mb.smartBlock.vertices.length; k++)
 		{
@@ -31,7 +28,6 @@ public class BoundingBox
 		}
 		
 		Vec3[] vertices = Matrix.multiply(mb.transformationMatrix, new Matrix(data)).toVec3Array();
-		//System.out.println
 		for (int k = 0; k < vertices.length; k++)
 		{
 			double[] vert = vertices[k].toArray();
@@ -44,7 +40,6 @@ public class BoundingBox
 			}
 			
 		}
-		//System.out.println("---------------------------------------------------------------------");
 		return new BoundingBox(new Vec3(max), new Vec3(min));
 	}
 }
