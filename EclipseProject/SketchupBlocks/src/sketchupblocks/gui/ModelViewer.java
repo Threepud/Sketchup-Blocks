@@ -312,17 +312,29 @@ public class ModelViewer
 		if(showDebugFaces)
 		{
 			window.fill(0, 162, 237);
+			
 			Face f = RuntimeData.topFace;
 			if(f != null)
 			{
+				window.beginShape();
 				for(int x = 0; x < f.corners.length; ++x)
-					window.vertex((float)f.corners[x].y, -(float)f.corners[x].z, (float)f.corners[x].x);
+				{
+					window.vertex(10 * (float)f.corners[x].y, 10 * -(float)f.corners[x].z, 10 * (float)f.corners[x].x);
+				}
+				window.endShape(PConstants.CLOSE);
 			}
 			
 			window.fill(206, 27, 167);
 			f = RuntimeData.bottomFace;
-			for(int x = f.corners.length - 1; x >= 0; ++x)
-				window.vertex((float)f.corners[x].y, -(float)f.corners[x].z, (float)f.corners[x].x);
+			if(f != null)
+			{
+				window.beginShape();
+				for(int x = f.corners.length - 1; x >= 0; --x)
+				{
+					window.vertex(10 * (float)f.corners[x].y, 10 * -(float)f.corners[x].z, 10 * (float)f.corners[x].x);
+				}	
+				window.endShape(PConstants.CLOSE);
+			}
 		}
 	}
 	
@@ -530,7 +542,13 @@ public class ModelViewer
 		{
 			if(e.getAction() == KeyEvent.RELEASE)
 			{
-				showDebugFaces = !showDebugFaces;
+				if(transparentModel == showDebugFaces)
+				{
+					showDebugFaces = !showDebugFaces;
+					transparentModel = !transparentModel;
+				}
+				else
+					showDebugFaces = !showDebugFaces;
 			}
 		}
 	}
