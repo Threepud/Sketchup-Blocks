@@ -245,6 +245,8 @@ public class SessionManager
     		try 
     		{
 				sarah.setLobby(lobby);
+				EnvironmentAnalyzer.setLobby(lobby);
+				jimmy.setLobby(lobby);
 			} 
     		catch (Exception e1) 
     		{
