@@ -296,7 +296,7 @@ public class Matrix implements Serializable
 	
 	 public Vec4 toVec4()
 	 {
-	     if (cols != 1 || rows != 4)
+	     if (cols != 1 || rows < 4)
 	     {
 	         throw new RuntimeException("Cannot convert matrix to vec4");
 	     }
@@ -309,7 +309,7 @@ public class Matrix implements Serializable
 	
 	public Vec3[] toVec3Array()
 	{
-	    if (rows != 3)
+	    if (rows < 3)
 	    {
 	        throw new RuntimeException("Cannot convert matrix to vec3Array");
 	    }
