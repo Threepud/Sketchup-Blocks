@@ -100,21 +100,7 @@ public class ModelConstructor implements Runnable
 				blockMap.put(iBlock.block.blockId,block);
 			}
 			
-			BlockInfo.CamFidIdentifier key = block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID);
-			if(block.fiducialMap.containsKey(key) // the fiducial is overridden
-					&&
-					block.removed) //The block is removed
-			{
-				BlockInfo.Fiducial fid =  block.fiducialMap.get(key);
-				if(fid.camViewX - iBlock.cameraEvent.x < 0.01 && fid.camViewY - iBlock.cameraEvent.y < 0.01) // Seen at the same place
-				{
-					block.removed = false;
-					fid.seen = true;
-					eddy.updateModel((new ModelBlock((SmartBlock)block.smartBlock, block.transform, ModelBlock.ChangeType.UPDATE)));
-				}
-			
-			}
-			else
+			if(!checkReAdd(block,iBlock))
 			{
 				BlockInfo.Fiducial fiducial =  block.new Fiducial(iBlock.cameraEvent);
 				block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
@@ -125,12 +111,12 @@ public class ModelConstructor implements Runnable
 		{
 			
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
-			for(BlockInfo.Fiducial fid : block.fiducialMap.values())
-			{
+			BlockInfo.Fiducial fid = block.fiducialMap.get(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
+			fid.seen = false;
 				if(fid.worldPosition == null)
 				{
 					//We have not yet procceded data.
-					break;
+					return;
 				}
 				Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
 				Vec3 fidPos = fid.worldPosition;
@@ -139,10 +125,28 @@ public class ModelConstructor implements Runnable
 					block.removed = true;
 					eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));
 				}
-			}
+			
 		}
 	}
 	
+	
+	private boolean checkReAdd(BlockInfo block , InputBlock iBlock)
+	{
+		BlockInfo.CamFidIdentifier key = block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID);
+		if(!block.fiducialMap.containsKey(key))
+			return false; //There is no information to build on
+		
+		BlockInfo.Fiducial fid =  block.fiducialMap.get(key);
+		if(!fid.seen) //The block was removed and we are seeing it again.
+		{
+			if(Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.01 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.01) // Seen at the same place
+			{
+				fid.seen = true;
+				return true;
+			}		
+		}
+		return false;
+	}
 	
 	private void callCalibrate(InputBlock iBlock)
 	{
@@ -185,7 +189,6 @@ public class ModelConstructor implements Runnable
 					{
 						Logger.log("Processing "+b.fiducialMap.size()+" number of lines after "+timePassed, 50);
 						processBin(b);
-						//b.fiducialMap.clear();
 					}
 				}
 				Thread.sleep(1);
