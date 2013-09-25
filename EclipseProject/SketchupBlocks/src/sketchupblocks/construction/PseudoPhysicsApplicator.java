@@ -21,13 +21,9 @@ public class PseudoPhysicsApplicator
 		
 		Face topFace;
 		if (mBelow == null)
-		{
 			topFace = new Face(new Vec3(100, -100, 0), new Vec3(-100, 100, 0), new Vec3(100, 100, 0));
-		}
 		else 
-		{
 			topFace = EnvironmentAnalyzer.getFacingFace(mBelow, new Vec3(0, 0, 1)); //This face has already been rotated.
-		}
 		
 		Vec3 surfaceNormal = topFace.normal();
 		Vec3 invertedSurfaceNormal = Vec3.scalar(-1, surfaceNormal);
@@ -46,28 +42,21 @@ public class PseudoPhysicsApplicator
 			if (minDot > largest)
 			{
 				minDot = largest;
-				/*System.out.println("*************************************");
-				System.out.println("Bottom face normal "+bottomFace.normal());
-				System.out.println("Top face normal "+surfaceNormal);
-				
-				System.out.println("*************************************");
-				System.out.println("\nCorners of bottom face");
-				for (int k = 0; k < bottomFace.corners.length; k++)
-					System.out.println(bottomFace.corners[k]);
-				System.out.println("*************************************");*/
 			}
 			
+			int count = 0;
 			//Fix minor rotations;
-			//First we need to find the direction to rotate in for the x and then the y axes.
-			
-			RotationMatrix3D minXRot = findMinimalRot(bottomFace, Matrix.Axis.X_AXIS, invertedSurfaceNormal);
-			bottomFace = new Face(Matrix.multiply(minXRot, new Matrix(bottomFace.corners, true)).toVec3Array());
-			RotationMatrix3D minYRot = findMinimalRot(bottomFace, Matrix.Axis.Y_AXIS, invertedSurfaceNormal);
-			bottomFace = new Face(Matrix.multiply(minYRot, new Matrix(bottomFace.corners, true)).toVec3Array());
-			calculatedRotationMatrix = Matrix.multiply(minYRot, Matrix.multiply(minXRot, calculatedRotationMatrix));
-			
-			//System.out.println("Old match: "+largest);
-			//System.out.println("New match: "+Vec3.dot(invertedSurfaceNormal, bottomFace.normal()));
+			while(Vec3.dot(invertedSurfaceNormal, bottomFace.normal()) < 0.99999 && count < MaxIter)
+			{
+				RotationMatrix3D minXRot = findMinimalRot(bottomFace, Matrix.Axis.X_AXIS, invertedSurfaceNormal);
+				bottomFace = new Face(Matrix.multiply(minXRot, new Matrix(bottomFace.corners, true)).toVec3Array());
+				RotationMatrix3D minYRot = findMinimalRot(bottomFace, Matrix.Axis.Y_AXIS, invertedSurfaceNormal);
+				bottomFace = new Face(Matrix.multiply(minYRot, new Matrix(bottomFace.corners, true)).toVec3Array());
+				calculatedRotationMatrix = Matrix.multiply(minYRot, Matrix.multiply(minXRot, calculatedRotationMatrix));
+				count++;
+			}
+			System.out.println("Old match: "+largest);
+			System.out.println("New match: "+Vec3.dot(invertedSurfaceNormal, bottomFace.normal()));
 			
 			//Translate the model down to the height of the face just below:
 			Vec3 origTrans = m.transformationMatrix.colToVec3(3);
@@ -79,7 +68,7 @@ public class PseudoPhysicsApplicator
 				//System.out.println("Which yields "+bottomFace.corners[k]);
 			}
 			
-			//We find a point on the bottom face of the modelblock to be placed. 
+			/*We find a point on the bottom face of the modelblock to be placed. 
 			Vec3 pointOnBottomFace = Vec3.scalar(0.5, Vec3.add(bottomFace.corners[0], bottomFace.corners[1]));
 			
 			//We then project that point onto the top face of the modelblock below it.
@@ -88,7 +77,7 @@ public class PseudoPhysicsApplicator
 			//double z2 = (surfaceNormal.x*bottomFace.corners[2].x + surfaceNormal.y*bottomFace.corners[2].y-Vec3.dot(surfaceNormal, topFace.corners[0]))/surfaceNormal.z;
 			double diffZ = (pointOnBottomFace.z - z);
 			//double diffZ2 = bottomFace.corners[2].z - z2;
-			//The difference in z co-ordinates is then the additional translation to apply.
+			//The difference in z co-ordinates is then the additional translation to apply.*/
 			
 			double[][] data = new double[4][4];
 			for (int k = 0; k < calculatedRotationMatrix.rows; k++)
@@ -113,7 +102,6 @@ public class PseudoPhysicsApplicator
 	
 	private static RotationMatrix3D findMinimalRot(Face bottomFace, Matrix.Axis axis, Vec3 surfaceNormal)
 	{
-		
 		RotationMatrix3D result = new RotationMatrix3D(0, axis);
 		
 		double localStep = stepSize;
@@ -121,7 +109,7 @@ public class PseudoPhysicsApplicator
 		double currDot;
 		int count = 0;
 		
-		//Find direction:
+		//First we need to find the direction to rotate in for the x and then the y axes.
 		result.updateTheta(localStep);
 		double positiveDot = Vec3.dot(Matrix.multiply(result,  bottomFace.normal()), surfaceNormal);
 		result.updateTheta(-1*localStep);
@@ -147,8 +135,10 @@ public class PseudoPhysicsApplicator
 			prevDot = currDot;
 			rotatedNormal = Vec3.normalize(Matrix.multiply(result,  rotatedNormal));
 			currDot = Vec3.dot(rotatedNormal, surfaceNormal);
+			System.out.println("curr" + currDot);
 			count++;
 		}
+		System.out.println("With result "+prevDot+" we stopped at "+count);
 		currentTheta -= localStep*10.0/9.0;
 		result.updateTheta(currentTheta);
 		return result;
