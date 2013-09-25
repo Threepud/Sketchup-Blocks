@@ -310,6 +310,7 @@ public class ModelConstructor implements Runnable
 			bin.removed = false;
 			//eddy.updateModel((new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE)));
 			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE)));
+			//eddy.updateModel(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
 		}
 		else
 		{
