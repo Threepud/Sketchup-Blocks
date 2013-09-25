@@ -24,6 +24,14 @@ import sketchupblocks.network.Lobby;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author Neoin
+ *
+ */
+/**
+ * @author Neoin
+ *
+ */
 public class ModelConstructor implements Runnable 
 {
 	private Lobby eddy;
@@ -50,29 +58,17 @@ public class ModelConstructor implements Runnable
 	}
 
 	  
+	/**
+	 * This function is called by session manager to process all blocks
+	 * @param iBlock the block seen by the camera.
+	 */
 	public void receiveBlock(InputBlock iBlock)
 	{
 		try
 		{
 			if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE  )
 			{
-				boolean calibrated = RuntimeData.isSystemCalibrated();
-				if(!calibrated)
-				{
-					boolean changedPosition = cally.processBlock(iBlock);
-					
-					//Propagate updated camera positions to the appropriate parties.
-					Logger.log("Calibrated ? "+calibrated, 100);
-					Logger.log("changed: "+changedPosition, 100);
-					
-					if (changedPosition && calibrated)
-					{
-						for (int k = 0; k < Settings.numCameras; k++)
-						{
-							sessMan.updateCameraPosition(k);
-						}
-					}
-				}
+				callCalibrate(iBlock);
 			}
 			else 
 			{
@@ -85,10 +81,15 @@ public class ModelConstructor implements Runnable
 		}
 		
 	}
+
 	
+	/**
+	 * This function updates the block information in a Map to be processed later by a separate thread.
+	 * The thread will only process the data once there is enough.
+	 * @param iBlock
+	 */
 	private void store(InputBlock iBlock)
 	{
-		
 		if (iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
@@ -103,41 +104,44 @@ public class ModelConstructor implements Runnable
 			block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
 
 			block.lastChange = new Date();
-			
-			/*if(block.ready() && calibrated)
-			{
-				processBin(block);
-				//blockMap.remove(block.blockID);
-				block.fiducialMap.clear();
-			}*/
 		}
 		else //When a remove call is received
 		{
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
-			
-			if (block == null)
+			for(BlockInfo.Fiducial fid : block.fiducialMap.values())
 			{
-				Logger.log("Proposed removal of block that has not been added!?", 1);
-				return; // Nothing to remove
-			}	
-			
-			if (block.fiducialMap.containsKey(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID)))
-			{
-				block.fiducialMap.remove(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
+				Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
+				Vec3 fidPos = fid.worldPosition;
+				if(EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos).length == 0 ) //There is nothing that prevents us from seeing.
+				{
+					block.removed = true;
+					eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));
+				}
 			}
-			
-			/*
-			* Cleanup -- Remove blocks if not seen
-			* No need to clean up camera. They will always be there.
-			*/
-			
-			/*if(block.fiducialMap.isEmpty())
-			{
-				blockMap.remove(iBlock.block.blockId);
-				if (iBlock.block instanceof SmartBlock)
-					eddy.updateModel(new ModelBlock((SmartBlock)iBlock.block, null, ModelBlock.ChangeType.REMOVE));
-			}*/
 		}
+	}
+	
+	
+	private void callCalibrate(InputBlock iBlock)
+	{
+		boolean calibrated = RuntimeData.isSystemCalibrated();
+		if(!calibrated)
+		{
+			boolean changedPosition = cally.processBlock(iBlock);
+			
+			//Propagate updated camera positions to the appropriate parties.
+			Logger.log("Calibrated ? "+calibrated, 100);
+			Logger.log("changed: "+changedPosition, 100);
+			
+			if (changedPosition && calibrated)
+			{
+				for (int k = 0; k < Settings.numCameras; k++)
+				{
+					sessMan.updateCameraPosition(k);
+				}
+			}
+		}
+	
 	}
 	
 	public void run()
@@ -173,6 +177,12 @@ public class ModelConstructor implements Runnable
 		}
 	}
 	
+	
+	
+	/**
+	 * This calculates the block position and adds it to the model.
+	 * @param bin
+	 */
 	private void processBin(BlockInfo bin)
 	{
 		if (bin.smartBlock instanceof SmartBlock)
@@ -236,7 +246,7 @@ public class ModelConstructor implements Runnable
 			Vec3 [] upRotWorld = new Vec3[numFiducials];
 			for(int k = 0 ; k < numFiducials ; k++)
 			{
-				fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+				fids[k].worldPosition = fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
 				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation, Matrix.Axis.Z_AXIS);	
 				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
 				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
