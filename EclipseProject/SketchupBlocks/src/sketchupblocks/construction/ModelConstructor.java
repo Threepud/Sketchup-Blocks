@@ -327,8 +327,7 @@ public class ModelConstructor implements Runnable
 				mbToAdd.debugLines = lines;
 				mbToAdd.debugPoints = fiducialWorld;
 			
-			eddy.updateModel(mbToAdd);
-			//eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE)));
+			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
 		}
 		else
 		{
