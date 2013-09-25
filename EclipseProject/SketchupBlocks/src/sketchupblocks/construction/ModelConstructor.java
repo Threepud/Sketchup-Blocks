@@ -88,7 +88,6 @@ public class ModelConstructor implements Runnable
 	{
 		if (iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
-			if(iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.ADD) return;
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
 			
 			if (block == null)
