@@ -281,13 +281,6 @@ public class ModelConstructor implements Runnable
 				lines[k].direction.normalize();
 			}
 			
-			//For debugging purposes
-			//To display debugging lines to fiducial centers
-			String[] IDS = new String[fids.length];
-			for(int a = 0; a < IDS.length; ++a)
-				IDS[a] = fids[a].camID + "," + fids[a].fiducialsID;
-			sessMan.debugLines(IDS, lines);
-			
 			Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
 			
 			
@@ -330,17 +323,6 @@ public class ModelConstructor implements Runnable
 				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
 				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
 			}
-
-			String[] IDP = new String[numFiducials];
-			for(int a = 0; a < IDP.length; ++a)
-				IDP[a] = fids[a].camID + "," + fids[a].fiducialsID;
-			sessMan.debugPoints(IDP, fiducialWorld);
-			
-			
-			IDP = new String[fiducialWorld.length];
-			for(int a = 0; a < IDP.length; ++a)
-				IDP[a] = ""+fids[a].fiducialsID;
-			sessMan.debugPoints(IDP, fiducialWorld);
 			
 			Integer[] temp = new Integer[0];
 			Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(temp));

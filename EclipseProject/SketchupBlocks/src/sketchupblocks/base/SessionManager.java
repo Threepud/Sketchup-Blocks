@@ -17,7 +17,6 @@ import sketchupblocks.gui.ModelViewer;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.*;
 import sketchupblocks.recording.Feeder;
-import sketchupblocks.math.Line;
 
 public class SessionManager
 {
@@ -326,16 +325,6 @@ public class SessionManager
     		
     		t.start();
     	}
-    }
-    
-    public void debugLines(String[] IDS, Line[] lines)
-    {
-    	sarah.setDebugLines(IDS, lines);
-    }
-    
-    public void debugPoints(String[] IDS, Vec3[] points)
-    {
-    	sarah.setDebugPoints(IDS, points);
     }
     
     public void drawGUI()

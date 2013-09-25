@@ -1,8 +1,6 @@
 package sketchupblocks.gui;
 
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-
 import processing.core.*;
 import processing.event.*;
 import sketchupblocks.base.CameraEvent;
@@ -52,7 +50,6 @@ public class ModelViewer
 	
 	//fiducial debug lines
 	private boolean showDebugLines = false;
-	private ConcurrentHashMap<String, Line> debugLines = new ConcurrentHashMap<>();
 	private int lineLength = 80;
 	private int lineRate = 1;
 	private boolean lineShorter = false;
@@ -60,7 +57,6 @@ public class ModelViewer
 	
 	//fiducial debug points
 	private boolean showDebugPoints = false;
-	private ConcurrentHashMap<String, Vec3> debugPointsMap = new ConcurrentHashMap<>();
 	
 	//debug model
 	private boolean showModel = true;
@@ -95,12 +91,6 @@ public class ModelViewer
 		currentCamera = userCamera;
 	}
 	
-	public void clearDebugData()
-	{
-		debugLines.clear();
-		debugPointsMap.clear();
-	}
-	
 	public void updateSystemCameraPosition(int camID)
 	{
 		Vec3 pos = RuntimeData.getCameraPosition(camID);
@@ -112,34 +102,6 @@ public class ModelViewer
 	public void setSystemCamera(int index, Camera newCamera)
 	{
 		systemCameras[index] = newCamera;
-	}
-	
-	public void setDebugLines(String[] IDS, Line[] lines)
-	{
-		if(IDS.length != lines.length)
-		{
-			Logger.log("ERROR: Debug lines, lengths don't match.", 2);
-			return;
-		}
-		
-		for(int x = 0; x < IDS.length; ++x)
-		{
-			debugLines.put(IDS[x], lines[x]);
-		}
-	}
-	
-	public void setDebugPoints(String[] IDS, Vec3[] points)
-	{
-		if(IDS.length != points.length)
-		{
-			Logger.log("ERROR: Debug lines, lengths don't match.", 2);
-			return;
-		}
-		
-		for(int x = 0; x < IDS.length; ++x)
-		{
-			debugPointsMap.put(IDS[x], points[x]);
-		}
 	}
 	
 	public void setWindow(PApplet _window)
@@ -235,32 +197,44 @@ public class ModelViewer
 		if(showDebugLines)
 		{
 			window.stroke(255, 0, 0);
-			ArrayList<Line> lines = new ArrayList<>(debugLines.values());
-			ArrayList<String> IDS = new ArrayList<>(debugLines.keySet());
-			for(int x = 0; x < lines.size(); ++x)
+			Model model;
+			try 
 			{
-				Line line = null;
-				if(selectCamera == 0)
+				model = lobby.getModel();
+			} 
+			catch (ModelNotSetException e) 
+			{
+				e.printStackTrace();
+				return;
+			}
+			for(ModelBlock mBlock: model.getBlocks())
+			{
+				ArrayList<Line> lines = new ArrayList<>(mBlock.debugLines.values());
+				ArrayList<Integer> IDS = new ArrayList<>(mBlock.debugLines.keySet());
+				for(int x = 0; x < lines.size(); ++x)
 				{
-					line = lines.get(x);
-				}
-				else
-				{
-					String temp = IDS.get(x);
-					String id = (temp.split(","))[0];
-					if((Integer.parseInt(id)) == selectCamera - 1)
+					Line line = null;
+					if(selectCamera == 0)
+					{
 						line = lines.get(x);
-				}
-				
-				if(line != null)
-				{
-					Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
-					Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
+					}
+					else
+					{
+						int id = IDS.get(x);
+						if(id == selectCamera - 1)
+							line = lines.get(x);
+					}
 					
-					start = Vec3.scalar(10, start);
-					end = Vec3.scalar(lineLength * 10, end);
-					end = Vec3.add(start, end);
-					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+					if(line != null)
+					{
+						Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
+						Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
+						
+						start = Vec3.scalar(10, start);
+						end = Vec3.scalar(lineLength * 10, end);
+						end = Vec3.add(start, end);
+						window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+					}
 				}
 			}
 		}
@@ -274,33 +248,45 @@ public class ModelViewer
 			window.noStroke();
 			window.fill(0, 255, 0);
 			
-			ArrayList<Vec3> points = new ArrayList<>(debugPointsMap.values());
-			ArrayList<String> IDS = new ArrayList<>(debugPointsMap.keySet());
-			for(int x = 0; x < points.size(); ++x)
+			Model model;
+			try 
 			{
-				Vec3 point = null;
-				
-				if(selectCamera == 0)
+				model = lobby.getModel();
+			} 
+			catch (ModelNotSetException e) 
+			{
+				e.printStackTrace();
+				return;
+			}
+			for(ModelBlock mBlock: model.getBlocks())
+			{
+			ArrayList<Vec3> points = new ArrayList<>(mBlock.debugPoints.values());
+			ArrayList<Integer> IDS = new ArrayList<>(mBlock.debugPoints.keySet());
+				for(int x = 0; x < points.size(); ++x)
 				{
-					point = points.get(x);
-				}
-				else
-				{
-					String temp = IDS.get(x);
-					String id = (temp.split(","))[0];
-					if((Integer.parseInt(id)) == selectCamera - 1)
+					Vec3 point = null;
+					
+					if(selectCamera == 0)
+					{
 						point = points.get(x);
-				}
-				
-				if(point != null)
-				{
-					window.pushMatrix();
+					}
+					else
+					{
+						int id = IDS.get(x);
+						if(id == selectCamera - 1)
+							point = points.get(x);
+					}
 					
-					point = Vec3.scalar(10, point);
-					window.translate((float)point.y, (float)-point.z, (float)point.x);
-					window.sphere(5);
-					
-					window.popMatrix();
+					if(point != null)
+					{
+						window.pushMatrix();
+						
+						point = Vec3.scalar(10, point);
+						window.translate((float)point.y, (float)-point.z, (float)point.x);
+						window.sphere(5);
+						
+						window.popMatrix();
+					}
 				}
 			}
 			window.fill(255);
