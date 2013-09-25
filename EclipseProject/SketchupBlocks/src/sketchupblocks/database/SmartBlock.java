@@ -2,7 +2,6 @@ package sketchupblocks.database;
 
 import java.io.Serializable;
 
-import sketchupblocks.math.Face;
 import sketchupblocks.math.Vec3;
 
 public class SmartBlock extends Block implements Serializable
@@ -12,7 +11,4 @@ public class SmartBlock extends Block implements Serializable
 	public String name;
 	public Vec3[] vertices;
 	public int[] indices;
-	public Face[] faces;
-	
-	
 }

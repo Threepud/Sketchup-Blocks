@@ -269,7 +269,7 @@ public class ModelConstructor implements Runnable
 			
 			Logger.log("Transform: "+transform, 50);
 			
-			eddy.updateModel(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
+			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE)));
 		}
 		else
 		{

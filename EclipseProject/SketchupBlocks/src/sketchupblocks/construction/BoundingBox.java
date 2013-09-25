@@ -19,7 +19,16 @@ public class BoundingBox
 		double[] max = new double[]{-Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE};
 		double[] min = new double[]{Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE};
 		
-		Vec3[] vertices = Matrix.multiply(mb.transformationMatrix, new Matrix(mb.smartBlock.vertices, true)).toVec3Array();
+		double[][] data = new double[4][mb.smartBlock.vertices.length];
+		for (int k = 0; k < mb.smartBlock.vertices.length; k++)
+		{
+			double[] vecData = mb.smartBlock.vertices[k].toArray();
+			for (int i = 0; i < 3; i++)
+				data[i][k] = vecData[i];
+			data[3][k] = 1;
+		}
+		
+		Vec3[] vertices = Matrix.multiply(mb.transformationMatrix, new Matrix(data)).toVec3Array();
 		for (int k = 0; k < vertices.length; k++)
 		{
 			double[] vert = vertices[k].toArray();

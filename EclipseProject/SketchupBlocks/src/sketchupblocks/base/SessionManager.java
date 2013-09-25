@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import processing.core.PApplet;
 import processing.event.KeyEvent;
+import sketchupblocks.construction.EnvironmentAnalyzer;
 import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.construction.ModelConstructor;
 import sketchupblocks.database.Block;
@@ -60,6 +61,8 @@ public class SessionManager
 		
 		try 
 		{
+			EnvironmentAnalyzer.setLobby(lobby);
+			
 			sarah.setLobby(lobby);
 			sarah.setWindow(parent);
 			menu = new Menu(this, parent);

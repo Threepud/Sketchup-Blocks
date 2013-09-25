@@ -4,6 +4,11 @@ public class Face
 {
 	public Vec3[] corners;
 	
+	public Face(Vec3 c1, Vec3 c2, Vec3 c3)
+	{
+		corners = new Vec3[]{c1, c2, c3};
+	}
+	
 	public Face(Vec3[] _corners)
 	{
 		corners = _corners;
