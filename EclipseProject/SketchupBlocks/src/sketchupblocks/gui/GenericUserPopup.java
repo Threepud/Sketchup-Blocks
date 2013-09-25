@@ -6,6 +6,7 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
 import sketchupblocks.base.Settings;
+import sketchupblocks.database.Block;
 
 public class GenericUserPopup implements Popup 
 {
@@ -13,7 +14,10 @@ public class GenericUserPopup implements Popup
 	
 	private PApplet window;
 	
+	protected String userHeader = "GENERIC HEADER";
 	protected String userMessage = "GENERIC";
+	protected Menu.UserTypes userType;
+	protected Block holdBlock = null;
 	
 	//core
 	private long poisonStamp;
@@ -85,7 +89,7 @@ public class GenericUserPopup implements Popup
 			}
 			
 			drawPopupBase();
-			drawPopupHeader("Sketchup Blocks");
+			drawPopupHeader(userHeader);
 			drawPopupSubHeader(userMessage);
 			drawProgressBar();
 		}

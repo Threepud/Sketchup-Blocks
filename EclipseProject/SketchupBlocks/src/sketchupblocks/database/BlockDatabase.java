@@ -5,16 +5,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import sketchupblocks.base.ColladaLoader;
 import sketchupblocks.base.CommandBlock;
 import sketchupblocks.exception.DataBaseNotFoundException;
 import sketchupblocks.exception.RecordFormatException;
-import sketchupblocks.exception.UnknownBlockTypeException;
 import sketchupblocks.math.Vec3;
 
 public class BlockDatabase
@@ -234,7 +230,7 @@ public class BlockDatabase
 		int index = 0;
 		String[] elements = line.split("\t");
 		
-		if(elements.length != 5)
+		if(elements.length != 4)
 			throw new RecordFormatException("DB User Block: record length exception.");
 		
 		UserBlock tempBlock = new UserBlock();
@@ -272,213 +268,15 @@ public class BlockDatabase
 		//user address
 		tempBlock.address = elements[index++];
 		
-		//user picture path
-		tempBlock.picturePath = elements[index++];
-		
 		//add block to hash for all associated fiducials
 		for(int x = 0; x < associatedFiducials.length; ++x)
 		{
 			blocks.put(new Integer(associatedFiducials[x]), tempBlock);
 		}
 	}
-	
-	private void saveBlockData() throws Exception
-	{
-		ArrayList<Block> blockList = new ArrayList<>(blocks.values());
-		ArrayList<SmartBlock> smartList = new ArrayList<>();
-		ArrayList<CommandBlock> commandList = new ArrayList<>();
-		ArrayList<UserBlock> userList = new ArrayList<>();
-		
-		//Create dummy object for initial comparison
-		Block prevBlock = new Block();
-		prevBlock.blockId = -1;
-		
-		for(Block blockItem: blockList)
-		{
-			
-			if(prevBlock.blockId != blockItem.blockId)
-			{
-				switch(blockItem.blockType)
-				{
-					case SMART:
-						smartList.add((SmartBlock)blockItem);
-						break;
-					case COMMAND:
-						commandList.add((CommandBlock)blockItem);
-						break;
-					case USER:
-						userList.add((UserBlock)blockItem);
-						break;
-					default:
-						throw new UnknownBlockTypeException("Found unknown block type in database save.");
-				}
-			}
-			
-			prevBlock = blockItem;
-		}
-		
-		saveSmartBlockData(smartBlockPath, smartList);
-		saveCommandBlockData(commandBlockPath, commandList);
-		saveUserBlockData(userBlockPath, userList);
-	}
-	
-	private void saveSmartBlockData(String fileName, ArrayList<SmartBlock> list)
-	{
-		try 
-		{
-			PrintWriter printWriter = new PrintWriter(smartBlockPath, "UTF-8");
-			String line;
-			
-			//generate line
-			for(SmartBlock smartBlockItem: list)
-			{
-				//block ID
-				line = Integer.toString(smartBlockItem.blockId);
-				
-				//associated fiducials
-				int[] associatedFiducials = smartBlockItem.associatedFiducials;
-				line += "\t" + Integer.toString(associatedFiducials[0]);
-				for(int i = 1; i < associatedFiducials.length; ++i)
-				{
-					line += "," + Integer.toString(associatedFiducials[i]);
-				}
-				
-				//block fiducial coordinates
-				Vec3[] vertices = smartBlockItem.fiducialCoordinates;
-				line += "\t" + Double.toString(vertices[0].x);
-				line += "," + Double.toString(vertices[0].y);
-				line += "," + Double.toString(vertices[0].z);
-				for(int i = 1; i < vertices.length; ++i)
-				{
-					line += "," + Double.toString(vertices[i].x);
-					line += "," + Double.toString(vertices[i].y);
-					line += "," + Double.toString(vertices[i].z);
-				}
-				
-				//block collada file name
-				line += "\t" + smartBlockItem.name;
-				
-				printWriter.println(line);
-				line = "";
-			}
-			
-			printWriter.close();
-		} 
-		catch (FileNotFoundException e) 
-		{
-			e.printStackTrace();
-		}
-		catch (UnsupportedEncodingException e) 
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	private void saveCommandBlockData(String fileName, ArrayList<CommandBlock> list)
-	{
-		try 
-		{
-			PrintWriter printWriter = new PrintWriter(commandBlockPath, "UTF-8");
-			String line;
-			
-			//generate line
-			for(CommandBlock commandBlockItem: list)
-			{
-				//block ID
-				line = Integer.toString(commandBlockItem.blockId);
-				
-				//associated fiducials
-				int[] associatedFiducials = commandBlockItem.associatedFiducials;
-				line += "\t" + Integer.toString(associatedFiducials[0]);
-				for(int i = 1; i < associatedFiducials.length; ++i)
-				{
-					line += "," + Integer.toString(associatedFiducials[i]);
-				}
-				
-				//block command type
-				line += "\t" + commandBlockItem.type.toString();
-				
-				printWriter.println(line);
-				line = "";
-			}
-			
-			printWriter.close();
-		} 
-		catch (FileNotFoundException e) 
-		{
-			e.printStackTrace();
-		}
-		catch (UnsupportedEncodingException e) 
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	private void saveUserBlockData(String fileName, ArrayList<UserBlock> list)
-	{
-		try 
-		{
-			PrintWriter printWriter = new PrintWriter(userBlockPath, "UTF-8");
-			String line;
-			
-			//generate line
-			for(UserBlock userBlockItem: list)
-			{
-				//block ID
-				line = Integer.toString(userBlockItem.blockId);
-				
-				//associated fiducials
-				int[] associatedFiducials = userBlockItem.associatedFiducials;
-				line += "\t" + Integer.toString(associatedFiducials[0]);
-				for(int i = 1; i < associatedFiducials.length; ++i)
-				{
-					line += "," + Integer.toString(associatedFiducials[i]);
-				}
-				
-				//name
-				line += "\t" + userBlockItem.name;
-				
-				//address
-				line += "\t" + userBlockItem.address;
-				
-				//picture path
-				line += "\t" + userBlockItem.picturePath;
-				
-				printWriter.println(line);
-				line = "";
-			}
-			
-			printWriter.close();
-		} 
-		catch (FileNotFoundException e) 
-		{
-			e.printStackTrace();
-		}
-		catch (UnsupportedEncodingException e) 
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	public void insertBlock(Block block)
-	{
-	   int[] associatedFiducials = block.associatedFiducials;
-	   
-	   for(int fiducial: associatedFiducials)
-	   {
-		   blocks.put((Integer)fiducial, block);
-	   }
-	}
-	   
+	  
 	public Block findBlock(int fiducialID)
 	{
 		return blocks.get((Integer)fiducialID);
-	} 
-	
-	public boolean saveDatabase() throws Exception
-	{
-		saveBlockData();
-		
-		return true;
 	}
 }

@@ -92,7 +92,7 @@ public class SessionManager
     	
     	if(block instanceof UserBlock)
     	{
-    		System.out.println("This feature is not yet supported");
+    		menu.handleInput(block, cameraEvent);
     	}
     	else if (block instanceof CommandBlock)
     	{
@@ -109,7 +109,7 @@ public class SessionManager
     		}
     		else
     		{
-    			menu.handleInput((CommandBlock)block, cameraEvent);
+    			menu.handleInput(block, cameraEvent);
     		}
     	}
     	else if (block instanceof SmartBlock && !spectating)

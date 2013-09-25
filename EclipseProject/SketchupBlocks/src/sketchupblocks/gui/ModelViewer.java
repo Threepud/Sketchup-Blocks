@@ -329,10 +329,10 @@ public class ModelViewer
 			if(f != null)
 			{
 				window.beginShape();
-				for(int x = f.corners.length - 1; x >= 0; --x)
+				for(int x = 0; x < f.corners.length; ++x)
 				{
 					window.vertex(10 * (float)f.corners[x].y, 10 * -(float)f.corners[x].z, 10 * (float)f.corners[x].x);
-				}	
+				}
 				window.endShape(PConstants.CLOSE);
 			}
 		}

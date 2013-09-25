@@ -6,13 +6,20 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.CommandBlock;
-import sketchupblocks.base.Logger;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
+import sketchupblocks.database.Block;
+import sketchupblocks.database.UserBlock;
 
 public class Menu 
 {
+	public enum UserTypes
+	{
+		EXPORT,
+		SPECTATE
+	}
+	
 	private SessionManager sessMan;
 	private PApplet window;
 	
@@ -60,13 +67,15 @@ public class Menu
 		calibrated = true;
 	}
 	
-	public void handleInput(CommandBlock cBlock, CameraEvent cEvent)
+	public void handleInput(Block block, CameraEvent cEvent)
 	{
 		if(calibrated)
 		{
-			switch(cBlock.type)
+			if(block instanceof CommandBlock)
 			{
-				case EXPORT:
+				CommandBlock cBlock = (CommandBlock)block;
+				if(cBlock.type == CommandBlock.CommandType.EXPORT)
+				{
 					if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
 					{
 						if(sessMan.checkModelExists())
@@ -75,14 +84,14 @@ public class Menu
 							{
 								if(displayList.get(displayList.size() - 1) instanceof UserPopup)
 								{
-									if(((UserPopup)displayList.get(displayList.size() - 1)).userMessage.equals("Export"))
+									if(((UserPopup)displayList.get(displayList.size() - 1)).userType == UserTypes.EXPORT)
 									{
 										return;
 									}
 								}
 							}
 							
-							displayList.add(new UserPopup(window, "Export"));
+							displayList.add(new UserPopup(window, "Export", "Collada File", UserTypes.EXPORT));
 						}
 						else
 						{
@@ -106,46 +115,46 @@ public class Menu
 						{
 							if(displayList.get(displayList.size() - 1) instanceof UserPopup)
 							{
-								if(((UserPopup)displayList.get(displayList.size() - 1)).userMessage.equals("Export"))
+								if(((UserPopup)displayList.get(displayList.size() - 1)).userType == UserTypes.EXPORT)
 								{
 									displayList.remove(displayList.size() - 1);
 								}
 							}
 						}
 					}
-					break;
-				case SPECTATE:
-					if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
+				}
+			}
+			else if(block instanceof UserBlock)
+			{
+				UserBlock uBlock = (UserBlock)block;
+				if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
+				{
+					if(!displayList.isEmpty())
 					{
-						if(!displayList.isEmpty())
+						if(displayList.get(displayList.size() - 1) instanceof UserPopup)
 						{
-							if(displayList.get(displayList.size() - 1) instanceof UserPopup)
+							if(((UserPopup)displayList.get(displayList.size() - 1)).userType == UserTypes.SPECTATE)
 							{
-								if(((UserPopup)displayList.get(displayList.size() - 1)).userMessage.equals("Spectate"))
-								{
-									return;
-								}
-							}
-						}
-						
-						displayList.add(new UserPopup(window, "Spectate"));
-					}
-					else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
-					{
-						if(!displayList.isEmpty())
-						{
-							if(displayList.get(displayList.size() - 1) instanceof UserPopup)
-							{
-								if(((UserPopup)displayList.get(displayList.size() - 1)).userMessage.equals("Spectate"))
-								{
-									displayList.remove(displayList.size() - 1);
-								}
+								return;
 							}
 						}
 					}
-					break;
-				default:
-					Logger.log("Unsupported command", 1);
+					
+					displayList.add(new UserPopup(window, "Spectate", uBlock.name, UserTypes.SPECTATE, uBlock));
+				}
+				else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
+				{
+					if(!displayList.isEmpty())
+					{
+						if(displayList.get(displayList.size() - 1) instanceof UserPopup)
+						{
+							if(((UserPopup)displayList.get(displayList.size() - 1)).userType == UserTypes.SPECTATE)
+							{
+								displayList.remove(displayList.size() - 1);
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -290,7 +299,13 @@ public class Menu
 					if(!c.died)
 						c.draw();	
 					else
+					{
 						displayList.remove(0);
+						if(c.userType == UserTypes.EXPORT)
+							sessMan.exportToFile();
+						else if(c.userType == UserTypes.SPECTATE)
+							sessMan.spectate((UserBlock)c.holdBlock);
+					}
 				}
 			}
 			else if(displayList.get(0) instanceof SplashPopup)
