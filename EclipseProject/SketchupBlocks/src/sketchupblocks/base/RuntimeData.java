@@ -1,15 +1,16 @@
 package sketchupblocks.base;
 
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import sketchupblocks.math.Face;
 import sketchupblocks.math.Vec3;
 
 public class RuntimeData 
 {
-	private static Map<Integer, Vec3> cameraPositions = new TreeMap<Integer, Vec3>();
-	private static Map<Integer, Boolean> cameraCalibrated = new TreeMap<Integer, Boolean>();
+	private static Map<Integer, Vec3> cameraPositions = new ConcurrentHashMap<Integer, Vec3>();
+	private static Map<Integer, Vec3> cameraViewVectors = new ConcurrentHashMap<Integer, Vec3>();
+	private static Map<Integer, Boolean> cameraCalibrated = new ConcurrentHashMap<Integer, Boolean>();
 	
 	public static double[][][] cameraCalibrationDetails;
 	public static boolean[][] haveCalibrationDetails;
@@ -48,9 +49,10 @@ public class RuntimeData
 		return true;
 	}
 	
-	public static void setCameraPosition(int camID, Vec3 position)
+	public static void setCameraPosition(int camID, Vec3 position, Vec3 direction)
 	{
 		cameraPositions.put(camID, position);
+		cameraViewVectors.put(camID, direction);
 		cameraCalibrated.put(camID, true);
 	}
 	
@@ -59,9 +61,15 @@ public class RuntimeData
 		return cameraPositions.get(camID);
 	}
 	
+	public static Vec3 getCameraViewVector(int camID)
+	{
+		return cameraViewVectors.get(camID);		
+	}
+	
 	public static boolean isCameraCalibrated(int camID)
 	{
-		if (cameraCalibrated.get(camID) != null)
+		Boolean b;
+		if ((b = cameraCalibrated.get(camID)) != null && b == true)
 			return true;
 		return false;
 	}
@@ -69,7 +77,9 @@ public class RuntimeData
 	public static boolean isSystemCalibrated()
 	{
 		if (cameraCalibrated.size() == Settings.numCameras)
+		{
 			return true;
+		}
 		return false;
 	}
 	
