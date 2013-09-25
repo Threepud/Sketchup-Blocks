@@ -32,16 +32,7 @@ public class LinearSystemSolver
     	}
         
         Matrix[] lup = LUDecomposer.decompose(A);
-        try
-        {
-        	double[] res = LUDecomposer.solve(B.toArray(), lup);
-            return new Matrix(res);
-        }
-        catch(Exception e)
-        {
-        	e.printStackTrace();
-        }
-        
-        return null;
+    	double[] res = LUDecomposer.solve(B.toArray(), lup);
+        return new Matrix(res);
     }
 }
