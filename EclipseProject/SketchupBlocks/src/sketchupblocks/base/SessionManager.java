@@ -234,7 +234,7 @@ public class SessionManager
 		ColladaLoader.export(blocks);
     }
     
-    public void spectate(UserBlock  user)
+    public void spectate(final UserBlock uBlock)
     {
     	if(spectating)
     	{
@@ -287,7 +287,12 @@ public class SessionManager
     	    		{
     					menu.createConnectPopup();
     					
-    	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.221", Settings.connectPort, menu, sessionManager); 
+    					NetworkedLobby temp;
+    					if(uBlock == null)
+    						//debug: manual address here
+    						temp = new NetworkedLobby("192.168.137.221", Settings.connectPort, menu, sessionManager);
+    					else
+    						temp = new NetworkedLobby(uBlock.address, Settings.connectPort, menu, sessionManager); 
     	    			lobby = temp;
     	    			
     	    			server.stopServer();
