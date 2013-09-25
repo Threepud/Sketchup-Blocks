@@ -3,7 +3,9 @@ import sketchupblocks.base.InputBlock;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
 import sketchupblocks.base.Logger;
+import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Matrix;
+import sketchupblocks.math.Vec3;
 import sketchupblocks.math.nonlinearmethods.CP;
 import sketchupblocks.math.nonlinearmethods.ErrorFunction;
 import sketchupblocks.math.nonlinearmethods.Newton;
@@ -77,7 +79,18 @@ public class Calibrator
 			
 	    Logger.log("Camera position: "+camPos.toVec3(), 50);
 	    
-	    RuntimeData.setCameraPosition(cameraID, camPos.toVec3());
+	    Vec3[] landmarkToCamera = new Vec3[4];
+		double[] Myangles = new double[4];
+		
+		for (int k = 0; k < 4; k++)
+		{
+			landmarkToCamera[k] = Vec3.subtract(Settings.landmarks[k], camPos.toVec3());
+			Myangles[k] = RuntimeData.getAngle(cameraID, k, 0.5, 0.5);
+		}
+		// Do calculation 
+		Vec3 camViewVector = LineDirectionSolver.solve(landmarkToCamera, Myangles);
+		
+	    RuntimeData.setCameraPosition(cameraID, camPos.toVec3(),camViewVector);
 	}
 	
 }
