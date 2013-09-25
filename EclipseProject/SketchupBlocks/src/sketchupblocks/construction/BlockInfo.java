@@ -104,7 +104,12 @@ public class BlockInfo
 			
 			for (int k = 0; k < 4; k++)
 			{
-				landmarkToCamera[k] = Vec3.subtract(Settings.landmarks[k], RuntimeData.getCameraPosition(camID));
+				Vec3 camPosition = RuntimeData.getCameraPosition(camID);
+				if(camPosition == null)
+				{
+					throw new RuntimeException("Cameras not calibrated!");				
+				}
+				landmarkToCamera[k] = Vec3.subtract(Settings.landmarks[k], camPosition);
 				angles[k] = RuntimeData.getAngle(camID, k, camViewX, camViewY);
 			}
 			// Do calculation 
