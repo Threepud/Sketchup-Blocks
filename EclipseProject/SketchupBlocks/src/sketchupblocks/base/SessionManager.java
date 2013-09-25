@@ -14,7 +14,6 @@ import sketchupblocks.database.UserBlock;
 import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.gui.Menu;
 import sketchupblocks.gui.ModelViewer;
-import sketchupblocks.math.Vec3;
 import sketchupblocks.network.*;
 import sketchupblocks.recording.Feeder;
 
@@ -30,7 +29,6 @@ public class SessionManager
 	private BlockDatabase blockDB;
 	private Menu menu;
 	private String[] dbPaths;
-	private Vec3 [] cameraPositions;
 	
 	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
 	
@@ -80,8 +78,6 @@ public class SessionManager
     	{
 			e.printStackTrace();
 		}
-    	
-    	cameraPositions = new Vec3[Settings.numCameras];
 	}
 	
     public void onCameraEvent(CameraEvent cameraEvent)
@@ -152,13 +148,6 @@ public class SessionManager
     	lobby.setModel(new Model());
     }
     
-    public void updateCameraPosition(int cameraID)
-    {
-    	if(sarah != null)
-    		sarah.updateSystemCameraPosition(cameraID);
-    	
-    }
-    
     public void setModelConstructor(ModelConstructor _jimmy)
     {
     	jimmy = _jimmy;
@@ -183,12 +172,6 @@ public class SessionManager
 			e.printStackTrace();
 			System.exit(-1);
 		}
-    	for(int k = 0 ; k < cameraPositions.length ; k++)
-    	{
-	    	if(cameraPositions[k] != null)
-	    		sarah.updateSystemCameraPosition(k);
-    	}
-    	
     }
     
     public void setModelLoader(ModelLoader _modelLoader)

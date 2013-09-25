@@ -196,14 +196,6 @@ public class ModelConstructor implements Runnable
 			//Propagate updated camera positions to the appropriate parties.
 			Logger.log("Calibrated ? "+calibrated, 100);
 			Logger.log("changed: "+changedPosition, 100);
-			
-			if (changedPosition && calibrated)
-			{
-				for (int k = 0; k < Settings.numCameras; k++)
-				{
-					sessMan.updateCameraPosition(k);
-				}
-			}
 		}
 	
 	}

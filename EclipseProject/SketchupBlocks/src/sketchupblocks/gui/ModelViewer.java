@@ -91,19 +91,6 @@ public class ModelViewer
 		currentCamera = userCamera;
 	}
 	
-	public void updateSystemCameraPosition(int camID)
-	{
-		Vec3 pos = RuntimeData.getCameraPosition(camID);
-		systemCameras[camID].eye.x = pos.y * 10.2;
-		systemCameras[camID].eye.y = -pos.z * 10.2;
-		systemCameras[camID].eye.z = pos.x * 10.2;
-	}
-	
-	public void setSystemCamera(int index, Camera newCamera)
-	{
-		systemCameras[index] = newCamera;
-	}
-	
 	public void setWindow(PApplet _window)
 	{
 		window = _window;
@@ -375,9 +362,14 @@ public class ModelViewer
 	{
 		if(selectCamera == 0)
 			currentCamera = userCamera;
-		else if(selectCamera <= Settings.numCameras)
+		else if(selectCamera <= Settings.numCameras && RuntimeData.isSystemCalibrated())
 		{
-			currentCamera = systemCameras[selectCamera - 1];
+			Vec3 up = new Vec3(0, 1, 0);
+			Vec3 at = new Vec3(RuntimeData.getCameraPosition(selectCamera - 1).y, -RuntimeData.getCameraPosition(selectCamera - 1).z, RuntimeData.getCameraPosition(selectCamera - 1).x);
+			at = Vec3.scalar(10, at);
+			Vec3 eye = new Vec3(RuntimeData.getCameraViewVector(selectCamera - 1).y, -RuntimeData.getCameraViewVector(selectCamera - 1).z, RuntimeData.getCameraViewVector(selectCamera - 1).x);
+			eye = Vec3.add(eye, at);
+			currentCamera = new Camera(up, at, eye);
 		}
 	}
 	
