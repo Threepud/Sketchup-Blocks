@@ -23,6 +23,6 @@ public class Face
 		
 		Vec3 oneToTwo = Vec3.subtract(corners[0], corners[1]);
 		Vec3 oneToThree = Vec3.subtract(corners[0], corners[2]);
-		return Vec3.normalize(Vec3.cross(oneToTwo, oneToThree));
+		return Vec3.normalize(Vec3.cross(oneToThree, oneToTwo));
 	}
 }
