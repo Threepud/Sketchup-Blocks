@@ -86,6 +86,17 @@ public class Menu
 						}
 						else
 						{
+							if(!displayList.isEmpty())
+							{
+								if(displayList.get(displayList.size() - 1) instanceof WarningPopup)
+								{
+									if(((WarningPopup)displayList.get(displayList.size() - 1)).warningMessage.equals("No Model Found"))
+									{
+										return;
+									}
+								}
+							}
+							
 							displayList.add(new WarningPopup(window, "No Model Found"));
 						}
 					}
