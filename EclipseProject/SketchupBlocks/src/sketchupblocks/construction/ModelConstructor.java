@@ -333,7 +333,14 @@ public class ModelConstructor implements Runnable
 			bin.transform = transform;
 			bin.removed = false;
 			
-			eddy.updateModel((new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE)));
+			ModelBlock mbToAdd = (new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
+			for(int k = 0 ; k < fids.length ; k++)
+			{
+				mbToAdd.debugLines.put(new Integer(fids[k].camID),lines[k]);
+				mbToAdd.debugPoints.put(new Integer(fids[k].camID),fiducialWorld[k]);
+			}
+			
+			eddy.updateModel(mbToAdd);
 			//eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE)));
 		}
 		else
