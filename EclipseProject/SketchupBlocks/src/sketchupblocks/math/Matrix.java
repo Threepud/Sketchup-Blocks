@@ -294,6 +294,35 @@ public class Matrix implements Serializable
 	     }
 	 }
 	
+	 public Vec4 colToVec4(int index)
+	 {
+		 if (rows < 4) 
+			 throw new RuntimeException("Cannot convert this column to Vec4");
+		 return new Vec4(data[0][index], data[1][index], data[2][index], data[3][index]);
+	 }
+	 
+	 public Vec4 rowToVec4(int index)
+	 {
+		 if (cols < 4) 
+			 throw new RuntimeException("Cannot convert this row to Vec4");
+		 return new Vec4(data[index][0], data[index][1], data[index][2], data[index][3]);
+	 }
+	 
+	 public Vec3 colToVec3(int index)
+	 {
+		 if (rows < 3) 
+			 throw new RuntimeException("Cannot convert this column to Vec3");
+		 return new Vec3(data[0][index], data[1][index], data[2][index]);
+	 }
+	 
+	 public Vec3 rowToVec3(int index)
+	 {
+		 if (cols < 3) 
+			 throw new RuntimeException("Cannot convert this row to Vec3");
+		 return new Vec3(data[index][0], data[index][1], data[index][2]);
+	 }
+	 
+	 
 	 public Vec4 toVec4()
 	 {
 	     if (cols != 1 || rows < 4)
