@@ -20,6 +20,7 @@ public class BlockInfo
 	public int blockID;
 	public Block smartBlock;
 	public Date lastChange;
+	public boolean removed = false;
 	protected Map<CamFidIdentifier,Fiducial> fiducialMap;
 
 	
@@ -67,6 +68,8 @@ public class BlockInfo
 		public Date timestamp;
 		public double camViewX;
 		public double camViewY;
+		
+		public Vec3 worldPosition = null;
 		
 		public Fiducial(CameraEvent camE)
 		{
