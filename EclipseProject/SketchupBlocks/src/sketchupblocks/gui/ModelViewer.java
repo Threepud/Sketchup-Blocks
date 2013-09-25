@@ -334,10 +334,11 @@ public class ModelViewer
 		else if(selectCamera <= Settings.numCameras && RuntimeData.isSystemCalibrated())
 		{
 			Vec3 up = new Vec3(0, 1, 0);
-			Vec3 at = new Vec3(RuntimeData.getCameraPosition(selectCamera - 1).y, -RuntimeData.getCameraPosition(selectCamera - 1).z, RuntimeData.getCameraPosition(selectCamera - 1).x);
-			at = Vec3.scalar(10, at);
-			Vec3 eye = new Vec3(RuntimeData.getCameraViewVector(selectCamera - 1).y, -RuntimeData.getCameraViewVector(selectCamera - 1).z, RuntimeData.getCameraViewVector(selectCamera - 1).x);
-			eye = Vec3.add(eye, at);
+			Vec3 eye = new Vec3(RuntimeData.getCameraPosition(selectCamera - 1).y, -RuntimeData.getCameraPosition(selectCamera - 1).z, RuntimeData.getCameraPosition(selectCamera - 1).x);
+			eye = Vec3.scalar(10, eye);
+			//Vec3 at = new Vec3(0, 0, 0);
+			Vec3 at = new Vec3(RuntimeData.getCameraViewVector(selectCamera - 1).y, -RuntimeData.getCameraViewVector(selectCamera - 1).z, RuntimeData.getCameraViewVector(selectCamera - 1).x);
+			at = Vec3.add(at, eye);
 			currentCamera = new Camera(up, at, eye);
 		}
 	}

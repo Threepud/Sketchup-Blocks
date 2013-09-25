@@ -1,8 +1,6 @@
 package sketchupblocks.construction;
 
 import java.io.Serializable;
-import java.util.HashMap;
-
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
