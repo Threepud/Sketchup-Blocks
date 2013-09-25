@@ -2,7 +2,7 @@
 <Settings>
 	<System>
 		<VersionNumber>0.8</VersionNumber>
-		<DebugVerbose>4</DebugVerbose>
+		<DebugVerbose>1</DebugVerbose>
 	</System>
 	<Cameras>
 		<NumberOfCameras>3</NumberOfCameras>
@@ -38,7 +38,7 @@
 		<ProgressBarRotationSpeed>500</ProgressBarRotationSpeed>
 	</GUI>
 	<DebugRecording>
-		<LiveData>true</LiveData>
+		<LiveData>false</LiveData>
 		<RecordingInputFilename>debugOutput(JustSomeData)/output</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
