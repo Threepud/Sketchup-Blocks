@@ -92,6 +92,7 @@ public class ModelConstructor implements Runnable
 	{
 		if (iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
+			if(iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.ADD) return;
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
 			
 			if (block == null)
@@ -109,25 +110,58 @@ public class ModelConstructor implements Runnable
 		}
 		else //When a remove call is received
 		{
-			
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
+			if(block == null) return;
 			BlockInfo.Fiducial fid = block.fiducialMap.get(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
-			fid.seen = false;
+			if(fid == null) return;
 			
-				if(fid.worldPosition == null)
+			fid.setSeen(false);
+						
+			if(!block.removed)
+			{
+				if(blockNotSeen(block))
 				{
-					//We have not yet procceded data.
-					return;
+					if(expectedToSeeBlock(block))
+					{
+						block.removed = true;						
+						eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));
+					}
 				}
-				Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
-				Vec3 fidPos = fid.worldPosition;
-				if(EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos).length == 0 ) //There is nothing that prevents us from seeing.
-				{
-					block.removed = true;
-					eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));
-				}
+			}
+		}
+	}
+	
+	private boolean blockNotSeen(BlockInfo block)
+	{
+		for(BlockInfo.Fiducial fid : block.fiducialMap.values())
+		{
+			if(fid.isSeen())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean expectedToSeeBlock(BlockInfo block)
+	{
+		for(BlockInfo.Fiducial fid : block.fiducialMap.values())
+		{
+			Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
+			Vec3 fidPos = fid.worldPosition;
+			if(camPos == null || fidPos == null)
+				break;
+		
+			ModelBlock [] mb = EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos);
+			
+			
+			if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) //the fiducial should be seen
+			{
+				return true;
+			}
 			
 		}
+		return false;
 	}
 	
 	
@@ -138,18 +172,20 @@ public class ModelConstructor implements Runnable
 			return false; //There is no information to build on
 		
 		BlockInfo.Fiducial fid =  block.fiducialMap.get(key);
-		if(!fid.seen) //The block was removed and we are seeing it again.
+		if(!fid.isSeen()) //The block was removed and we are seeing it again.
 		{
-			if(Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.01 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.01) // Seen at the same place
+			if(Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.1 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.1) // Seen at the same place
 			{
-				fid.seen = true;
+				fid.setSeen(true);
 				if(block.removed) // if all the fiducials are seen we add
 				{
+					System.out.println("Adding block");
 					block.removed = false;
 					eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, block.transform, ModelBlock.ChangeType.UPDATE));							
 				}
 				return true;
-			}		
+			}
+			
 		}
 		return false;
 	}
@@ -227,7 +263,7 @@ public class ModelConstructor implements Runnable
 			for(BlockInfo.CamFidIdentifier keys : bin.fiducialMap.keySet())
 			{
 				BlockInfo.Fiducial fid = bin.fiducialMap.get(keys);
-				if(fid.seen)
+				if(fid.isSeen())
 					{
 					cleanFids.add(fid);
 					cleanIDs.add(keys);
