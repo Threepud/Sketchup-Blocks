@@ -145,16 +145,17 @@ public class ModelConstructor implements Runnable
 			Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
 			Vec3 fidPos = fid.worldPosition;
 			if(camPos == null || fidPos == null)
-				break;
+			{
+				continue;
+			}
 		
 			ModelBlock [] mb = EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos);
-			
+					
 			
 			if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) //the fiducial should be seen
 			{
 				return true;
 			}
-			
 		}
 		return false;
 	}
@@ -172,9 +173,8 @@ public class ModelConstructor implements Runnable
 			if(Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.1 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.1) // Seen at the same place
 			{
 				fid.setSeen(true);
-				if(block.removed) // if all the fiducials are seen we add
+				if(block.removed && block.transform != null) // if all the fiducials are seen we add
 				{
-					System.out.println("Adding block");
 					block.removed = false;
 					eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, block.transform, ModelBlock.ChangeType.UPDATE));							
 				}
@@ -225,7 +225,6 @@ public class ModelConstructor implements Runnable
 			}
 			catch(Exception e)
 			{
-				e.printStackTrace();
 				//If there is a concurrent change, then an exception will be thrown and we simply try again.
 			}
 		}
