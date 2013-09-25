@@ -37,22 +37,16 @@ public class TransformationCalculator
 	        
 	        Matrix t = Matrix.add(Matrix.multiply(Matrix.scalar(-1, proposedR), new Matrix(centroidA)), new Matrix(centroidB));
 	        
-	        
-	        double[][] data = new double[4][4];
-	        for (int k = 0; k < 4; k++)
-	        {
-	        	data[k][k] = 1;
-	        }
+	        Matrix finalT = Matrix.identity(4);
 	        for (int k = 0; k < 3; k++)
 	        {
-	        	data[k][3] = t.data[k][0];
+	        	finalT.data[k][3] = t.data[k][0];
 	        }
-	        t = new Matrix(data);
 	        
-	        Logger.log("Translation: "+t, 20);
+	        Logger.log("Translation: "+finalT, 20);
 	        Logger.log("Rotation: "+proposedR, 20);
 	        
-	       return new Matrix[]{proposedR, t};
+	       return new Matrix[]{proposedR, finalT};
 		}
 		catch(Exception e)
 		{
