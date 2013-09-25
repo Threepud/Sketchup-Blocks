@@ -1,5 +1,6 @@
 package sketchupblocks.construction;
 
+import sketchupblocks.base.Logger;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.math.Face;
 import sketchupblocks.math.Matrix;
@@ -55,8 +56,11 @@ public class PseudoPhysicsApplicator
 				calculatedRotationMatrix = Matrix.multiply(minYRot, Matrix.multiply(minXRot, calculatedRotationMatrix));
 				count++;
 			}
-			System.out.println("Old match: "+largest);
-			System.out.println("New match: "+Vec3.dot(invertedSurfaceNormal, bottomFace.normal()));
+			Logger.log("Old match: "+largest, 30);
+			Logger.log(("New match: "+Vec3.dot(invertedSurfaceNormal, bottomFace.normal())), 30);
+			
+			if (count == MaxIter)
+				Logger.log("WARNING: Major changes to block orientation", 2);
 			
 			//Translate the model down to the height of the face just below:
 			Vec3 origTrans = m.transformationMatrix.colToVec3(3);
