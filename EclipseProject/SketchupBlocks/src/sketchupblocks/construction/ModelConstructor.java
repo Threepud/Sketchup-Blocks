@@ -98,18 +98,40 @@ public class ModelConstructor implements Runnable
 			{
 				block = new BlockInfo(iBlock.block);
 				blockMap.put(iBlock.block.blockId,block);
-			}	
+			}
 			
-			BlockInfo.Fiducial fiducial =  block.new Fiducial(iBlock.cameraEvent);
-			block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
-
-			block.lastChange = new Date();
+			BlockInfo.CamFidIdentifier key = block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID);
+			if(block.fiducialMap.containsKey(key) // the fiducial is overridden
+					&&
+					block.removed) //The block is removed
+			{
+				BlockInfo.Fiducial fid =  block.fiducialMap.get(key);
+				if(fid.camViewX - iBlock.cameraEvent.x < 0.01 && fid.camViewY - iBlock.cameraEvent.y < 0.01) // Seen at the same place
+				{
+					block.removed = false;
+					fid.seen = true;
+					eddy.updateModel((new ModelBlock((SmartBlock)block.smartBlock, block.transform, ModelBlock.ChangeType.UPDATE)));
+				}
+			
+			}
+			else
+			{
+				BlockInfo.Fiducial fiducial =  block.new Fiducial(iBlock.cameraEvent);
+				block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
+				block.lastChange = new Date();
+			}
 		}
 		else //When a remove call is received
 		{
+			
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
 			for(BlockInfo.Fiducial fid : block.fiducialMap.values())
 			{
+				if(fid.worldPosition == null)
+				{
+					//We have not yet procceded data.
+					break;
+				}
 				Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
 				Vec3 fidPos = fid.worldPosition;
 				if(EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos).length == 0 ) //There is nothing that prevents us from seeing.
@@ -188,10 +210,22 @@ public class ModelConstructor implements Runnable
 		if (bin.smartBlock instanceof SmartBlock)
 		{
 			BlockInfo.Fiducial [] fids = new BlockInfo.Fiducial[0];
-			fids = bin.fiducialMap.values().toArray(fids);
-			
 			BlockInfo.CamFidIdentifier [] camIDs = new BlockInfo.CamFidIdentifier[0];
-			camIDs = bin.fiducialMap.keySet().toArray(camIDs);
+			
+			ArrayList<BlockInfo.Fiducial> cleanFids = new ArrayList<BlockInfo.Fiducial>();
+			ArrayList<BlockInfo.CamFidIdentifier> cleanIDs = new ArrayList<BlockInfo.CamFidIdentifier>();
+			
+			for(BlockInfo.CamFidIdentifier keys : bin.fiducialMap.keySet())
+			{
+				BlockInfo.Fiducial fid = bin.fiducialMap.get(keys);
+				if(fid.seen)
+					{
+					cleanFids.add(fid);
+					cleanIDs.add(keys);
+					}
+			}
+			fids =cleanFids.toArray(fids);			
+			camIDs = cleanIDs.toArray(camIDs);
 			
 			int numFiducials = fids.length;
 			
@@ -269,7 +303,9 @@ public class ModelConstructor implements Runnable
 			
 			Logger.log("Transform: "+transform, 50);
 			
-			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE)));
+			bin.transform = transform;
+			bin.removed = false;
+			eddy.updateModel((new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE)));
 		}
 		else
 		{
@@ -284,8 +320,8 @@ public class ModelConstructor implements Runnable
 		settings.tester = null;
 		settings.creator = new ParticleCreator(numFids,0,90);
 		
-		settings.particleCount = 32;
-		settings.iterationCount= 640;
+		settings.particleCount = 64;
+		settings.iterationCount= 1024;
 		
 		settings.ringTopology = true;
 		settings.ringSize =1;

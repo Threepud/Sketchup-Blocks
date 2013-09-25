@@ -11,6 +11,7 @@ import sketchupblocks.database.Block;
 import sketchupblocks.base.Logger;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.LineDirectionSolver;
+import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 
 public class BlockInfo 
@@ -20,7 +21,11 @@ public class BlockInfo
 	public int blockID;
 	public Block smartBlock;
 	public Date lastChange;
+	
+	//Variables for removal logic.
 	public boolean removed = false;
+	public Matrix transform = null;
+	
 	protected Map<CamFidIdentifier,Fiducial> fiducialMap;
 
 	
@@ -45,7 +50,8 @@ public class BlockInfo
 			{
 				if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
 				{
-					count++;
+					if(data[k].seen)
+						count++;
 				}
 				else
 				{
@@ -68,6 +74,7 @@ public class BlockInfo
 		public Date timestamp;
 		public double camViewX;
 		public double camViewY;
+		public boolean seen;
 		
 		public Vec3 worldPosition = null;
 		
@@ -84,6 +91,7 @@ public class BlockInfo
 			camViewX = _camViewX;
 			camViewY = _camViewY;
 			camID = _camID;
+			seen = true;
 		}
 		
 		public Line getLine()
