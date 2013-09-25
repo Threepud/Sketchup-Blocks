@@ -36,7 +36,7 @@ public class EnvironmentAnalyzer
 			{
 				if (modelBlock.smartBlock.blockId != newBlock.smartBlock.blockId)
 				{
-					BoundingBox modelBB = BoundingBox.generateBoundingBox(newBlock);
+					BoundingBox modelBB = BoundingBox.generateBoundingBox(modelBlock);
 	
 					boolean overlap = checkXYOverlap(newBB, modelBB);
 					
@@ -88,8 +88,8 @@ public class EnvironmentAnalyzer
 			//These will be the corners for the new, transformed faces
 			//Check if it is the bottom one by finding the one that is the closest to parallel.
 			worldFaces[k] = new Face(Matrix.multiply(rotationMatrix, new Matrix(worldFaces[k].corners, true)).toVec3Array());
-			double dotWithSurfNorm = Vec3.dot(worldFaces[k].normal(), surfaceNormal);
-			if (dotWithSurfNorm > largestDot)
+			double dotWithSurfNorm = (Vec3.dot(worldFaces[k].normal(), surfaceNormal));
+			if (dotWithSurfNorm >= largestDot)
 			{
 				largestDot = dotWithSurfNorm;
 				largestDotIndex = k;
@@ -155,12 +155,13 @@ public class EnvironmentAnalyzer
 	
 	private static Face[] getFaces(SmartBlock block)
 	{
-		Face[] result = new Face[block.vertices.length/3];
+		Face[] result = new Face[block.indices.length/3];
 		int c = 0;
-		for (int k = 0; k < block.vertices.length; k += 3)
+		for (int k = 0; k < block.indices.length; k += 3)
 		{
-			result[c++] = new Face(block.vertices[k+0], block.vertices[k+1], block.vertices[k+2]);
+			result[c++] = new Face(block.vertices[block.indices[k+0]], block.vertices[block.indices[k+1]], block.vertices[block.indices[k+2]]);
 		}
+		
 		return result;
 	}
 	
