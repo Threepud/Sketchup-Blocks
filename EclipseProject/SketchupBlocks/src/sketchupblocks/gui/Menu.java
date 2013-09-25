@@ -41,7 +41,8 @@ public class Menu
 		if(Settings.showSplash)
 			displayList.add(new SplashPopup(window));
 		
-		displayList.add(new CalibratePopup(window));
+		//displayList.add(new CalibratePopup(window));
+		displayList.add(new UserPopup(window, "Export"));
 	}
 	
 	private void updateCalibratedCameras()

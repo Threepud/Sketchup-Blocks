@@ -25,7 +25,8 @@ public class GenericUserPopup implements Popup
 	private int popupBaseWidth = 350;
 	private int popupBaseHeight = 270;
 	private float barRadius = 70;
-	private int rotationSpeed = Settings.progressBarRotationSpeed;
+	private int maxVel = Settings.progressBarRotationSpeed;
+	private float[] currentVel;
 	private int[] randomIndex;
 	private int turn = 0;
 	private int[][] randomColours = 
@@ -44,6 +45,10 @@ public class GenericUserPopup implements Popup
 		
 		headingFont = window.createFont("Arial", 40, true);
 		subFont = window.createFont("Arial", 30);
+		
+		currentVel = new float[3];
+		for(int x = 0; x < 3; ++x)
+			currentVel[x] = maxVel * 1.7f;
 		
 		Random genny = new Random();
 		randomIndex = new int[3];
@@ -116,8 +121,6 @@ public class GenericUserPopup implements Popup
 		window.noFill();
 		
 		window.strokeWeight(3);
-		float angle = PConstants.PI * 2 * 
-				(float)(System.currentTimeMillis() - poisonStamp) / (float)rotationSpeed;
 		
 		turn = (int)(System.currentTimeMillis() - poisonStamp) / 1000;
 		for(int x = 0; x < 3; ++x)
@@ -129,6 +132,12 @@ public class GenericUserPopup implements Popup
 			//arcs 1
 			if(x >= turn)
 			{
+				if(x == turn)
+					currentVel[x] -= 5.0f;
+				if(currentVel[x] < maxVel)
+					currentVel[x] = maxVel;
+				
+				float angle = PConstants.PI * 2 * (float)(System.currentTimeMillis() - poisonStamp) / currentVel[x];
 				float radius = (barRadius + (10 * x)) * (1 - (x == turn ? ((float)(System.currentTimeMillis() - poisonStamp) % (Settings.commandWaitTime / 3) / (float)(Settings.commandWaitTime / 3)) : 0));
 				window.arc(window.width / 2, (window.height / 2) + 60, 
 						   radius,
