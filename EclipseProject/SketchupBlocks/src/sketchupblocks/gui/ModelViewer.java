@@ -196,32 +196,17 @@ public class ModelViewer
 			}
 			for(ModelBlock mBlock: model.getBlocks())
 			{
-				ArrayList<Line> lines = new ArrayList<>(mBlock.debugLines.values());
-				ArrayList<Integer> IDS = new ArrayList<>(mBlock.debugLines.keySet());
-				for(int x = 0; x < lines.size(); ++x)
+				for(int x = 0; x < mBlock.debugLines.length; ++x)
 				{
-					Line line = null;
-					if(selectCamera == 0)
-					{
-						line = lines.get(x);
-					}
-					else
-					{
-						int id = IDS.get(x);
-						if(id == selectCamera - 1)
-							line = lines.get(x);
-					}
+					Line line = mBlock.debugLines[x];
 					
-					if(line != null)
-					{
-						Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
-						Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
-						
-						start = Vec3.scalar(10, start);
-						end = Vec3.scalar(lineLength * 10, end);
-						end = Vec3.add(start, end);
-						window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
-					}
+					Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
+					Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
+					
+					start = Vec3.scalar(10, start);
+					end = Vec3.scalar(lineLength * 10, end);
+					end = Vec3.add(start, end);
+					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
 				}
 			}
 		}
@@ -247,33 +232,17 @@ public class ModelViewer
 			}
 			for(ModelBlock mBlock: model.getBlocks())
 			{
-			ArrayList<Vec3> points = new ArrayList<>(mBlock.debugPoints.values());
-			ArrayList<Integer> IDS = new ArrayList<>(mBlock.debugPoints.keySet());
-				for(int x = 0; x < points.size(); ++x)
+				for(int x = 0; x < mBlock.debugPoints.length; ++x)
 				{
-					Vec3 point = null;
+					Vec3 point = mBlock.debugPoints[x];
 					
-					if(selectCamera == 0)
-					{
-						point = points.get(x);
-					}
-					else
-					{
-						int id = IDS.get(x);
-						if(id == selectCamera - 1)
-							point = points.get(x);
-					}
+					window.pushMatrix();
 					
-					if(point != null)
-					{
-						window.pushMatrix();
-						
-						point = Vec3.scalar(10, point);
-						window.translate((float)point.y, (float)-point.z, (float)point.x);
-						window.sphere(5);
-						
-						window.popMatrix();
-					}
+					point = Vec3.scalar(10, point);
+					window.translate((float)point.y, (float)-point.z, (float)point.x);
+					window.sphere(5);
+					
+					window.popMatrix();
 				}
 			}
 			window.fill(255);
