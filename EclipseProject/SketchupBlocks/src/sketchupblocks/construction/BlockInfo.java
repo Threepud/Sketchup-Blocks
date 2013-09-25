@@ -23,7 +23,7 @@ public class BlockInfo
 	public Date lastChange;
 	
 	//Variables for removal logic.
-	public boolean removed = false;
+	public boolean removed = true;
 	public Matrix transform = null;
 	
 	protected Map<CamFidIdentifier,Fiducial> fiducialMap;
