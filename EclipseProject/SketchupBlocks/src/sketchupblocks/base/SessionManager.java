@@ -120,12 +120,11 @@ public class SessionManager
     	}
     	else if(spectating)
     	{
-    		if(Settings.verbose >= 1)
-    			System.out.println("Spectating. No live data accepted.");
+    		Logger.log("Spectating. No live data accepted.", 90);
     	}
     	else
     	{
-    		Logger.log("--Unrecognized block!!--"+ cameraEvent.fiducialID, 10);
+    		Logger.log("--Unrecognized block!!--"+ cameraEvent.fiducialID, 1);
     	}
     }
     
@@ -288,7 +287,7 @@ public class SessionManager
     	    		{
     					menu.createConnectPopup();
     					
-    	    			NetworkedLobby temp = new NetworkedLobby("10.0.0.3", Settings.connectPort, menu, sessionManager); 
+    	    			NetworkedLobby temp = new NetworkedLobby("192.168.137.221", Settings.connectPort, menu, sessionManager); 
     	    			lobby = temp;
     	    			
     	    			server.stopServer();

@@ -39,7 +39,10 @@ public class NetworkedLobby extends Thread implements Lobby
 
 	public void updateModel(ModelBlock modelBlock)
 	{
-		model.addModelBlock(modelBlock);
+		if(modelBlock.type == ModelBlock.ChangeType.UPDATE)
+			model.addModelBlock(modelBlock);
+		else
+			model.removeModelBlock(modelBlock);
 		modelChangeListeners.trimToSize();
 		for (int k = 0; k < modelChangeListeners.size(); k++)
 		{
@@ -74,7 +77,10 @@ public class NetworkedLobby extends Thread implements Lobby
 				InputStream is = connection.getInputStream();
 				ObjectInputStream inp = new ObjectInputStream(is);
 				ModelBlock modelBlock = (ModelBlock) inp.readObject();
-				model.addModelBlock(modelBlock);
+				if(modelBlock.type == ModelBlock.ChangeType.UPDATE)
+					model.addModelBlock(modelBlock);
+				else
+					model.removeModelBlock(modelBlock);
 
 				modelChangeListeners.trimToSize();
 				for (int k = 0; k < modelChangeListeners.size(); k++)
