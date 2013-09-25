@@ -41,8 +41,7 @@ public class Menu
 		if(Settings.showSplash)
 			displayList.add(new SplashPopup(window));
 		
-		//displayList.add(new CalibratePopup(window));
-		displayList.add(new UserPopup(window, "Export"));
+		displayList.add(new CalibratePopup(window));
 	}
 	
 	private void updateCalibratedCameras()
@@ -105,6 +104,34 @@ public class Menu
 					}
 					break;
 				case SPECTATE:
+					if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
+					{
+						if(!displayList.isEmpty())
+						{
+							if(displayList.get(displayList.size() - 1) instanceof UserPopup)
+							{
+								if(((UserPopup)displayList.get(displayList.size() - 1)).userMessage.equals("Spectate"))
+								{
+									return;
+								}
+							}
+						}
+						
+						displayList.add(new UserPopup(window, "Spectate"));
+					}
+					else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
+					{
+						if(!displayList.isEmpty())
+						{
+							if(displayList.get(displayList.size() - 1) instanceof UserPopup)
+							{
+								if(((UserPopup)displayList.get(displayList.size() - 1)).userMessage.equals("Spectate"))
+								{
+									displayList.remove(displayList.size() - 1);
+								}
+							}
+						}
+					}
 					break;
 				default:
 					Logger.log("Unsupported command", 1);
