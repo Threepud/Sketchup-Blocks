@@ -21,8 +21,8 @@ public class ModelBlock implements Serializable
 	public SmartBlock smartBlock;
 	public Matrix transformationMatrix;
 	public ChangeType type;
-	public HashMap<Integer, Line> debugLines = new HashMap<>();
-	public HashMap<Integer, Vec3> debugPoints = new HashMap<>();
+	public Line [] debugLines = new Line[0];
+	public Vec3 [] debugPoints = new Vec3[0];
 	
 	public ModelBlock()
 	{

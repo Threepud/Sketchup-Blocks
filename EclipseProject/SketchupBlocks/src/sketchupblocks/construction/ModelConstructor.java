@@ -28,10 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Neoin
  *
  */
-/**
- * @author Neoin
- *
- */
 public class ModelConstructor implements Runnable 
 {
 	private Lobby eddy;
@@ -274,6 +270,8 @@ public class ModelConstructor implements Runnable
 			
 			int numFiducials = fids.length;
 			
+			
+			
 			Line[] lines = new Line[numFiducials];
 			for(int k = 0 ; k < fids.length ; k++)
 			{
@@ -334,11 +332,9 @@ public class ModelConstructor implements Runnable
 			bin.removed = false;
 			
 			ModelBlock mbToAdd = (new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
-			for(int k = 0 ; k < fids.length ; k++)
-			{
-				mbToAdd.debugLines.put(new Integer(fids[k].camID),lines[k]);
-				mbToAdd.debugPoints.put(new Integer(fids[k].camID),fiducialWorld[k]);
-			}
+			
+				mbToAdd.debugLines = lines;
+				mbToAdd.debugPoints = fiducialWorld;
 			
 			eddy.updateModel(mbToAdd);
 			//eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE)));
