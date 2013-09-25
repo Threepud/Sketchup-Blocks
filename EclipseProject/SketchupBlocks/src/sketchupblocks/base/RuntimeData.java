@@ -3,6 +3,7 @@ package sketchupblocks.base;
 import java.util.Map;
 import java.util.TreeMap;
 
+import sketchupblocks.math.Face;
 import sketchupblocks.math.Vec3;
 
 public class RuntimeData 
@@ -12,6 +13,9 @@ public class RuntimeData
 	
 	public static double[][][] cameraCalibrationDetails;
 	public static boolean[][] haveCalibrationDetails;
+	
+	public static Face topFace;
+	public static Face bottomFace;
 	
 	public static void init()
 	{
