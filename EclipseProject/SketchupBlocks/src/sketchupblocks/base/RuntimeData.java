@@ -33,6 +33,7 @@ public class RuntimeData
 				haveCalibrationDetails[l][k] = false;
 			}
 		}
+		debugLine = new Line(new Vec3(-10,-10,10),new Vec3(10,10,10));
 	}
 	
 	public static void clearCalibrationDetails(int camID)
