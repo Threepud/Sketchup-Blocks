@@ -13,6 +13,7 @@ public class PseudoPhysicsApplicator
 	private static double minErrorMargin = 0.5;
 	private static double stepSize = 0.01;
 	private static int MaxIter = 2000; 
+	private static int MaxReruns = 10;
 	private static double minDot = 0;
 	private static double totalThetaX = 0;
 	private static double totalThetaY = 0;
@@ -21,6 +22,7 @@ public class PseudoPhysicsApplicator
 	{
 		totalThetaX = 0;
 		totalThetaY = 0;
+		int timesRerun = 0;
 		//Get the top face of the block just below the block to be placed (m)
 		boolean unsatisfied = true;
 		while(unsatisfied)
@@ -109,9 +111,24 @@ public class PseudoPhysicsApplicator
 		        ModelBlock mBelowAfter = EnvironmentAnalyzer.getModelBlockBelow(m);
 		        
 		        if (mBelow.equals(mBelowAfter) || (mBelowAfter == null && mBelow.smartBlock == null))
+		        {
 		        	unsatisfied = false;
+		        }
 		        else
+		        {
 		        	mBelow = mBelowAfter;
+		        	timesRerun++;
+		        }
+		        if (timesRerun == MaxReruns)
+		        {
+		        	Logger.log("Could not find suitable surface on which to place block "+m.smartBlock.blockId, 1);
+		        	unsatisfied = false;
+		        }
+			}
+			else
+			{
+				unsatisfied = false;
+				Logger.log("Slanted or very accurate block detected", 1);
 			}
 		}
 		
