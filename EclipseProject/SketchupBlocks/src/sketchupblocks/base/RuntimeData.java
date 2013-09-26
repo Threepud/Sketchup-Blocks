@@ -20,6 +20,7 @@ public class RuntimeData
 	
 	public static Face topFace;
 	public static Face bottomFace;
+	public static int blockID;
 	
 	public static void init()
 	{
