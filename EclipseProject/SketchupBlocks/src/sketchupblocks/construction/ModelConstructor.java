@@ -156,8 +156,8 @@ public class ModelConstructor implements Runnable
 		
 			ModelBlock [] mb = EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos);
 					
-			
-			if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) //the fiducial should be seen
+			//The fiducial is not obscured.
+			if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) 
 			{
 				return true;
 			}
@@ -165,6 +165,32 @@ public class ModelConstructor implements Runnable
 		return false;
 	}
 	
+	/**
+	 * @return a List of Blocks the are removed, but expected to be seen.
+	 */
+	private BlockInfo [] allPossibleReadditions()
+	{
+		ArrayList<BlockInfo> result = new ArrayList<BlockInfo>();
+		for(BlockInfo bi : blockMap.values())
+		{
+			if(bi.removed && expectedToSeeBlock(bi))
+				result.add(bi);
+		}
+		BlockInfo [] res = new BlockInfo [0];
+		return result.toArray(res);
+	}
+	
+	private void doReadditions(BlockInfo [] bis)
+	{
+		for(BlockInfo bi : bis)
+		{
+			if(bi.removed && !expectedToSeeBlock(bi))
+				{
+				bi.removed = false;
+				eddy.updateModel(new ModelBlock((SmartBlock)bi.smartBlock, bi.transform, ModelBlock.ChangeType.UPDATE));
+				}
+		}
+	}
 	
 	private boolean checkReAdd(BlockInfo block , InputBlock iBlock)
 	{
@@ -331,7 +357,9 @@ public class ModelConstructor implements Runnable
 				mbToAdd.debugLines = lines;
 				mbToAdd.debugPoints = fiducialWorld;
 			
-			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
+			BlockInfo [] bis = allPossibleReadditions();
+			eddy.updateModel(mbToAdd);
+			doReadditions(bis);
 		}
 		else
 		{
