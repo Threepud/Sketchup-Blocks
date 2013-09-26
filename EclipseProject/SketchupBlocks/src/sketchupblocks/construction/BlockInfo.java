@@ -1,5 +1,6 @@
 package sketchupblocks.construction;
 
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import sketchupblocks.math.Vec3;
 public class BlockInfo 
 {
 	int minEvents = 3;
+	int minFidVis = 2;
 	int LIFETIME = 1500; //ms
 	public int blockID;
 	public Block smartBlock;
@@ -38,6 +40,16 @@ public class BlockInfo
 		lastChange = new Date();
 	}
 	
+	public Date getLastSeen()
+	{
+		Date result = new Date();
+		for(Fiducial fid : fiducialMap.values())
+		{
+			if(result.getTime() > fid.lastSeen.getTime())
+				result = fid.lastSeen;
+		}
+		return result;
+	}
 	
 	public boolean ready()
 	{
@@ -55,6 +67,7 @@ public class BlockInfo
 			//Do nothing
 		}
 		
+		ArrayList<Integer> fiducialList = new ArrayList<Integer>();
 		int count = 0;
 		for (int k = 0; k < data.length; k++)
 		{
@@ -62,8 +75,12 @@ public class BlockInfo
 			{
 				if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
 				{
+					count ++;
 					if(data[k].seen)
-						count++;
+					{
+						if( !fiducialList.contains(new Integer(data[k].fiducialsID)))
+						fiducialList.add(data[k].fiducialsID);
+					}
 				}
 				else
 				{
@@ -72,7 +89,7 @@ public class BlockInfo
 			}
 		}
 		
-		if (count >= minEvents)
+		if (fiducialList.size() >= minFidVis && count >= minEvents)
 			return true;
 		else 
 			return false;
