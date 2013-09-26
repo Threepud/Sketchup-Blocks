@@ -188,17 +188,9 @@ public class EnvironmentAnalyzer
 		
 		for(ModelBlock mb : model.getBlocks())
 		{
-			for(int k = 0 ; k < mb.smartBlock.indices.length ; k+= 3)
+			if(isIntersecting(theLine,mb))
 			{
-				Vec3 v0 = Matrix.multiply(mb.transformationMatrix , mb.smartBlock.vertices[mb.smartBlock.indices[k+0]].padVec3()).toVec3();
-				Vec3 v1 = Matrix.multiply(mb.transformationMatrix , mb.smartBlock.vertices[mb.smartBlock.indices[k+1]].padVec3()).toVec3();
-				Vec3 v2 = Matrix.multiply(mb.transformationMatrix , mb.smartBlock.vertices[mb.smartBlock.indices[k+2]].padVec3()).toVec3();
-				if(rayIntersectsTriangle(theLine,v0,v1,v2))
-				{
-					result.add(mb);	
-					break; // it goes through at least one face so we are good.
-				}
-			
+				result.add(mb);
 			}
 			
 		}
@@ -206,6 +198,23 @@ public class EnvironmentAnalyzer
 		
 		 ModelBlock [] res = new  ModelBlock [0];
 	return result.toArray(res);	
+	}
+	
+	static boolean isIntersecting(Line line , ModelBlock mb)
+	{
+		for(int k = 0 ; k < mb.smartBlock.indices.length ; k+= 3)
+		{
+			Vec3 v0 = Matrix.multiply(mb.transformationMatrix , mb.smartBlock.vertices[mb.smartBlock.indices[k+0]].padVec3()).toVec3();
+			Vec3 v1 = Matrix.multiply(mb.transformationMatrix , mb.smartBlock.vertices[mb.smartBlock.indices[k+1]].padVec3()).toVec3();
+			Vec3 v2 = Matrix.multiply(mb.transformationMatrix , mb.smartBlock.vertices[mb.smartBlock.indices[k+2]].padVec3()).toVec3();
+			if(rayIntersectsTriangle(line,v0,v1,v2))
+			{
+					
+				return true; // it goes through at least one face so we are good.
+			}
+		
+		}
+		return false;
 	}
 	
 	static boolean rayIntersectsTriangle(Line line, Vec3 v0,Vec3 v1,Vec3 v2)
