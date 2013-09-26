@@ -119,7 +119,7 @@ public class SessionManager
     	}
     	else
     	{
-    		Logger.log("--Unrecognized block!!--"+ cameraEvent.fiducialID, 1);
+    		Logger.log("--Unrecognized block!!--"+ cameraEvent.fiducialID, 5);
     	}
     }
     
