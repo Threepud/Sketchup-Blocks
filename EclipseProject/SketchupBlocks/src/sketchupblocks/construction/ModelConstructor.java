@@ -169,7 +169,7 @@ public class ModelConstructor implements Runnable
 		
 		
 		//mb.debugPoints;
-		eddy.updateModel(mb);	
+		eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mb));	
 	
 	}
 	
