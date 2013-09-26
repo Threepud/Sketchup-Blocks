@@ -44,15 +44,20 @@ public class EnvironmentAnalyzer
 					{
 						//System.out.println("There is overlap between "+modelBlock.smartBlock.blockId+" and the new block "+newBlock.smartBlock.blockId);
 						//System.out.println("("+newBB.min.x+","+newBB.min.y+") ("+newBB.max.x+","+newBB.max.y+") overlaps with +("+modelBB.min.x+","+modelBB.min.y+") ("+modelBB.max.x+","+modelBB.max.y+")");
-						if (below != null && higherThan(modelBB, belowBB))
+						if (below != null && higherThan(modelBB, belowBB) && higherThan(newBB, modelBB))
 						{
 							below = modelBlock;
 							belowBB = modelBB;
 						}
-						else if (below == null)
+						else if (below == null && higherThan(newBB, modelBB))
 						{
 							below = modelBlock;
 							belowBB = modelBB;
+							//System.out.println("New block "+ newBlock.smartBlock.blockId+" is higher than "+modelBlock.smartBlock.blockId);
+						}
+						else if (!higherThan(newBB, modelBB))
+						{
+							//System.out.println("New block "+newBlock.smartBlock.blockId+" is lower than "+modelBlock.smartBlock.blockId);
 						}
 					}
 					else
