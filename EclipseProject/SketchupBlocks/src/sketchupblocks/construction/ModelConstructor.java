@@ -386,7 +386,9 @@ public class ModelConstructor implements Runnable
 			mbToAdd.debugPoints = fiducialWorld;
 			
 			BlockInfo [] bis = allPossibleReadditions();
-			eddy.updateModel((mbToAdd)); // PseudoPhysicsApplicator.applyPseudoPhysics
+			
+			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
+			//eddy.updateModel(mbToAdd);
 			doReadditions(bis);
 		}
 		else
