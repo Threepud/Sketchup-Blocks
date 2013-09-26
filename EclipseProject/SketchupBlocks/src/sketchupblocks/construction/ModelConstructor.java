@@ -25,9 +25,9 @@ import sketchupblocks.network.Lobby;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author Neoin
- *
+ * @author Hein,Jacques,Elre
  */
+
 public class ModelConstructor implements Runnable 
 {
 	private Lobby eddy;
@@ -111,6 +111,7 @@ public class ModelConstructor implements Runnable
 			if(fid == null) return;
 			
 			fid.setSeen(false);
+			block.lastChange = new Date();
 						
 			if(!block.removed)
 			{
@@ -126,6 +127,10 @@ public class ModelConstructor implements Runnable
 		}
 	}
 	
+	/**
+	 * @param block The block being assessed.
+	 * @return true is the block has any visible fiducials
+	 */
 	private boolean blockNotSeen(BlockInfo block)
 	{
 		for(BlockInfo.Fiducial fid : block.fiducialMap.values())
