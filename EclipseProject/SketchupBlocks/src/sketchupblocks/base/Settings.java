@@ -58,6 +58,7 @@ public class Settings
 		}
 		catch (IOException | ParserConfigurationException | SAXException e) 
 		{
+			Logger.log("ERROR: Set settings.", 1);
 			e.printStackTrace();
 			System.exit(-1);
 		}
@@ -81,16 +82,26 @@ public class Settings
 			XML camera = cameras.getChild(x);
 			if(camera.getName().equals("CameraSettings") && cameraCount < numCameras)
 			{
-				double fov = Double.parseDouble(camera.getChild("FOV").getContent());
-				double width = Double.parseDouble(camera.getChild("Width").getContent());
-				double height = Double.parseDouble(camera.getChild("Height").getContent());
-				int port = Integer.parseInt(camera.getChild("Port").getContent());
-				cameraSettings[cameraCount++] = new CameraSettings(fov, width/height, port);
+				try
+				{
+					double fov = Double.parseDouble(camera.getChild("FOV").getContent());
+					double width = Double.parseDouble(camera.getChild("Width").getContent());
+					double height = Double.parseDouble(camera.getChild("Height").getContent());
+					int port = Integer.parseInt(camera.getChild("Port").getContent());
+					cameraSettings[cameraCount++] = new CameraSettings(fov, width/height, port);
+				}
+				catch(NumberFormatException e)
+				{
+					Logger.log("ERROR: Set settings.", 1);
+					e.printStackTrace();
+					System.exit(-1);
+				}
 			}
 		}
 		
 		if(numCameras > cameraCount)
 		{
+			Logger.log("ERROR: Set settings.", 1);
 			System.err.println("Settings: Too many suggested number of cameras.");
 			System.exit(-1);
 		}
@@ -121,13 +132,22 @@ public class Settings
 					System.exit(-1);
 				}
 				
-				double[] coords = 
+				try
 				{
-					Double.parseDouble(coordsString[0]),
-					Double.parseDouble(coordsString[1]),
-					Double.parseDouble(coordsString[2])
-				};
-				landmarks[landmarkCount++] = new Vec3(coords[0], coords[1], coords[2]);
+					double[] coords = 
+					{
+						Double.parseDouble(coordsString[0]),
+						Double.parseDouble(coordsString[1]),
+						Double.parseDouble(coordsString[2])
+					};
+					landmarks[landmarkCount++] = new Vec3(coords[0], coords[1], coords[2]);
+				}
+				catch(NumberFormatException e)
+				{
+					Logger.log("ERROR: Set settings.", 1);
+					e.printStackTrace();
+					System.exit(-1);
+				}
 			}
 		}
 		
@@ -139,10 +159,19 @@ public class Settings
 		XML commandWaitTimeNode = gui.getChild("CommandWaitTime");
 		XML progressBarRotationSpeedNode = gui.getChild("ProgressBarRotationSpeed");
 		
-		showSplash = Boolean.parseBoolean(showSplashNode.getContent());
-		splashTTL = Integer.parseInt(splashTTLNode.getContent());
-		commandWaitTime = Integer.parseInt(commandWaitTimeNode.getContent());
-		progressBarRotationSpeed = Integer.parseInt(progressBarRotationSpeedNode.getContent());
+		try
+		{
+			showSplash = Boolean.parseBoolean(showSplashNode.getContent());
+			splashTTL = Integer.parseInt(splashTTLNode.getContent());
+			commandWaitTime = Integer.parseInt(commandWaitTimeNode.getContent());
+			progressBarRotationSpeed = Integer.parseInt(progressBarRotationSpeedNode.getContent());
+		}
+		catch(Exception e)
+		{
+			Logger.log("ERROR: Set settings.", 1);
+			e.printStackTrace();
+			System.exit(-1);
+		}
 		
 		//Debug recording
 		XML debugRecordingNode = settings.getChild("DebugRecording");
@@ -159,8 +188,17 @@ public class Settings
 		XML hostPortNode = network.getChild("HostPort");
 		XML connectPortNode = network.getChild("ConnectPort");
 		
-		hostPort = Short.parseShort(hostPortNode.getContent());
-		connectPort = Short.parseShort(connectPortNode.getContent());
+		try
+		{
+			hostPort = Short.parseShort(hostPortNode.getContent());
+			connectPort = Short.parseShort(connectPortNode.getContent());
+		}
+		catch(NumberFormatException e)
+		{
+			Logger.log("ERROR: Set settings.", 1);
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 	
 	public static class CameraSettings
