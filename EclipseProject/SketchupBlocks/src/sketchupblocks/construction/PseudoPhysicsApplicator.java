@@ -22,13 +22,25 @@ public class PseudoPhysicsApplicator
 		
 		Face topFace;
 		if (mBelow == null)
+		{
+			mBelow = new ModelBlock();
+			mBelow.transformationMatrix = Matrix.identity(4);
 			topFace = new Face(new Vec3(100, -100, 0), new Vec3(-100, 100, 0), new Vec3(100, 100, 0));
+		}
 		else 
+		{
 			topFace = EnvironmentAnalyzer.getFacingFace(mBelow, new Vec3(0, 0, 1)); //This face has already been rotated.
+		}
 		
 		Vec3 surfaceNormal = topFace.normal();
 		Vec3 invertedSurfaceNormal = Vec3.scalar(-1, surfaceNormal);
 		Face bottomFace = EnvironmentAnalyzer.getFacingFace(m, invertedSurfaceNormal); //Get the face of m that is towards the block below it.
+		
+		/*System.out.println("*******************************************************************");
+		System.out.println("Bottom face normal: "+bottomFace.normal());
+		System.out.println("Top face norma: "+surfaceNormal);
+		System.out.println("Inverted top face: "+invertedSurfaceNormal);
+		System.out.println("*******************************************************************");*/
 		
 		RuntimeData.topFace = topFace;
 		RuntimeData.bottomFace = bottomFace;
@@ -47,7 +59,7 @@ public class PseudoPhysicsApplicator
 			
 			int count = 0;
 			//Fix minor rotations;
-			while(Vec3.dot(invertedSurfaceNormal, bottomFace.normal()) < 0.99999 && count < MaxIter)
+			while(Vec3.dot(invertedSurfaceNormal, bottomFace.normal()) < 0.999 && count < MaxIter)
 			{
 				RotationMatrix3D minXRot = findMinimalRot(bottomFace, Matrix.Axis.X_AXIS, invertedSurfaceNormal);
 				bottomFace = new Face(Matrix.multiply(minXRot, new Matrix(bottomFace.corners, true)).toVec3Array());
@@ -56,31 +68,47 @@ public class PseudoPhysicsApplicator
 				calculatedRotationMatrix = Matrix.multiply(minYRot, Matrix.multiply(minXRot, calculatedRotationMatrix));
 				count++;
 			}
-			Logger.log("Old match: "+largest, 30);
-			Logger.log(("New match: "+Vec3.dot(invertedSurfaceNormal, bottomFace.normal())), 30);
+			Logger.log("Old match: "+largest, 1);
+			Logger.log(("New match: "+Vec3.dot(invertedSurfaceNormal, bottomFace.normal())), 1);
 			
 			if (count == MaxIter)
 				Logger.log("WARNING: Major changes to block orientation", 2);
 			
 			//Translate the model down to the height of the face just below:
 			Vec3 origTrans = m.transformationMatrix.colToVec3(3);
-			//System.out.println("Translation before: "+origTrans);
+			Vec3 surfaceTrans = mBelow.transformationMatrix.colToVec3(3);
 			for (int k = 0; k < bottomFace.corners.length; k++)
 			{
-				//System.out.println("Applying translation on "+bottomFace.corners[k]);
 				bottomFace.corners[k] = Vec3.add(bottomFace.corners[k], origTrans);
-				//System.out.println("Which yields "+bottomFace.corners[k]);
+				topFace.corners[k] = Vec3.add(topFace.corners[k], surfaceTrans);
 			}
 			
-			/*We find a point on the bottom face of the modelblock to be placed. 
-			Vec3 pointOnBottomFace = Vec3.scalar(0.5, Vec3.add(bottomFace.corners[0], bottomFace.corners[1]));
+			RuntimeData.bottomFace = bottomFace;
+			RuntimeData.topFace = topFace;
 			
+			//We find a point on the bottom face of the modelblock to be placed. 
+			Vec3 pointOnBottomFace = Vec3.scalar(1.0/3.0, Vec3.add(Vec3.add(bottomFace.corners[0], bottomFace.corners[1]), bottomFace.corners[2]));
+			Vec3 pointOnSurface = Vec3.scalar(1.0/3.0, Vec3.add(Vec3.add(topFace.corners[0], topFace.corners[1]), topFace.corners[2]));
+			/*System.out.println("--------------------------------------------");
+			System.out.println("Bottom face: ");
+			for (int k = 0; k < bottomFace.corners.length; k++)
+			{
+				System.out.println(bottomFace.corners[k]);
+			}
+			System.out.println("Point: "+pointOnBottomFace);
+			System.out.println("--------------------------------------------");
+			System.out.println("Top face: ");
+			for (int k = 0; k < topFace.corners.length; k++)
+			{
+				System.out.println(topFace.corners[k]);
+			}
+			System.out.println("Point: "+pointOnSurface);
+			System.out.println("--------------------------------------------");*/
 			//We then project that point onto the top face of the modelblock below it.
 			//Final z co-ordinate is:
-			double z = (surfaceNormal.x*pointOnBottomFace.x + surfaceNormal.y*pointOnBottomFace.y-Vec3.dot(surfaceNormal, topFace.corners[0]))/surfaceNormal.z;
-			//double z2 = (surfaceNormal.x*bottomFace.corners[2].x + surfaceNormal.y*bottomFace.corners[2].y-Vec3.dot(surfaceNormal, topFace.corners[0]))/surfaceNormal.z;
-			double diffZ = (pointOnBottomFace.z - z);
-			//double diffZ2 = bottomFace.corners[2].z - z2;
+			double z = (-surfaceNormal.x*pointOnBottomFace.x - surfaceNormal.y*pointOnBottomFace.y+Vec3.dot(surfaceNormal, pointOnSurface))/surfaceNormal.z;
+			double diffZ = -(pointOnBottomFace.z - z);
+			System.out.println("Diff z "+diffZ);
 			//The difference in z co-ordinates is then the additional translation to apply.*/
 			
 			double[][] data = new double[4][4];
@@ -93,14 +121,14 @@ public class PseudoPhysicsApplicator
 	        {
 	        	data[k][3] = m.transformationMatrix.data[k][3];
 	        }
-	        //data[2][3] += diffZ;
+	        data[2][3] += diffZ;
 	        m.transformationMatrix = new Matrix(data);
 		}
 		else
 		{
 			//System.out.println("Igoring "+largest);
 		}
-		
+		System.out.println("Adding "+m.smartBlock.blockId);
 		return m;
 	}
 	
@@ -139,12 +167,14 @@ public class PseudoPhysicsApplicator
 			prevDot = currDot;
 			rotatedNormal = Vec3.normalize(Matrix.multiply(result,  rotatedNormal));
 			currDot = Vec3.dot(rotatedNormal, surfaceNormal);
-			System.out.println("curr" + currDot);
+			//System.out.println("curr" + currDot);
 			count++;
 		}
-		System.out.println("With result "+prevDot+" we stopped at "+count);
+		//System.out.println("With result "+prevDot+" we stopped at "+count);
 		currentTheta -= localStep*10.0/9.0;
 		result.updateTheta(currentTheta);
+		if (10 < (currentTheta*180/Math.PI))
+			Logger.log("WARNING: Huge changes to block rotation", 1);
 		return result;
 	}
 	
