@@ -73,6 +73,9 @@ public class ModelViewer
 	//debug line intersections
 	private boolean showDebugLineIntersection = false;
 	
+	//debug ghost blocks - pre sudo physics
+	private boolean showGhostBlocks = false;
+	
 	private PImage tilesTexture;
 	 
 	public ModelViewer()
@@ -139,43 +142,18 @@ public class ModelViewer
 		
 		window.background(100);
 		
+		drawDebugStuff();
+		drawBlocks();
+		drawGhostBlocks();
+		drawConstructionFloor();
+	}
+	
+	private void drawDebugStuff()
+	{
 		drawDebugLines();
 		drawDebugLinesIntersections();
 		drawDebugPoints();
 		drawDebugFaces();
-		drawBlocks();
-		drawConstructionFloor();
-	}
-	
-	private void drawConstructionFloor()
-	{
-		window.pushMatrix();
-		
-		window.noStroke();
-		window.fill(window.color(255));
-		
-		if(alphaBlendFloor)
-			window.tint(255, 50);
-		else
-			window.tint(255, 255);
-		
-		window.beginShape();
-		
-		window.texture(tilesTexture);
-		window.textureMode(PConstants.NORMAL);
-		window.textureWrap(PConstants.REPEAT);
-		
-		final int point = 5000;
-		final int repeat = 100;
-		
-		window.vertex(-point, 0, -point, 0, 0);
-		window.vertex(point, 0, -point, repeat, 0);
-		window.vertex(point, 0, point, repeat, repeat);
-		window.vertex(-point, 0, point, 0, repeat);
-				
-		window.endShape(PConstants.CLOSE);
-		
-		window.popMatrix();
 	}
 	
 	private void drawDebugLines()
@@ -309,6 +287,65 @@ public class ModelViewer
 		}
 	}
 	
+	private void drawGhostBlocks()
+	{
+		if(showGhostBlocks)
+		{
+			window.pushMatrix();
+			window.noStroke();
+			window.fill(200, 255, 0, 100);
+			window.scale(10, 10, 10);
+			
+			//draw block list
+			Model model;
+			try 
+			{
+				model = lobby.getModel();
+			} 
+			catch (ModelNotSetException e) 
+			{
+				e.printStackTrace();
+				return;
+			}
+			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
+			{
+				if(showDebugLineIntersection)
+				{
+					Line line = RuntimeData.debugLine;
+					if(line != null)
+					{
+						if(EnvironmentAnalyzer.isIntersecting(line, block))
+						{
+							window.fill(0, 255, 0);
+						}
+						else
+						{
+							window.fill(255);
+						}
+					}
+				}
+				if (block.type == ModelBlock.ChangeType.REMOVE)
+				{
+					Logger.log("Drawing removed block!", 1);
+					return;
+				}
+				
+				SmartBlock smartBlock = block.smartBlock;
+				window.beginShape(PConstants.TRIANGLES);
+				for(int x = 0; x < smartBlock.indices.length; ++x)
+				{
+					Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
+					
+					vertex = Matrix.multiply(block.rawMatrix, vertex.padVec3()).toVec3();
+					window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
+				}
+				
+				window.endShape();
+			}
+			window.popMatrix();
+		}
+	}
+	
 	private void drawBlocks()
 	{
 		if(showModel)
@@ -369,6 +406,37 @@ public class ModelViewer
 			}
 			window.popMatrix();
 		}
+	}
+	
+	private void drawConstructionFloor()
+	{
+		window.pushMatrix();
+		
+		window.noStroke();
+		window.fill(window.color(255));
+		
+		if(alphaBlendFloor)
+			window.tint(255, 50);
+		else
+			window.tint(255, 255);
+		
+		window.beginShape();
+		
+		window.texture(tilesTexture);
+		window.textureMode(PConstants.NORMAL);
+		window.textureWrap(PConstants.REPEAT);
+		
+		final int point = 5000;
+		final int repeat = 100;
+		
+		window.vertex(-point, 0, -point, 0, 0);
+		window.vertex(point, 0, -point, repeat, 0);
+		window.vertex(point, 0, point, repeat, repeat);
+		window.vertex(-point, 0, point, 0, repeat);
+				
+		window.endShape(PConstants.CLOSE);
+		
+		window.popMatrix();
 	}
 	
 	private void switchCamera()
@@ -547,6 +615,13 @@ public class ModelViewer
 			if(e.getAction() == KeyEvent.RELEASE)
 			{
 				showDebugLineIntersection = !showDebugLineIntersection;
+			}
+		}
+		else if(e.getKey() == 'g')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+			{
+				showGhostBlocks = !showGhostBlocks; 
 			}
 		}
 	}

@@ -13,3 +13,5 @@ n - toggle transparent model
 
 c - toggle debug faces
 i - toggle dubug line intersections
+
+g - toggle ghost blocks
