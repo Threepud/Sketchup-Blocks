@@ -143,6 +143,36 @@ public class ModelConstructor implements Runnable
 		return true;
 	}
 	
+	private void addBlockToModel(BlockInfo bi)
+	{
+		bi.removed = false;
+		ModelBlock mb = new ModelBlock((SmartBlock)bi.smartBlock, bi.transform, ModelBlock.ChangeType.UPDATE);
+		
+		Line [] dbLines = new Line[bi.fiducialMap.size()];
+		Vec3 [] dbPoints = new Vec3[bi.fiducialMap.size()];
+		int k = 0 ;
+		for(BlockInfo.Fiducial fid : bi.fiducialMap.values())
+		{
+			if(RuntimeData.getCameraPosition(fid.camID) == null)
+			{
+				continue;
+			}
+			if(fid.worldPosition == null)
+			{
+				continue;
+			}
+			Vec3 direction = Vec3.subtract(RuntimeData.getCameraPosition(fid.camID),fid.worldPosition);
+			dbLines[k] = new Line(RuntimeData.getCameraPosition(fid.camID),direction);
+			dbPoints[k] = fid.worldPosition;
+			k++;
+		}
+		
+		
+		//mb.debugPoints;
+		eddy.updateModel(mb);	
+	
+	}
+	
 	private boolean expectedToSeeBlock(BlockInfo block)
 	{
 		for(BlockInfo.Fiducial fid : block.fiducialMap.values())
@@ -186,8 +216,7 @@ public class ModelConstructor implements Runnable
 		{
 			if(bi.removed && !expectedToSeeBlock(bi))
 				{
-				bi.removed = false;
-				eddy.updateModel(new ModelBlock((SmartBlock)bi.smartBlock, bi.transform, ModelBlock.ChangeType.UPDATE));
+				addBlockToModel(bi);
 				}
 		}
 	}
@@ -206,8 +235,7 @@ public class ModelConstructor implements Runnable
 				fid.setSeen(true);
 				if(block.removed && block.transform != null) // if all the fiducials are seen we add
 				{
-					block.removed = false;
-					eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, block.transform, ModelBlock.ChangeType.UPDATE));							
+					addBlockToModel(block);							
 				}
 				return true;
 			}
@@ -354,11 +382,11 @@ public class ModelConstructor implements Runnable
 			
 			ModelBlock mbToAdd = (new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
 			
-				mbToAdd.debugLines = lines;
-				mbToAdd.debugPoints = fiducialWorld;
+			mbToAdd.debugLines = lines;
+			mbToAdd.debugPoints = fiducialWorld;
 			
 			BlockInfo [] bis = allPossibleReadditions();
-			eddy.updateModel(mbToAdd);
+			eddy.updateModel((mbToAdd)); // PseudoPhysicsApplicator.applyPseudoPhysics
 			doReadditions(bis);
 		}
 		else
