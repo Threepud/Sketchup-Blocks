@@ -29,11 +29,8 @@ public class CalibratePopup implements Popup
 	private int[][] randomColours = 
 		{
 			{255, 32, 0},
-			{0, 255, 64},
-			{0, 217, 255},
-			{159, 0, 255},
-			{254, 1, 159},
-			{255, 134, 0}
+			{162, 237, 0},
+			{0, 217, 255}
 		};
 	
 	//particles
