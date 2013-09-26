@@ -1,5 +1,6 @@
 package sketchupblocks.construction;
 
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,7 @@ import sketchupblocks.math.Vec3;
 public class BlockInfo 
 {
 	int minEvents = 3;
-	int LIFETIME = 500; //ms
+	int LIFETIME = 1500; //ms
 	public int blockID;
 	public Block smartBlock;
 	public Date lastChange;
@@ -41,7 +42,18 @@ public class BlockInfo
 	public boolean ready()
 	{
 		Fiducial[] data = new Fiducial[0];
-		data = fiducialMap.values().toArray(data);
+		boolean tryToArray = true;
+		
+		while(tryToArray)
+		try
+		{
+			data = fiducialMap.values().toArray(data);
+			tryToArray = false;
+		}
+		catch(ConcurrentModificationException e)
+		{
+			//Do nothing
+		}
 		
 		int count = 0;
 		for (int k = 0; k < data.length; k++)
