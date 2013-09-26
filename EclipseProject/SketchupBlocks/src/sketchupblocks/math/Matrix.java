@@ -103,6 +103,15 @@ public class Matrix implements Serializable
         }
     }
     
+    public Matrix clone()
+    {
+    	double[][] nd = new double[rows][cols];
+    	for (int k = 0; k < rows; k++)
+    		for (int i = 0; i < cols; i++)
+    			nd[k][i] = data[k][i];
+    	return new Matrix(nd);
+    }
+    
     public void repeatAsRows(Vec3 v, int numRows)
     {
         cols = 3;
