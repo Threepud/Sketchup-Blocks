@@ -60,6 +60,7 @@ public class ModelConstructor implements Runnable
 	 */
 	public void receiveBlock(InputBlock iBlock)
 	{
+		
 		try
 		{
 			if (iBlock.block.blockType == Block.BlockType.COMMAND && ((CommandBlock)iBlock.block).type == CommandBlock.CommandType.CALIBRATE  )
@@ -68,6 +69,7 @@ public class ModelConstructor implements Runnable
 			}
 			else 
 			{
+				
 				store(iBlock);
 			}
 		}
@@ -120,7 +122,23 @@ public class ModelConstructor implements Runnable
 					if(expectedToSeeBlock(block))
 					{
 						block.removed = true;						
-						eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));
+						eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));			
+					}
+				}
+			}
+			
+			//Check ALLLLLL the blocks
+			for(BlockInfo blokkie : blockMap.values())
+			{
+				if(!blokkie.removed)
+				{
+					if(blockNotSeen(blokkie))
+					{
+						if(expectedToSeeBlock(blokkie))
+						{
+							blokkie.removed = true;						
+							eddy.updateModel(new ModelBlock((SmartBlock)blokkie.smartBlock, null, ModelBlock.ChangeType.REMOVE));			
+						}
 					}
 				}
 			}
@@ -148,8 +166,8 @@ public class ModelConstructor implements Runnable
 		bi.removed = false;
 		ModelBlock mb = new ModelBlock((SmartBlock)bi.smartBlock, bi.transform, ModelBlock.ChangeType.UPDATE);
 		
-		Line [] dbLines = new Line[bi.fiducialMap.size()];
-		Vec3 [] dbPoints = new Vec3[bi.fiducialMap.size()];
+		ArrayList<Line> dbLines = new ArrayList<Line>();
+		ArrayList<Vec3>  dbPoints = new ArrayList<Vec3>();
 		int k = 0 ;
 		for(BlockInfo.Fiducial fid : bi.fiducialMap.values())
 		{
@@ -161,13 +179,14 @@ public class ModelConstructor implements Runnable
 			{
 				continue;
 			}
-			Vec3 direction = Vec3.subtract(RuntimeData.getCameraPosition(fid.camID),fid.worldPosition);
-			dbLines[k] = new Line(RuntimeData.getCameraPosition(fid.camID),direction);
-			dbPoints[k] = fid.worldPosition;
+			Vec3 direction = Vec3.subtract(fid.worldPosition,RuntimeData.getCameraPosition(fid.camID));
+			dbLines.add(new Line(RuntimeData.getCameraPosition(fid.camID),direction));
+			dbPoints.add(fid.worldPosition);
 			k++;
 		}
 		
-		
+		mb.debugLines = dbLines.toArray(new Line[0]);
+		mb.debugPoints = dbPoints.toArray(new Vec3[0]);
 		//mb.debugPoints;
 		eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mb));	
 	
@@ -203,7 +222,7 @@ public class ModelConstructor implements Runnable
 		ArrayList<BlockInfo> result = new ArrayList<BlockInfo>();
 		for(BlockInfo bi : blockMap.values())
 		{
-			if(bi.removed && expectedToSeeBlock(bi))
+			if(bi.removed && expectedToSeeBlock(bi) && bi.getLastSeen().getTime() < 2*changeWindow)
 				result.add(bi);
 		}
 		BlockInfo [] res = new BlockInfo [0];
@@ -230,7 +249,7 @@ public class ModelConstructor implements Runnable
 		BlockInfo.Fiducial fid =  block.fiducialMap.get(key);
 		if(!fid.isSeen()) //The block was removed and we are seeing it again.
 		{
-			if(Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.1 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.1) // Seen at the same place
+			if(fid.camID == iBlock.cameraEvent.cameraID && Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.1 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.1) // Seen at the same place
 			{
 				fid.setSeen(true);
 				if(block.removed && block.transform != null) // if all the fiducials are seen we add
