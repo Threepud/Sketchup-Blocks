@@ -32,7 +32,9 @@ public class ModelBlock implements Serializable
 	{
 		smartBlock = _smartBlock;
 		transformationMatrix = _transformMatrix;
-		rawMatrix = _transformMatrix.clone();
+		if (_transformMatrix != null)
+			rawMatrix = _transformMatrix.clone();
+		else rawMatrix = null;
 		type = _type;
 	}
 	

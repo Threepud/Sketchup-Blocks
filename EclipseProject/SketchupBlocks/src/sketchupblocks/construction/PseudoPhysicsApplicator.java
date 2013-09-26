@@ -34,6 +34,7 @@ public class PseudoPhysicsApplicator
 			{
 				mBelow = new ModelBlock();
 				mBelow.transformationMatrix = Matrix.identity(4);
+				mBelow.rawMatrix = Matrix.identity(4);
 				topFace = new Face(new Vec3(100, -100, 0), new Vec3(-100, 100, 0), new Vec3(100, 100, 0));
 			}
 			else 
