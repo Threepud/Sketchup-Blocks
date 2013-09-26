@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import sketchupblocks.math.Face;
+import sketchupblocks.math.Line;
 import sketchupblocks.math.Vec3;
 
 public class RuntimeData 
