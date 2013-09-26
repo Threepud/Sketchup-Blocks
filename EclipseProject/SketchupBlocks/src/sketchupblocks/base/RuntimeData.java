@@ -12,6 +12,8 @@ public class RuntimeData
 	private static Map<Integer, Vec3> cameraViewVectors = new ConcurrentHashMap<Integer, Vec3>();
 	private static Map<Integer, Boolean> cameraCalibrated = new ConcurrentHashMap<Integer, Boolean>();
 	
+	public static Line debugLine; 
+	
 	public static double[][][] cameraCalibrationDetails;
 	public static boolean[][] haveCalibrationDetails;
 	
