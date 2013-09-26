@@ -23,7 +23,7 @@ public class PseudoPhysicsApplicator
 		totalThetaX = 0;
 		totalThetaY = 0;
 		int timesRerun = 0;
-		Matrix original = m.transformationMatrix.clone();
+		
 		//Get the top face of the block just below the block to be placed (m)
 		boolean unsatisfied = true;
 		while(unsatisfied)
@@ -129,7 +129,7 @@ public class PseudoPhysicsApplicator
 			else
 			{
 				Logger.log("Slanted or very accurate block detected", 1);
-				m.transformationMatrix = original;
+				//TODO: See effects of fixing and not fixing the transformation matrix.
 				return m;
 			}
 		}
