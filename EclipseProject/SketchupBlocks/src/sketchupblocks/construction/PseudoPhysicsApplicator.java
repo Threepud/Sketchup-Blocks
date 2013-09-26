@@ -108,7 +108,7 @@ public class PseudoPhysicsApplicator
 			//Final z co-ordinate is:
 			double z = (-surfaceNormal.x*pointOnBottomFace.x - surfaceNormal.y*pointOnBottomFace.y+Vec3.dot(surfaceNormal, pointOnSurface))/surfaceNormal.z;
 			double diffZ = -(pointOnBottomFace.z - z);
-			System.out.println("Diff z "+diffZ);
+			/System.out.println("Diff z "+diffZ);
 			//The difference in z co-ordinates is then the additional translation to apply.*/
 			
 			double[][] data = new double[4][4];
@@ -128,7 +128,7 @@ public class PseudoPhysicsApplicator
 		{
 			//System.out.println("Igoring "+largest);
 		}
-		System.out.println("Adding "+m.smartBlock.blockId);
+		//System.out.println("Adding "+m.smartBlock.blockId);
 		return m;
 	}
 	
