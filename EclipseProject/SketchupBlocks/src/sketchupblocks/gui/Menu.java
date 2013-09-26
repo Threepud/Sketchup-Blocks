@@ -33,7 +33,7 @@ public class Menu
 	
 	private ArrayList<Popup> displayList;
 	
-	public Menu(SessionManager _sessMan, PApplet _window)
+	public Menu(SessionManager _sessMan, PApplet _window, boolean startupStatus)
 	{
 		sessMan = _sessMan;
 		window = _window;
@@ -48,6 +48,8 @@ public class Menu
 		if(Settings.showSplash)
 			displayList.add(new SplashPopup(window));
 		
+		if(!startupStatus)
+			displayList.add(new WarningPopup(window, "Check Settings"));
 		if(Settings.numCameras < 1)
 			displayList.add(new WarningPopup(window, "No Cameras Set"));
 		else

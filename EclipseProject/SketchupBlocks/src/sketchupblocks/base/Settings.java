@@ -13,30 +13,30 @@ import sketchupblocks.math.Vec3;
 public class Settings 
 {
 	//System
-	public static String versionNr;
-	public static int verbose; //0 is default. From there, higher is more verbose.
+	public static String versionNr = "1.0";
+	public static int verbose = 0; //0 is default. From there, higher is more verbose.
 
 	//Cameras
-	public static int numCameras;
+	public static int numCameras = 0;
 	public static CameraSettings [] cameraSettings;
 	
 	//Calibration
 	public static Vec3[] landmarks;
 	
 	//GUI
-	public static boolean showSplash;
-	public static int splashTTL;
-	public static int commandWaitTime;
-	public static int progressBarRotationSpeed;
+	public static boolean showSplash = false;
+	public static int splashTTL = 3000;
+	public static int commandWaitTime = 3000;
+	public static int progressBarRotationSpeed = 500;
 	
 	//Debug recording
-	public static boolean liveData;
-	public static String recordingInputFileName;
-	public static boolean timeDelay;
+	public static boolean liveData = true;
+	public static String recordingInputFileName = "debugOutput(JustSomeData)/output";
+	public static boolean timeDelay = true;
 	
 	//Network
-	public static short hostPort;
-	public static short connectPort;
+	public static short hostPort = 5555;
+	public static short connectPort = 5555;
 	
 	public Settings()
 	{
@@ -48,8 +48,10 @@ public class Settings
 		readSettings(fileName);
 	}
 	
-	public static void readSettings(String fileName)
+	public static boolean readSettings(String fileName)
 	{
+		boolean result = true;
+		
 		XML settings = null;
 		try 
 		{
@@ -60,7 +62,7 @@ public class Settings
 		{
 			Logger.log("ERROR: Set settings.", 1);
 			e.printStackTrace();
-			System.exit(-1);
+			result = false;
 		}
 		
 		//System
@@ -94,7 +96,7 @@ public class Settings
 				{
 					Logger.log("ERROR: Set settings.", 1);
 					e.printStackTrace();
-					System.exit(-1);
+					result = false;
 				}
 			}
 		}
@@ -103,7 +105,7 @@ public class Settings
 		{
 			Logger.log("ERROR: Set settings.", 1);
 			System.err.println("Settings: Too many suggested number of cameras.");
-			System.exit(-1);
+			result = false;
 		}
 		
 		//Calibration
@@ -129,7 +131,7 @@ public class Settings
 				if(coordsString.length != 3)
 				{
 					System.err.println("Landmark coordinates incomplete.");
-					System.exit(-1);
+					result = false;
 				}
 				
 				try
@@ -146,7 +148,7 @@ public class Settings
 				{
 					Logger.log("ERROR: Set settings.", 1);
 					e.printStackTrace();
-					System.exit(-1);
+					result = false;
 				}
 			}
 		}
@@ -170,7 +172,7 @@ public class Settings
 		{
 			Logger.log("ERROR: Set settings.", 1);
 			e.printStackTrace();
-			System.exit(-1);
+			result = false;
 		}
 		
 		//Debug recording
@@ -197,8 +199,10 @@ public class Settings
 		{
 			Logger.log("ERROR: Set settings.", 1);
 			e.printStackTrace();
-			System.exit(-1);
+			result = false;
 		}
+		
+		return result;
 	}
 	
 	public static class CameraSettings

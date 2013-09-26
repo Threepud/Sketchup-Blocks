@@ -21,9 +21,10 @@ public class SketchupBlocks extends PApplet
 			frame.setResizable(false);
 		}
 		
-		Settings.readSettings("Settings.xml");
+		boolean status = Settings.readSettings("Settings.xml");
 		RuntimeData.init();
-		sessMan = new SessionManager(this);
+		sessMan = new SessionManager(this, status);
+		
 		startTime = System.currentTimeMillis();
 	}
 

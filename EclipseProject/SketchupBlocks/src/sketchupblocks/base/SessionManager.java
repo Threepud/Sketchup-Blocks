@@ -35,9 +35,12 @@ public class SessionManager
 	private boolean spectating = false;
 	private boolean connecting = false;
 	
-	public SessionManager(PApplet _parent)
+	private boolean startupStatus = false;
+	
+	public SessionManager(PApplet _parent, boolean status)
 	{
 		parent = _parent;
+		startupStatus = status;
 		parent.registerMethod("keyEvent", modelViewerEventListener);
 		
 		lobby = new LocalLobby();
@@ -62,7 +65,7 @@ public class SessionManager
 			
 			sarah.setLobby(lobby);
 			sarah.setWindow(parent);
-			menu = new Menu(this, parent);
+			menu = new Menu(this, parent, startupStatus);
 			
 			jimmy = new ModelConstructor(this);
 			jimmy.setLobby(lobby);
