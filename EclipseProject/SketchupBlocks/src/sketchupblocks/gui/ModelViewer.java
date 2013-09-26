@@ -1,6 +1,7 @@
 package sketchupblocks.gui;
 
 import java.util.ArrayList;
+
 import processing.core.*;
 import processing.event.*;
 import sketchupblocks.base.CameraEvent;
@@ -9,6 +10,7 @@ import sketchupblocks.base.Logger;
 import sketchupblocks.base.Model;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
+import sketchupblocks.construction.EnvironmentAnalyzer;
 import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.ModelNotSetException;
@@ -222,6 +224,15 @@ public class ModelViewer
 		if(showDebugLineIntersection)
 		{
 			window.pushMatrix();
+			window.fill(255);
+			
+			Line debugLine = RuntimeData.debugLine;
+			if(debugLine != null)
+			{
+				Vec3 start = new Vec3(10 * debugLine.point.y, 10 * -debugLine.point.z, 10 * debugLine.point.x);
+				Vec3 end = new Vec3(10 * debugLine.direction.y, 10 * -debugLine.direction.z, 10 * debugLine.direction.x);
+				window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+			}
 			
 			window.popMatrix();
 		}
@@ -323,8 +334,26 @@ public class ModelViewer
 			}
 			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
 			{
+				if(showDebugLineIntersection)
+				{
+					Line line = RuntimeData.debugLine;
+					if(line != null)
+					{
+						if(EnvironmentAnalyzer.isIntersecting(line, block))
+						{
+							window.fill(0, 255, 0);
+						}
+						else
+						{
+							window.fill(255);
+						}
+					}
+				}
 				if (block.type == ModelBlock.ChangeType.REMOVE)
+				{
 					Logger.log("Drawing removed block!", 1);
+					return;
+				}
 				
 				SmartBlock smartBlock = block.smartBlock;
 				window.beginShape(PConstants.TRIANGLES);

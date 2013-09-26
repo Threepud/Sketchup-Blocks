@@ -200,7 +200,7 @@ public class EnvironmentAnalyzer
 	return result.toArray(res);	
 	}
 	
-	static boolean isIntersecting(Line line , ModelBlock mb)
+	public static boolean isIntersecting(Line line , ModelBlock mb)
 	{
 		for(int k = 0 ; k < mb.smartBlock.indices.length ; k+= 3)
 		{
