@@ -33,4 +33,27 @@ public class ModelBlock implements Serializable
 		transformationMatrix = _transformMatrix;
 		type = _type;
 	}
+	
+	public ModelBlock clone()
+	{
+		ModelBlock dolly = new ModelBlock();
+		dolly.smartBlock = smartBlock;
+		dolly.transformationMatrix = transformationMatrix.clone();
+		dolly.type = type;
+		dolly.debugLines = new Line[debugLines.length];
+		for (int k = 0; k < debugLines.length; k++)
+		{
+			Vec3 point = new Vec3(debugLines[k].point.x ,debugLines[k].point.y, debugLines[k].point.z);
+			Vec3 direction = new Vec3(debugLines[k].direction.x, debugLines[k].direction.y, debugLines[k].direction.z);
+			dolly.debugLines[k] = new Line(point, direction);
+		}
+		
+		dolly.debugPoints = new Vec3[debugPoints.length];
+		for (int k = 0; k < debugPoints.length; k++)
+		{
+			Vec3 point = new Vec3(debugPoints[k].x ,debugPoints[k].y, debugPoints[k].z);
+			dolly.debugPoints[k] = point;
+		}
+		return dolly;
+	}
 }
