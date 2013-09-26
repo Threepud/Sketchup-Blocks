@@ -68,6 +68,9 @@ public class ModelViewer
 	//debug faces
 	private boolean showDebugFaces = false;
 	
+	//debug line intersections
+	private boolean showDebugLineIntersection = false;
+	
 	private PImage tilesTexture;
 	 
 	public ModelViewer()
@@ -135,6 +138,7 @@ public class ModelViewer
 		window.background(100);
 		
 		drawDebugLines();
+		drawDebugLinesIntersections();
 		drawDebugPoints();
 		drawDebugFaces();
 		drawBlocks();
@@ -213,10 +217,21 @@ public class ModelViewer
 		window.popMatrix();
 	}
 	
+	private void drawDebugLinesIntersections()
+	{
+		if(showDebugLineIntersection)
+		{
+			window.pushMatrix();
+			
+			window.popMatrix();
+		}
+	}
+	
 	private void drawDebugPoints()
 	{
 		if(showDebugPoints)
 		{
+			window.pushMatrix();
 			window.noStroke();
 			window.fill(0, 255, 0);
 			
@@ -246,6 +261,7 @@ public class ModelViewer
 				}
 			}
 			window.fill(255);
+			window.popMatrix();
 		}
 	}
 	
@@ -253,6 +269,7 @@ public class ModelViewer
 	{
 		if(showDebugFaces)
 		{
+			window.pushMatrix();
 			window.fill(0, 162, 237);
 			
 			Face f = RuntimeData.topFace;
@@ -277,6 +294,7 @@ public class ModelViewer
 				}
 				window.endShape(PConstants.CLOSE);
 			}
+			window.popMatrix();
 		}
 	}
 	
@@ -321,9 +339,6 @@ public class ModelViewer
 				window.endShape();
 			}
 			window.popMatrix();
-			
-			if(transparentModel)
-				window.fill(255);
 		}
 	}
 	
@@ -336,7 +351,6 @@ public class ModelViewer
 			Vec3 up = new Vec3(0, 1, 0);
 			Vec3 eye = new Vec3(RuntimeData.getCameraPosition(selectCamera - 1).y, -RuntimeData.getCameraPosition(selectCamera - 1).z, RuntimeData.getCameraPosition(selectCamera - 1).x);
 			eye = Vec3.scalar(10, eye);
-			//Vec3 at = new Vec3(0, 0, 0);
 			Vec3 at = new Vec3(RuntimeData.getCameraViewVector(selectCamera - 1).y, -RuntimeData.getCameraViewVector(selectCamera - 1).z, RuntimeData.getCameraViewVector(selectCamera - 1).x);
 			at = Vec3.add(at, eye);
 			currentCamera = new Camera(up, at, eye);
@@ -497,6 +511,13 @@ public class ModelViewer
 				}
 				else
 					showDebugFaces = !showDebugFaces;
+			}
+		}
+		else if(e.getKey() == 'i')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+			{
+				showDebugLineIntersection = !showDebugLineIntersection;
 			}
 		}
 	}
