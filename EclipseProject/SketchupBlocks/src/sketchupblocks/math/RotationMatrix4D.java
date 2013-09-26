@@ -14,7 +14,7 @@ public class RotationMatrix4D extends Matrix
         super(4, 4);
         axis = _axis;
         
-        double[][] d = new double[3][];
+        double[][] d = new double[4][];
         switch(axis)
         {
         	case X_AXIS:
