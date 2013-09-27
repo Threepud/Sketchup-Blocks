@@ -145,8 +145,8 @@ public class ModelViewer
 		drawDebugStuff();
 		drawBlocks();
 		drawGhostBlocks();
-		drawConstructionFloor();
 		drawSkyBox();
+		drawConstructionFloor();
 	}
 	
 	private void drawDebugStuff()
@@ -409,6 +409,16 @@ public class ModelViewer
 		}
 	}
 	
+	private void drawSkyBox()
+	{
+		window.pushMatrix();
+		
+		window.fill(74, 154, 225);
+		window.sphere(10000);
+		
+		window.popMatrix();	
+	}
+	
 	private void drawConstructionFloor()
 	{
 		window.pushMatrix();
@@ -438,16 +448,6 @@ public class ModelViewer
 		window.endShape(PConstants.CLOSE);
 		
 		window.popMatrix();
-	}
-	
-	private void drawSkyBox()
-	{
-		window.pushMatrix();
-		
-		window.fill(74, 154, 225);
-		window.sphere(10000);
-		
-		window.popMatrix();	
 	}
 	
 	private void switchCamera()
