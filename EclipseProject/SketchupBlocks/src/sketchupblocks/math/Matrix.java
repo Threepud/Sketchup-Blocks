@@ -2,6 +2,8 @@ package sketchupblocks.math;
 
 import java.io.Serializable;
 
+import sketchupblocks.base.Logger;
+
 
 public class Matrix implements Serializable
 {
@@ -237,6 +239,18 @@ public class Matrix implements Serializable
         if (rows == cols)
                 return true;
         else return false;
+    }
+    
+    public boolean isSingular()
+    {
+    	for (int k = 0; k < rows; k++)
+    		for (int i = 0; i < cols; i++)
+    			if (data[k][i] == Double.NaN || data[k][i] == Double.POSITIVE_INFINITY || data[k][i] == Double.NEGATIVE_INFINITY)
+    			{
+    		    	Logger.log("Singular matrix encountered", 1);
+    				return true;
+    			}
+    	return false;
     }
     
     

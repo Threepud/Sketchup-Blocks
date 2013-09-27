@@ -33,10 +33,18 @@ public class Newton
             {
                 Matrix LHS = G.calcJacobian(x);
                 Matrix RHS = Matrix.scalar(-1, G.calcFunction(x));
+                if(LHS.isSingular())
+                	return null;
+                if (RHS.isSingular())
+                	return null;
                 Matrix y = LinearSystemSolver.solve(LHS, RHS.toArray());
+                if (y.isSingular())
+                	return null;
                 try
                 {
                 	x = Matrix.add(x, y);
+                	if (x.isSingular())
+                		return null;
                 }
                 catch(Exception e)
                 {
