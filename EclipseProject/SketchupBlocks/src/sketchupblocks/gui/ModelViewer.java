@@ -136,7 +136,7 @@ public class ModelViewer
 		final float aspectR = 1280.0f / 720.0f;
 		window.perspective(fov, aspectR, cameraZ/100.0f, cameraZ*100.0f);
 		
-		window.directionalLight(150, 150, 150, 0.2f, 0.8f, 0f);
+		window.directionalLight(200, 200, 200, 0.2f, 0.8f, 0f);
 		window.pointLight(200, 200, 200, 100, -1000, 400);
 		window.ambientLight(50, 50, 50);
 		
@@ -427,8 +427,8 @@ public class ModelViewer
 		window.textureMode(PConstants.NORMAL);
 		window.textureWrap(PConstants.REPEAT);
 		
-		final int point = 5000;
-		final int repeat = 100;
+		final int point = 100000;
+		final int repeat = 2000;
 		
 		window.vertex(-point, 0, -point, 0, 0);
 		window.vertex(point, 0, -point, repeat, 0);
@@ -442,17 +442,12 @@ public class ModelViewer
 	
 	private void drawSkyBox()
 	{
-		/*
-		window.popMatrix();
-		
-		window.beginShape(PConstants.QUAD);
-		
-		window.vertex(x, y, z);
-		
-		window.endShape(PConstants.CLOSE);
-		
 		window.pushMatrix();
-		*/
+		
+		window.fill(74, 154, 225);
+		window.sphere(10000);
+		
+		window.popMatrix();	
 	}
 	
 	private void switchCamera()
