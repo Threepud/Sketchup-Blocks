@@ -447,6 +447,8 @@ public class ModelViewer
 		final int point = 100000;
 		final int repeat = 2000;
 		
+		window.shader(fog);
+		
 		window.vertex(-point, 0, -point, 0, 0);
 		window.vertex(point, 0, -point, repeat, 0);
 		window.vertex(point, 0, point, repeat, repeat);
@@ -454,6 +456,7 @@ public class ModelViewer
 				
 		window.endShape(PConstants.CLOSE);
 		
+		window.resetShader();
 		window.popMatrix();
 	}
 	

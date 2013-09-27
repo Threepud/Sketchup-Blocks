@@ -3,30 +3,28 @@ precision mediump float;
 precision mediump int;
 #endif
 
-#define PROCESSING_LIGHT_SHADER
+uniform sampler2D texture;
 
 varying vec4 pos;
 varying vec4 vertColor;
+varying vec4 vertTexCoord;
 
-void main() {  
-	vec4 top = vec4(0.2156862745098039, 0.4901960784313725, 0.7647058823529412, 1.0);
-	vec4 bot = vec4(0.3882352941176471, 0.6666666666666667, 0.9176470588235294, 1.0);
+void main() 
+{
+	vec4 color = texture2D(texture, vertTexCoord.xy);
+	float dist = sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
 	
-	float max = 4000.0;
-	float min = 400.0;
-	
-	vec4 color;
-	if(-pos.y > max)
-		color = top;
-	else if(-pos.y < min)
-		color = bot;
-	else if(-pos.y >= min && -pos.y <= max)
+	if(dist > 5000.0 && dist < 8000.0)
 	{
-		float ratio = -pos.y / (max - min);
-	
-		color = ((bot * ratio) + (top * (1 - ratio))) / 2.0;
-		color.w = 1.0;
+		color.w = 1 - ((dist - 5000.0) / 11000.0);
+	}
+	else if(dist >= 8000.0)
+	{
+		color.w = 1 - ((8000 - 5000.0) / 11000.0) - pow((dist - 8000.0) / 1000.0, 2);
 	}
 	
-  gl_FragColor = color;  
+	if(color.w < 0.0)
+		color.w = 0.0;
+	
+	gl_FragColor = color;
 }
