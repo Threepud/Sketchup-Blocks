@@ -21,14 +21,14 @@ public class ModelTransformationCalculator
 					for (int k = 0; k < modelFidCoords.length; k++)
 					{
 						modelFidCoords[k] = sBlock.fiducialCoordinates[fidIDs[k]];
-						Logger.log("Getting coord for "+fidIDs[k], 30);
-						Logger.log(modelFidCoords[k].toString(), 30);
-						Logger.log(positions[k].toString(), 30);
+						Logger.log("Getting coord for "+fidIDs[k], 60);
+						Logger.log(modelFidCoords[k].toString(), 60);
+						Logger.log(positions[k].toString(), 60);
 					}
 					
 					Matrix[] transformMatrices = TransformationCalculator.calculateTransformationMatrices(modelFidCoords, positions);
-					Logger.log("ROTATION: "+transformMatrices[0], 20);
-					Logger.log("TRANSLATION: "+transformMatrices[1], 20);
+					Logger.log("ROTATION: "+transformMatrices[0], 60);
+					Logger.log("TRANSLATION: "+transformMatrices[1], 60);
 					
 					return Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
 				}

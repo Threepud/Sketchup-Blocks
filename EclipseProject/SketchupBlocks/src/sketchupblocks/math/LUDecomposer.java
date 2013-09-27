@@ -33,7 +33,6 @@ public class LUDecomposer
             if (big == 0.0)
             {
                 System.out.println("Singular matrix");
-                System.out.println(a);
                 try
                 {
                 	throw new Exception("Singular matrix");

@@ -68,8 +68,8 @@ public class PseudoPhysicsApplicator
 					calculatedRotationMatrix = Matrix.multiply(minYRot, Matrix.multiply(minXRot, calculatedRotationMatrix));
 					count++;
 				}
-				Logger.log("Old match: "+largest, 30);
-				Logger.log(("New match: "+Vec3.dot(invertedSurfaceNormal, bottomFace.normal())), 30);
+				Logger.log("Old match: "+largest, 50);
+				Logger.log(("New match: "+Vec3.dot(invertedSurfaceNormal, bottomFace.normal())), 50);
 				
 				if (count == MaxIter)
 					Logger.log("WARNING: Major changes to block orientation", 1);

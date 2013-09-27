@@ -43,8 +43,8 @@ public class TransformationCalculator
 	        	finalT.data[k][3] = t.data[k][0];
 	        }
 	        
-	        Logger.log("Translation: "+finalT, 20);
-	        Logger.log("Rotation: "+proposedR, 20);
+	        Logger.log("Translation: "+finalT, 60);
+	        Logger.log("Rotation: "+proposedR, 60);
 	        
 	       return new Matrix[]{proposedR, finalT};
 		}

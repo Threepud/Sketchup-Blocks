@@ -48,8 +48,10 @@ public class Newton
                 }
                 catch(Exception e)
                 {
-                	e.printStackTrace();
-                	Logger.log("x: "+x+"\ny: "+y, 1);
+                	//e.printStackTrace();
+                	//Logger.log("x: "+x+"\ny: "+y, 1);
+                	System.exit(-1);
+                	return null;
                 }
                 
                 if (y.norm() < TOL)
