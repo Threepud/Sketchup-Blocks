@@ -16,9 +16,9 @@ public class ErrorFunction extends Function
         f = _f;
     }
     
-    public double calcG(Matrix inputs)
+    public double calcError(Matrix inputs)
     {
-        Matrix fout = f.calcF(inputs);
+        Matrix fout = f.calcFunction(inputs);
         double res = 0;
         
         for (int k = 0; k < fout.rows; k++)
@@ -26,23 +26,23 @@ public class ErrorFunction extends Function
         return res;
     }
     
-    public Matrix calcDelG(Matrix inputs)
+    public Matrix calcDelError(Matrix inputs)
     {
-        Matrix J = f.calcJ(inputs);
-        Matrix F = f.calcF(inputs);
+        Matrix J = f.calcJacobian(inputs);
+        Matrix F = f.calcFunction(inputs);
         return Matrix.multiply(Matrix.scalar(2, J).transpose(), F);
     }
     
     @Override
-    public Matrix calcF(Matrix inputs)
+    public Matrix calcFunction(Matrix inputs)
     {
-        return f.calcF(inputs);
+        return f.calcFunction(inputs);
     }
 
     @Override
-    public Matrix calcJ(Matrix inputs)
+    public Matrix calcJacobian(Matrix inputs)
     {
-        return f.calcJ(inputs);
+        return f.calcJacobian(inputs);
     }
     
 }

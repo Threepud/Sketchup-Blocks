@@ -15,8 +15,8 @@ public abstract class Function
         numParameters = _numParams;
     }
     
-    public abstract Matrix calcF(Matrix inputs);
-    public abstract Matrix calcJ(Matrix inputs);
+    public abstract Matrix calcFunction(Matrix inputs);
+    public abstract Matrix calcJacobian(Matrix inputs);
     
     
     protected double[] extractInput(Matrix inputs)

@@ -4,8 +4,8 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 
 /**
- *
  * @author cravingoxygen
+ *@about Camera Position calculator by using output of sphere intersection function.
  */
 public class CP extends Function
 {
@@ -22,7 +22,7 @@ public class CP extends Function
     }
     
     @Override
-    public Matrix calcF(Matrix inputs)
+    public Matrix calcFunction(Matrix inputs)
     {
         double[] cPos = extractInput(inputs);
         double[][] data = new double[numEquations][1];
@@ -41,7 +41,7 @@ public class CP extends Function
     }
 
     @Override
-    public Matrix calcJ(Matrix inputs)
+    public Matrix calcJacobian(Matrix inputs)
     {
         double[] cPos = extractInput(inputs);
         double[][] data = new double[numEquations][cPos.length];
