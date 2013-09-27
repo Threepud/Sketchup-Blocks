@@ -65,6 +65,38 @@ public class Matrix implements Serializable
             }
         }
     }
+    
+    public Matrix(double[] vdata, boolean colVec)
+    {
+        if (colVec)
+        {
+            rows = vdata.length;
+            cols = 1;
+            data = new double[rows][cols];
+
+            for (int k = 0; k < cols; k++)
+            {
+                for (int i = 0; i < rows; i++)
+                {
+                    data[i][k] = vdata[i];
+                }
+            }
+        }
+        else
+        {
+            rows = 1;
+            cols = vdata.length;
+            data = new double[rows][cols];
+
+            for (int k = 0; k < rows; k++)
+            {
+                for (int i = 0; i < cols; i++)
+                {
+                    data[k][i] = vdata[i];
+                }
+            }
+        }
+    }
 
     //Constructor 4
     public Matrix(Vec3 v)

@@ -34,7 +34,7 @@ public class ModelBlock implements Serializable
 		transformationMatrix = _transformMatrix;
 		if (_transformMatrix != null)
 			rawMatrix = _transformMatrix.clone();
-		else rawMatrix = null;
+		else rawMatrix = null; 
 		type = _type;
 	}
 	
