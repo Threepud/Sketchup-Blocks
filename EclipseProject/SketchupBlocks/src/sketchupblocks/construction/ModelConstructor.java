@@ -34,16 +34,13 @@ public class ModelConstructor implements Runnable
 	private Map<Integer,BlockInfo> blockMap;
 	
 	private Calibrator cally;
-	private SessionManager sessMan;
 	
-	//private boolean calibrated = false;
 	private int changeWindow = 100;
 	
 	public ModelConstructor(SessionManager _sessMan)
 	{
 		blockMap = new ConcurrentHashMap<Integer,BlockInfo>();
 		cally = new Calibrator();
-		sessMan = _sessMan;
 		Thread th = new Thread(this);
 		th.start();
 	}
@@ -168,7 +165,6 @@ public class ModelConstructor implements Runnable
 		
 		ArrayList<Line> dbLines = new ArrayList<Line>();
 		ArrayList<Vec3>  dbPoints = new ArrayList<Vec3>();
-		int k = 0 ;
 		for(BlockInfo.Fiducial fid : bi.fiducialMap.values())
 		{
 			if(RuntimeData.getCameraPosition(fid.camID) == null)
@@ -182,7 +178,6 @@ public class ModelConstructor implements Runnable
 			Vec3 direction = Vec3.subtract(fid.worldPosition,RuntimeData.getCameraPosition(fid.camID));
 			dbLines.add(new Line(RuntimeData.getCameraPosition(fid.camID),direction));
 			dbPoints.add(fid.worldPosition);
-			k++;
 		}
 		
 		mb.debugLines = dbLines.toArray(new Line[0]);
