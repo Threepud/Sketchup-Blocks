@@ -32,6 +32,7 @@
 		<Landmark id="3">2.9,-2.9,0</Landmark>
 	</Calibration>
 	<GUI>
+		<FancyShaders>true</FancyShaders>
 		<ShowSplash>false</ShowSplash>
 		<SplashTTL>3000</SplashTTL>
 		<CommandWaitTime>3000</CommandWaitTime>

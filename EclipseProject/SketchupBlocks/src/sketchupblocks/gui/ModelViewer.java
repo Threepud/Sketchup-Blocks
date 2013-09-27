@@ -143,7 +143,10 @@ public class ModelViewer
 		final float aspectR = 1280.0f / 720.0f;
 		window.perspective(fov, aspectR, cameraZ/100.0f, cameraZ*100.0f);
 		
-		final float pwr = 150.0f;
+		float pwr = 150.0f;
+		if(!Settings.fancyShaders)
+			pwr = 200.0f;
+		
 		window.directionalLight(pwr, pwr, pwr, 0.2f, 0.8f, 0f);
 		window.pointLight(pwr, pwr, pwr, 100, -1000, 400);
 		window.ambientLight(50, 50, 50);
@@ -432,6 +435,14 @@ public class ModelViewer
 	{
 		window.pushMatrix();
 		
+		if(!Settings.fancyShaders)
+		{
+			if(alphaBlendFloor)
+				window.tint(255, 100);
+			else
+				window.tint(255);
+		}
+		
 		window.noStroke();
 		window.fill(window.color(255));
 		
@@ -444,8 +455,11 @@ public class ModelViewer
 		final int point = 100000;
 		final int repeat = 2000;
 		
-		fog.set("trans", (alphaBlendFloor) ? 1 : 0);
-		window.shader(fog);
+		if(Settings.fancyShaders)
+		{
+			fog.set("trans", (alphaBlendFloor) ? 1 : 0);
+			window.shader(fog);
+		}
 		
 		window.vertex(-point, 0, -point, 0, 0);
 		window.vertex(point, 0, -point, repeat, 0);
@@ -454,7 +468,9 @@ public class ModelViewer
 				
 		window.endShape(PConstants.CLOSE);
 		
-		window.resetShader();
+		if(Settings.fancyShaders)
+			window.resetShader();
+		
 		window.popMatrix();
 	}
 	

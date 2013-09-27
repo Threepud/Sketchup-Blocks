@@ -29,6 +29,7 @@ public class Settings
 	};
 	
 	//GUI
+	public static boolean fancyShaders = true;
 	public static boolean showSplash = false;
 	public static int splashTTL = 3000;
 	public static int commandWaitTime = 3000;
@@ -162,6 +163,7 @@ public class Settings
 		//GUI
 		XML gui = settings.getChild("GUI");
 		
+		XML fancyShadersNode = gui.getChild("FancyShaders");
 		XML showSplashNode = gui.getChild("ShowSplash");
 		XML splashTTLNode = gui.getChild("SplashTTL");
 		XML commandWaitTimeNode = gui.getChild("CommandWaitTime");
@@ -169,6 +171,7 @@ public class Settings
 		
 		try
 		{
+			fancyShaders = Boolean.parseBoolean(fancyShadersNode.getContent());
 			showSplash = Boolean.parseBoolean(showSplashNode.getContent());
 			splashTTL = Integer.parseInt(splashTTLNode.getContent());
 			commandWaitTime = Integer.parseInt(commandWaitTimeNode.getContent());
