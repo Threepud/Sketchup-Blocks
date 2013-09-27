@@ -1,11 +1,13 @@
 package sketchupblocks.math.nonlinearmethods;
 
+import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 
 /**
  *
  * @author cravingoxygen
+ * @about Block position calculator. This calculates the length of the line between a camera and a block.
  */
 public class BPos extends Function
 {
@@ -14,17 +16,22 @@ public class BPos extends Function
     private Vec3[] dirs;
     private double[] dists;
     
-    public BPos(int _numPoints, Vec3[] _camPos, Vec3[] _dirs, double[] _dists)
+    public BPos(int _numPoints, Line[] _lines, double[] _dists)
     {
         super(_numPoints);
         numEquations = _numPoints*(_numPoints-1)/2;
-        camPos = _camPos;
-        dirs = _dirs;
+        camPos = new Vec3[_lines.length];
+        dirs = new Vec3[_lines.length];
+        for (int k = 0; k < _lines.length; k++)
+        {
+        	camPos[k] = _lines[k].point;
+        	dirs[k] = _lines[k].direction;
+        }
         dists = _dists;
     }
 
     @Override
-    public Matrix calcF(Matrix inputs)
+    public Matrix calcFunction(Matrix inputs)
     {
         double[] lambdas = extractInput(inputs);
         
@@ -48,7 +55,7 @@ public class BPos extends Function
     }
     
     @Override
-    public Matrix calcJ(Matrix inputs)
+    public Matrix calcJacobian(Matrix inputs)
     {
         double[] lambdas = extractInput(inputs);
         
@@ -61,16 +68,16 @@ public class BPos extends Function
             {
                 Vec3 diff = evalPoint(k, i, lambdas);
                 double sum = 0;
-                sum += 2*dirs[k].x*diff.x;
-                sum += 2*dirs[k].y*diff.y;
-                sum += 2*dirs[k].z*diff.y;
-                res[num][k] = sum;
+                sum += dirs[k].x*diff.x;
+                sum += dirs[k].y*diff.y;
+                sum += dirs[k].z*diff.y;
+                res[num][k] = 2*sum;
                 
                 sum = 0;
-                sum -= 2*dirs[i].x*diff.x;
-                sum += 2*dirs[i].y*diff.y;
-                sum += 2*dirs[i].z*diff.y;
-                res[num][i] = sum;
+                sum += dirs[i].x*diff.x;
+                sum += dirs[i].y*diff.y;
+                sum += dirs[i].z*diff.y;
+                res[num][i] = -2*sum;
                 num++;
             }
         }
