@@ -12,6 +12,8 @@ varying vec4 vertTexCoord;
 void main() 
 {
 	vec4 color = texture2D(texture, vertTexCoord.xy);
+	color.w = 1.0f;
+	
 	float dist = sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
 	
 	if(dist > 5000.0 && dist < 8000.0)
@@ -25,6 +27,8 @@ void main()
 	
 	if(color.w < 0.0)
 		color.w = 0.0;
+	else if(color.w > 1.0)
+		color.w = 1.0;
 	
 	gl_FragColor = color;
 }
