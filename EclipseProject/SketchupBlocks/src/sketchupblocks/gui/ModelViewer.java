@@ -88,6 +88,7 @@ public class ModelViewer
 		Vec3 at = new Vec3();
 		Vec3 eye = new Vec3();
 		
+		currentRotation = 2.5f;
 		eye.x = cameraRadius * Math.cos(currentRotation);
 		eye.z = cameraRadius * Math.sin(currentRotation);
 		eye.y = cameraHeight;
