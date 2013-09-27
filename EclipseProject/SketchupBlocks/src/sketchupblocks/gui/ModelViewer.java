@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import processing.core.*;
 import processing.event.*;
+import processing.opengl.PShader;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.ColladaLoader;
 import sketchupblocks.base.Logger;
@@ -28,6 +29,9 @@ public class ModelViewer
 	private Camera[] systemCameras;
 	private Camera currentCamera;
 	private int selectCamera = 0;
+	
+	//shaders
+	private PShader fog;
 	
 	//fiducial
 	private double velocityScalar = 2.0;
@@ -104,6 +108,8 @@ public class ModelViewer
 		window = _window;
 		
 		tilesTexture = window.loadImage("./images/FloorTile.png");
+		
+		fog = window.loadShader("./shaders/constructionFloor/fogFrag.glsl", "./shaders/constructionFloor/fogVert.glsl");
 	}
 	
 	public void setLobby(Lobby _lobby) throws Exception
@@ -413,6 +419,7 @@ public class ModelViewer
 	{
 		window.pushMatrix();
 		
+		window.translate(0, -1000, 0);
 		window.fill(74, 154, 225);
 		window.sphere(10000);
 		
