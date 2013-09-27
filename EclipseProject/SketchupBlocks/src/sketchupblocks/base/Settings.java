@@ -18,10 +18,21 @@ public class Settings
 
 	//Cameras
 	public static int numCameras = 0;
-	public static CameraSettings [] cameraSettings;
+	public static CameraSettings[] cameraSettings = 
+	{
+		new CameraSettings(68.5, 1280.0/720.0, 3333),
+		new CameraSettings(68.5, 1280.0/720.0, 3334),
+		new CameraSettings(68.5, 1280.0/720.0, 3335)
+	};
 	
 	//Calibration
-	public static Vec3[] landmarks;
+	public static Vec3[] landmarks = 
+	{
+		new Vec3(-2.9,-2.9,0),
+		new Vec3(-2.9,2.9,0),
+		new Vec3(2.9,2.9,0),
+		new Vec3(2.9,-2.9,0)
+	};
 	
 	//GUI
 	public static boolean showSplash = false;
@@ -58,11 +69,12 @@ public class Settings
 			 settings = new XML(new File(fileName));
 			
 		}
-		catch (IOException | ParserConfigurationException | SAXException e) 
+		catch (Exception e) 
 		{
 			Logger.log("ERROR: Set settings.", 1);
 			e.printStackTrace();
 			result = false;
+			return result;
 		}
 		
 		//System
