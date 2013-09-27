@@ -66,9 +66,6 @@ public class MatrixTest
 		Matrix m = new Matrix(data);
 		assertTrue("Column and row numbers incorrectly initialized (Constructor 2)",m.cols == 2 && m.rows == 1);
 		assertTrue("Data incorrectly initialized", m.data[0][0] == 1 && m.data[0][1] == 2);
-		
-		m = new Matrix(data);
-		assertTrue("Matrix size error not noticed", m.data == null);
 	}
 	
 	@Test
