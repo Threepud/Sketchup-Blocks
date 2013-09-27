@@ -20,6 +20,9 @@ import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.Vec3;
+import sketchupblocks.math.nonlinearmethods.BPos;
+import sketchupblocks.math.nonlinearmethods.ErrorFunction;
+import sketchupblocks.math.nonlinearmethods.Newton;
 import sketchupblocks.network.Lobby;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -165,6 +168,7 @@ public class ModelConstructor implements Runnable
 		
 		ArrayList<Line> dbLines = new ArrayList<Line>();
 		ArrayList<Vec3>  dbPoints = new ArrayList<Vec3>();
+		
 		for(BlockInfo.Fiducial fid : bi.fiducialMap.values())
 		{
 			if(RuntimeData.getCameraPosition(fid.camID) == null)
@@ -316,15 +320,15 @@ public class ModelConstructor implements Runnable
 			BlockInfo.Fiducial [] fids = new BlockInfo.Fiducial[0];
 			BlockInfo.CamFidIdentifier [] camIDs = new BlockInfo.CamFidIdentifier[0];
 			
-			ArrayList<BlockInfo.Fiducial> cleanFids = new ArrayList<BlockInfo.Fiducial>();
-			ArrayList<BlockInfo.CamFidIdentifier> cleanIDs = new ArrayList<BlockInfo.CamFidIdentifier>();
+			ArrayList<BlockInfo.Fiducial> cleanFids = new ArrayList<BlockInfo.Fiducial>(); //Get all fiducials ever seen
+			ArrayList<BlockInfo.CamFidIdentifier> cleanIDs = new ArrayList<BlockInfo.CamFidIdentifier>(); //Get all cam ids ever seen
 			
 			for(BlockInfo.CamFidIdentifier keys : bin.fiducialMap.keySet())
 			{
 				BlockInfo.Fiducial fid = bin.fiducialMap.get(keys);
 				if(fid.isSeen())
 					{
-					cleanFids.add(fid);
+					cleanFids.add(fid);//Remove the ones that aren't currently visible
 					cleanIDs.add(keys);
 					}
 			}
@@ -332,7 +336,6 @@ public class ModelConstructor implements Runnable
 			camIDs = cleanIDs.toArray(camIDs);
 			
 			int numFiducials = fids.length;
-			
 			
 			
 			Line[] lines = new Line[numFiducials];
@@ -370,23 +373,46 @@ public class ModelConstructor implements Runnable
 				fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
 			}
 			
-			//Bin should have enough information to get position.
-			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
-			Particle bestabc = null;
-			bestabc = system.go();
+			double[] dists = new double[numFiducials*(numFiducials-1)/2];
+			int count = 0;
+			for (int k = 0; k < numFiducials-1; k++)
+			{
+				for (int i = k+1; i < numFiducials; i++)
+				{
+					dists[count++] = fidCoordsM[k].distance(fidCoordsM[i]);
+				}
+			}
+			
+			double[] x0 = new double[numFiducials];
+			for (int k = 0; k < numFiducials; k++)
+				x0[k] = 20;
+			
+			BPos bpos = new BPos(numFiducials, lines, dists);
+			ErrorFunction errorFunc = new ErrorFunction(bpos);
+			Matrix lambdas = Newton.go(new Matrix(x0, true), errorFunc);
+			if (lambdas == null)
+			{
+				ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
+				Particle bestabc = null;
+				bestabc = system.go();
+				lambdas = new Matrix(bestabc.bestPosition);
+				Logger.log("PSO gives: "+errorFunc.calcError(lambdas), 30);
+			}
+			////Bin should have enough information to get position.
 			
 			Vec3 [] fiducialWorld = new Vec3[numFiducials];
 			Vec3 [] upRotWorld = new Vec3[numFiducials];
 			for(int k = 0 ; k < numFiducials ; k++)
 			{
-				fids[k].worldPosition = fiducialWorld[k] = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+				fids[k].worldPosition = fiducialWorld[k] = Vec3.add(lines[k].point,  Vec3.scalar(lambdas.data[k][0], lines[k].direction));
+				//Vec3 PSORes = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
+				//System.out.println(fids[k].worldPosition.distance(PSORes));
 				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation, Matrix.Axis.Z_AXIS);	
 				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
 				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
 			}
 			
-			Integer[] temp = new Integer[0];
-			Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(temp));
+			Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(new Integer[0]));
 			//Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, uniqueFidBlockIndex.toArray(temp));
 			
 			Logger.log("Transform: "+transform, 50);
