@@ -143,7 +143,7 @@ public class ModelViewer
 		final float aspectR = 1280.0f / 720.0f;
 		window.perspective(fov, aspectR, cameraZ/100.0f, cameraZ*100.0f);
 		
-		window.directionalLight(200, 200, 200, 0.2f, 0.8f, 0f);
+		window.directionalLight(180, 180, 180, 0.2f, 0.8f, 0f);
 		window.pointLight(200, 200, 200, 100, -1000, 400);
 		window.ambientLight(50, 50, 50);
 		
