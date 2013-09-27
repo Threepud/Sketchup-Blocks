@@ -88,7 +88,7 @@ public class ModelViewer
 		Vec3 at = new Vec3();
 		Vec3 eye = new Vec3();
 		
-		currentRotation = 2.5f;
+		currentRotation = 2.5;
 		eye.x = cameraRadius * Math.cos(currentRotation);
 		eye.z = cameraRadius * Math.sin(currentRotation);
 		eye.y = cameraHeight;
@@ -143,8 +143,9 @@ public class ModelViewer
 		final float aspectR = 1280.0f / 720.0f;
 		window.perspective(fov, aspectR, cameraZ/100.0f, cameraZ*100.0f);
 		
-		window.directionalLight(180, 180, 180, 0.2f, 0.8f, 0f);
-		window.pointLight(200, 200, 200, 100, -1000, 400);
+		final float pwr = 150.0f;
+		window.directionalLight(pwr, pwr, pwr, 0.2f, 0.8f, 0f);
+		window.pointLight(pwr, pwr, pwr, 100, -1000, 400);
 		window.ambientLight(50, 50, 50);
 		
 		window.background(100);
@@ -434,11 +435,6 @@ public class ModelViewer
 		window.noStroke();
 		window.fill(window.color(255));
 		
-		if(alphaBlendFloor)
-			window.tint(255, 50);
-		else
-			window.tint(255, 255);
-		
 		window.beginShape();
 		
 		window.texture(tilesTexture);
@@ -448,6 +444,7 @@ public class ModelViewer
 		final int point = 100000;
 		final int repeat = 2000;
 		
+		fog.set("trans", (alphaBlendFloor) ? 1 : 0);
 		window.shader(fog);
 		
 		window.vertex(-point, 0, -point, 0, 0);
