@@ -1,20 +1,20 @@
-package sketchupblocks.base;
+package sketchupblocks.database;
 
-import sketchupblocks.database.Block;
 
+/**
+ * 
+ * 
+ * @author cravingoxygen
+ *
+ */
 public class CommandBlock extends Block
 {
 	private static final long serialVersionUID = 1L;
 
 	public enum CommandType
     {
-    	LOAD("LOAD"),
-    	NEW("NEW"),
-    	SAVE("SAVE"),
-    	EXPORT("EXPORT"),
+		EXPORT("EXPORT"),
     	ROTATE("ROTATE"),
-    	OK("OK"),
-    	CANCEL("CANCEL"),
     	SPECTATE("SPECTATE"),
     	CALIBRATE("CALIBRATE");
     	

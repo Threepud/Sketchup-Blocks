@@ -32,15 +32,15 @@
 		<Landmark id="3">2.9,-2.9,0</Landmark>
 	</Calibration>
 	<GUI>
-		<FancyShaders>true</FancyShaders>
+		<FancyShaders>false</FancyShaders>
 		<ShowSplash>false</ShowSplash>
 		<SplashTTL>3000</SplashTTL>
 		<CommandWaitTime>3000</CommandWaitTime>
 		<ProgressBarRotationSpeed>500</ProgressBarRotationSpeed>
 	</GUI>
 	<DebugRecording>
-		<LiveData>false</LiveData>
-		<RecordingInputFilename>debugOutput(JustSomeData)/output</RecordingInputFilename>
+		<LiveData>true</LiveData>
+		<RecordingInputFilename>debugOutput(Wall)/output</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
 	<Network>

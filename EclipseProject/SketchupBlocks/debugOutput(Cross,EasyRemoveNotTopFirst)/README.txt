@@ -1,0 +1,1 @@
+Cross formation is built. All blocks are removed, the top is not first.

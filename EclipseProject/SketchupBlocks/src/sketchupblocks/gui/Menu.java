@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import sketchupblocks.base.CameraEvent;
-import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
 import sketchupblocks.database.Block;
+import sketchupblocks.database.CommandBlock;
 import sketchupblocks.database.UserBlock;
 
 /**

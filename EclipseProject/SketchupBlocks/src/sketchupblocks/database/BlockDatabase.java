@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import sketchupblocks.base.ColladaLoader;
-import sketchupblocks.base.CommandBlock;
 import sketchupblocks.exception.DataBaseNotFoundException;
 import sketchupblocks.exception.RecordFormatException;
 import sketchupblocks.math.Vec3;

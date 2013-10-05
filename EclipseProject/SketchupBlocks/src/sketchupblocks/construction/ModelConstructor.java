@@ -9,7 +9,6 @@ import java.util.Map;
 
 import sketchupblocks.database.*;
 import sketchupblocks.base.CameraEvent;
-import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.InputBlock;
 import sketchupblocks.base.Logger;
 import sketchupblocks.base.RuntimeData;
@@ -431,7 +430,7 @@ public class ModelConstructor implements Runnable
 				if(PSOScore < MTCScore)
 				{
 					System.err.println("PSO beat MTC");	
-					transform =PSOtransform;
+					transform = PSOtransform;
 				}
 				
 				System.out.println("Transformation score(MTC):"+MTCScore);

@@ -9,9 +9,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import sketchupblocks.base.CommandBlock;
 import sketchupblocks.database.Block;
 import sketchupblocks.database.BlockDatabase;
+import sketchupblocks.database.CommandBlock;
 import sketchupblocks.database.SmartBlock;
 
 public class BlockDatabaseTest 

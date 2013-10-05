@@ -76,7 +76,7 @@ public class Calibrator
 	    ErrorFunction camPosErrorFunction = new ErrorFunction(camPosFunction);
 	    double[] camPosX0 = new double[]{1, 1, 1};
 	    Matrix camPos = Newton.go(new Matrix(camPosX0), camPosErrorFunction);
-			
+			//TODO: Fail gracefully if camPos is null
 	    Logger.log("Camera position: "+camPos.toVec3(), 50);
 	    
 	    Vec3[] landmarkToCamera = new Vec3[4];

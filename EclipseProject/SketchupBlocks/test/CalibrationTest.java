@@ -13,12 +13,12 @@ import org.xml.sax.SAXException;
 
 import processing.data.XML;
 import sketchupblocks.base.CameraEvent;
-import sketchupblocks.base.CommandBlock;
 import sketchupblocks.base.InputBlock;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
 import sketchupblocks.calibrator.Calibrator;
 import sketchupblocks.database.Block;
+import sketchupblocks.database.CommandBlock;
 import sketchupblocks.math.Vec3;
 
 

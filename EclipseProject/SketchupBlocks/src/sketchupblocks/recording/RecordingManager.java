@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import processing.core.PApplet;
 import sketchupblocks.base.Logger;
+import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
 
 public class RecordingManager extends PApplet
@@ -22,6 +23,7 @@ public class RecordingManager extends PApplet
 	public void setup()
 	{
 		settings = new Settings("Settings.xml");
+		RuntimeData.init();
 		recorders = new Recorder[Settings.numCameras];
 		Logger.log("Num recorders created; "+recorders.length+" "+Settings.numCameras, 10);
 		for (int k = 0; k < recorders.length; k++)

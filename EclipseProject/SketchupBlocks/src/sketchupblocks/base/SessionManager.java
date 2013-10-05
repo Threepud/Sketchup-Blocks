@@ -9,6 +9,7 @@ import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.construction.ModelConstructor;
 import sketchupblocks.database.Block;
 import sketchupblocks.database.BlockDatabase;
+import sketchupblocks.database.CommandBlock;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.database.UserBlock;
 import sketchupblocks.exception.ModelNotSetException;
