@@ -12,6 +12,13 @@ import sketchupblocks.base.Settings;
 import sketchupblocks.database.Block;
 import sketchupblocks.database.UserBlock;
 
+/**
+ * @author Jacques Coetzee
+ * 
+ * The menu class provides system feedback to the user
+ * by displaying a 2D graphic overlay. This overlay is
+ * drawn onto the 3D model viewer.
+ */
 public class Menu 
 {
 	public enum UserTypes
