@@ -2,6 +2,7 @@ package sketchupblocks.construction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -300,9 +301,13 @@ public class ModelConstructor implements Runnable
 				Thread.sleep(1);
 		
 			}
-			catch(Exception e)
+			catch(ConcurrentModificationException ie)
 			{
 				//If there is a concurrent change, then an exception will be thrown and we simply try again.
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
 			}
 		}
 	}
@@ -390,6 +395,7 @@ public class ModelConstructor implements Runnable
 			BPos bpos = new BPos(numFiducials, lines, dists);
 			ErrorFunction errorFunc = new ErrorFunction(bpos);
 			Matrix lambdas = Newton.go(new Matrix(x0, true), errorFunc);
+			
 			if (lambdas == null)
 			{
 				ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
@@ -413,7 +419,24 @@ public class ModelConstructor implements Runnable
 			}
 			
 			Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(new Integer[0]));
-			//Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, uniqueFidBlockIndex.toArray(temp));
+			
+			double MTCScore =  getTransformationScore(transform,sBlock, fiducialWorld, fiducialIndices.toArray(new Integer[0]));
+			
+			if(MTCScore > 3.0)
+			{
+				Matrix PSOtransform = PSOPosition.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(new Integer[0]));
+				
+				double PSOScore = getTransformationScore(PSOtransform,sBlock, fiducialWorld, fiducialIndices.toArray(new Integer[0]));
+				
+				if(PSOScore < MTCScore)
+				{
+					System.err.println("PSO beat MTC");	
+					transform =PSOtransform;
+				}
+				
+				System.out.println("Transformation score(MTC):"+MTCScore);
+				System.out.println("Transformation score(PSO):"+PSOScore);
+			}
 			
 			Logger.log("Transform: "+transform, 50);
 			
@@ -435,6 +458,24 @@ public class ModelConstructor implements Runnable
 		{
 			Logger.log("Attempting to process a Command Block, but this is not yet supported", 1);
 		}
+	}
+	
+	private double getTransformationScore(Matrix transform,SmartBlock sBlock, Vec3[] positions, Integer[] fidIDs)
+	{
+		Vec3[] modelFidCoords = new Vec3[positions.length];
+		for (int k = 0; k < modelFidCoords.length; k++)
+		{
+			modelFidCoords[k] = sBlock.fiducialCoordinates[fidIDs[k]];
+		}
+		
+		double error = 1;
+       	for(int k = 0 ; k < positions.length ;k++)
+       	{
+       		double temp = positions[k].distance(Matrix.multiply(transform, modelFidCoords[k].padVec3()).toVec3());
+       		error += temp*temp;
+       	}
+		
+		return error;		
 	}
 	
 	private ParticleSystemSettings getPSOConfiguration(Vec3[] fidCoordsM, Line[] lines, int numFids)
