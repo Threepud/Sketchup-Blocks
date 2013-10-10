@@ -4,7 +4,7 @@ package sketchupblocks.math;
 public class LUDecomposer 
  {
 	
-    public static Matrix[] decompose(Matrix a)
+    public static Matrix[] decompose(Matrix a) throws SingularMatrixException
     {
     	if (a == null)
     		throw new NullPointerException();
@@ -32,15 +32,7 @@ public class LUDecomposer
                     big = temp;
             if (big == 0.0)
             {
-                System.out.println("Singular matrix");
-                try
-                {
-                	throw new Exception("Singular matrix");
-                }
-                catch(Exception e)
-                {
-                	e.printStackTrace();
-                }
+            	throw new SingularMatrixException();
             }
             vv[i]=1.0/big;
         }

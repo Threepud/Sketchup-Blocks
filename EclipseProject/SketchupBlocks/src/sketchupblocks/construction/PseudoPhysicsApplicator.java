@@ -130,7 +130,7 @@ public class PseudoPhysicsApplicator
 			else
 			{
 				Logger.log("Slanted or very accurate block detected", 1);
-				//TODO: See effects of fixing and not fixing the transformation matrix.
+				m.transformationMatrix = m.rawMatrix;
 				return m;
 			}
 		}

@@ -1,6 +1,5 @@
 package sketchupblocks.construction;
 
-import sketchupblocks.base.Logger;
 import sketchupblocks.calibrator.EvalResults;
 import sketchupblocks.calibrator.Evaluator;
 import sketchupblocks.calibrator.*;
@@ -8,7 +7,6 @@ import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.*;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.RotationMatrix4D;
-import sketchupblocks.math.Matrix.Axis;
 
 public class PSOPosition {
 	
@@ -95,23 +93,17 @@ public class PSOPosition {
 		return Matrix.multiply(translation, rotation);	
 	}
 	
-	public static Matrix getModelTransformationMatrix(Vec3 [] rotation, SmartBlock sBlock, Vec3[] positions, Integer[] fidIDs)
+	public static Matrix getModelTransformationMatrix(SmartBlock sBlock, Vec3[] positions, Vec3[] fidCoordsM)
 	{
 		if( positions.length < 3 )
 			throw new RuntimeException("Too few positions to calculate");
 		
-		Vec3[] modelFidCoords = new Vec3[positions.length];
-		for (int k = 0; k < modelFidCoords.length; k++)
-		{
-			modelFidCoords[k] = sBlock.fiducialCoordinates[fidIDs[k]];
-		}
-				
-		Vec3 modelCenter = calculateCentroid(modelFidCoords);
+		Vec3 modelCenter = calculateCentroid(fidCoordsM);
 		Vec3 worlCenter = calculateCentroid(positions);
 		Matrix trantsMat = getTranslationMatrix(modelCenter,worlCenter);
 		
 		ParticleSystemSettings settings = new ParticleSystemSettings();
-		settings.eval = new PSORot(trantsMat,modelFidCoords,positions);
+		settings.eval = new PSORot(trantsMat,fidCoordsM,positions);
 		settings.tester = null;
 		settings.creator = new ParticleCreator(3, -10, 10);
 		

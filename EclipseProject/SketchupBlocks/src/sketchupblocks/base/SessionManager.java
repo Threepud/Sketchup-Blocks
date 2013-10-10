@@ -30,6 +30,7 @@ public class SessionManager
 	private BlockDatabase blockDB;
 	private Menu menu;
 	private String[] dbPaths;
+	private Interpreter[] wimpie;
 	
 	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
 	
@@ -123,13 +124,13 @@ public class SessionManager
     	}
     	else
     	{
-    		Logger.log("--Unrecognized block!!--"+ cameraEvent.fiducialID, 5);
+    		Logger.log("--Unrecognized block!!--"+ cameraEvent.fiducialID, 87);
     	}
     }
     
     public void createInterpreters()
     {
-    	Interpreter[] wimpie = new Interpreter[Settings.numCameras];
+    	wimpie = new Interpreter[Settings.numCameras];
 		if (Settings.liveData)
 		{
 			for (int k = 0;  k < Settings.numCameras; k++)
@@ -331,8 +332,21 @@ public class SessionManager
 		public void keyEvent(final KeyEvent e) 
 		{
 			if(e.getKey() == 's')
+			{
 				if(e.getAction() == KeyEvent.RELEASE)
 					spectate(null);
+			}
+			else if(e.getKeyCode() == 19)
+			{
+				if(e.getAction() == KeyEvent.PRESS)
+				{
+					for (int k = 0; k < wimpie.length; k++)
+					{
+						wimpie[k].paused = !wimpie[k].paused;
+					}
+				}
+			
+			}
 			
 			viewerFeedKeyboard(e);
 		}

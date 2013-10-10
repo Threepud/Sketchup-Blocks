@@ -11,7 +11,7 @@ public class LinearSystemSolver
      * @param args the command line arguments
      */
     
-    public static Matrix solve(Matrix input, double[] b)
+    public static Matrix solve(Matrix input, double[] b) throws SingularMatrixException
     {
     	//r1*c1*r2*c2 = r1*c2
     	if (b.length != input.rows)

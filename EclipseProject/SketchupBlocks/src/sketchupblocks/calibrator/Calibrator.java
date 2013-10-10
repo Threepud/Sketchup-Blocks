@@ -5,6 +5,7 @@ import sketchupblocks.base.Settings;
 import sketchupblocks.base.Logger;
 import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Matrix;
+import sketchupblocks.math.SingularMatrixException;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.nonlinearmethods.CP;
 import sketchupblocks.math.nonlinearmethods.ErrorFunction;
@@ -70,27 +71,52 @@ public class Calibrator
 	    SIS radiiFunction = new SIS(lengths, angles);
 	    ErrorFunction radiiErrorFunction = new ErrorFunction(radiiFunction);
 	    double[] radiiX0 = new double[]{60, 60, 60, 60};
-	    Matrix radii = Newton.go(new Matrix(radiiX0), radiiErrorFunction);
+	    Matrix radii;
+	    try
+	    {
+	    	radii = Newton.go(new Matrix(radiiX0), radiiErrorFunction);
+	    }
+	    catch(Exception e)
+	    {
+	    	e.printStackTrace();
+	    	return;
+	    }
 	    
 	    CP camPosFunction = new CP(Settings.landmarks, radii.toArray());
 	    ErrorFunction camPosErrorFunction = new ErrorFunction(camPosFunction);
 	    double[] camPosX0 = new double[]{1, 1, 1};
-	    Matrix camPos = Newton.go(new Matrix(camPosX0), camPosErrorFunction);
-			//TODO: Fail gracefully if camPos is null
+	    Matrix camPos;
+	    try
+	    {
+	    	camPos = Newton.go(new Matrix(camPosX0), camPosErrorFunction);
+	    }
+	    catch(Exception e)
+	    {
+	    	e.printStackTrace();
+	    	return;
+			//TODO: Fail gracefully
+	    }
 	    Logger.log("Camera position: "+camPos.toVec3(), 50);
 	    
 	    Vec3[] landmarkToCamera = new Vec3[4];
-		double[] Myangles = new double[4];
+		double[] myAngles = new double[4];
 		
 		for (int k = 0; k < 4; k++)
 		{
 			landmarkToCamera[k] = Vec3.subtract(Settings.landmarks[k], camPos.toVec3());
-			Myangles[k] = RuntimeData.getAngle(cameraID, k, 0.5, 0.5);
+			myAngles[k] = RuntimeData.getAngle(cameraID, k, 0.5, 0.5);
 		}
-		// Do calculation 
-		Vec3 camViewVector = LineDirectionSolver.solve(landmarkToCamera, Myangles);
 		
-	    RuntimeData.setCameraPosition(cameraID, camPos.toVec3(),camViewVector);
+		// Do calculation 
+		try
+		{
+			Vec3 camViewVector = LineDirectionSolver.solve(landmarkToCamera, myAngles);
+		    RuntimeData.setCameraPosition(cameraID, camPos.toVec3(),camViewVector);
+		}
+		catch(SingularMatrixException s)
+		{
+			s.printStackTrace();
+		}
 	}
 	
 }

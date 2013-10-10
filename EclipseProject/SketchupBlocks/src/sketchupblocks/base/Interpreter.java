@@ -9,6 +9,7 @@ public class Interpreter
 	private TuioProcessing tuioClient;
 	protected int cameraID;
 	protected SessionManager sessMan;
+	protected boolean paused;
 	  
 	public Interpreter(int port, SessionManager _sessMan, PApplet _parent, int _id)
 	{
@@ -16,6 +17,7 @@ public class Interpreter
 		parent = _parent;
 		tuioClient  = new TuioProcessing(this, port);
 		cameraID = _id;
+		paused = false;
 	}
 	
 	public Interpreter(SessionManager _sessMan, PApplet _parent, int _id)
@@ -23,6 +25,7 @@ public class Interpreter
 		sessMan = _sessMan;
 		parent = _parent;
 		cameraID = _id;
+		paused = false;
 	}
   
 	public int getCameraID()
@@ -33,6 +36,8 @@ public class Interpreter
 	
 	public void addTuioObject(TuioObject tobj) 
 	{
+		if (paused)
+			return;
 		CameraEvent came = new CameraEvent();
 		came.rotation = tobj.getAngle();
 		came.rotAcceleration = tobj.getRotationAccel();
@@ -49,6 +54,8 @@ public class Interpreter
 	// called when an object is removed from the scene
 	public void removeTuioObject(TuioObject tobj) 
 	{
+		if (paused)
+			return;
 		CameraEvent came = new CameraEvent();
 		came.rotation = tobj.getAngle();
 		came.rotAcceleration = tobj.getRotationAccel();
@@ -65,6 +72,8 @@ public class Interpreter
 	// called when an object is moved
 	public void updateTuioObject (TuioObject tobj) 
 	{
+		if (paused)
+			return;
 		CameraEvent came = new CameraEvent();
 		came.rotation = tobj.getAngle();
 		came.rotAcceleration = tobj.getRotationAccel();

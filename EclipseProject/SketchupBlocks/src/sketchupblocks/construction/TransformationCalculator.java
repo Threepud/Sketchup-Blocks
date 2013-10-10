@@ -25,8 +25,8 @@ public class TransformationCalculator
 	        double det = Matrix.determinant(proposedR);
 	        if(det < 0)
 	        {
-	        	Logger.log("DETERMINANT: "+det, 50);
-	        	Logger.log("R: "+proposedR, 50);
+	        	Logger.log("DETERMINANT: "+det, 4);
+	        	Logger.log("R: "+proposedR, 4);
 	            int COLUMN_THREE = 2;
 	            for (int k = 0; k < proposedR.rows; k++)
 	            {

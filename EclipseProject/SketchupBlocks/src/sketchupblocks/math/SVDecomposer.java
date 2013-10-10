@@ -4,6 +4,7 @@
  */
 package sketchupblocks.math;
 
+
 /**
  *
  * @author cravingoxygen
@@ -12,7 +13,7 @@ public class SVDecomposer
 {
 	public static int MaxIter = 30;
     //Return U, W, V
-    public static Matrix[] decompose(Matrix A)
+    public static Matrix[] decompose(Matrix A) throws NoConvergenceException
     {
         A = prep(A);
         
@@ -206,7 +207,7 @@ public class SVDecomposer
                 }
                 if (its == MaxIter) 
                 {
-                    throw new RuntimeException("No Convergence in 30 svdcmp Iterations");
+                    throw new NoConvergenceException();
                 }
                 x = w[l];// Shift from bottom 2-by-2 minor.
                 nm = k-1;

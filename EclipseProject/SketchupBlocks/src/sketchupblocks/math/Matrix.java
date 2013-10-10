@@ -248,14 +248,13 @@ public class Matrix implements Serializable
     			if (data[k][i] == Double.NaN || data[k][i] == Double.POSITIVE_INFINITY || data[k][i] == Double.NEGATIVE_INFINITY)
     			{
     		    	Logger.log("Singular matrix encountered", 1);
-
     				return true;
     			}
     	return false;
     }
     
     
-    public Matrix getInverse()
+    public Matrix getInverse() throws SingularMatrixException
     {
     	if (!isSquare())
     		throw new RuntimeException("Cannot invert a nonsquare matrix");

@@ -39,6 +39,7 @@ public class ModelConstructor implements Runnable
 	private Calibrator cally;
 	
 	private int changeWindow = 100;
+	private double errorThreshold = 5; //Error threshold for calculating transformation matrix before resorting to PSO.
 	
 	public ModelConstructor(SessionManager _sessMan)
 	{
@@ -161,10 +162,10 @@ public class ModelConstructor implements Runnable
 		return true;
 	}
 	
-	private void addBlockToModel(BlockInfo bi)
+	private void reAddBlockToModel(BlockInfo bi)
 	{
 		bi.removed = false;
-		ModelBlock mb = new ModelBlock((SmartBlock)bi.smartBlock, bi.transform, ModelBlock.ChangeType.UPDATE);
+		ModelBlock mb = new ModelBlock((SmartBlock)bi.smartBlock, bi.getTransform(), ModelBlock.ChangeType.UPDATE);
 		
 		ArrayList<Line> dbLines = new ArrayList<Line>();
 		ArrayList<Vec3>  dbPoints = new ArrayList<Vec3>();
@@ -233,9 +234,9 @@ public class ModelConstructor implements Runnable
 		for(BlockInfo bi : bis)
 		{
 			if(bi.removed && !expectedToSeeBlock(bi))
-				{
-				addBlockToModel(bi);
-				}
+			{
+				reAddBlockToModel(bi);
+			}
 		}
 	}
 	
@@ -251,9 +252,9 @@ public class ModelConstructor implements Runnable
 			if(fid.camID == iBlock.cameraEvent.cameraID && Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.1 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.1) // Seen at the same place
 			{
 				fid.setSeen(true);
-				if(block.removed && block.transform != null) // if all the fiducials are seen we add
+				if(block.removed && block.getTransform() != null) // if all the fiducials are seen we add
 				{
-					addBlockToModel(block);							
+					reAddBlockToModel(block);							
 				}
 				return true;
 			}
@@ -319,158 +320,145 @@ public class ModelConstructor implements Runnable
 	 */
 	private void processBin(BlockInfo bin)
 	{
-		if (bin.smartBlock instanceof SmartBlock)
+		BlockInfo.Fiducial [] fids = bin.getCleanFiducials();
+		int numFiducials = fids.length;
+		
+		Line[] lines = new Line[numFiducials];
+		for(int k = 0 ; k < fids.length ; k++)
 		{
-			BlockInfo.Fiducial [] fids = new BlockInfo.Fiducial[0];
-			BlockInfo.CamFidIdentifier [] camIDs = new BlockInfo.CamFidIdentifier[0];
-			
-			ArrayList<BlockInfo.Fiducial> cleanFids = new ArrayList<BlockInfo.Fiducial>(); //Get all fiducials ever seen
-			ArrayList<BlockInfo.CamFidIdentifier> cleanIDs = new ArrayList<BlockInfo.CamFidIdentifier>(); //Get all cam ids ever seen
-			
-			for(BlockInfo.CamFidIdentifier keys : bin.fiducialMap.keySet())
-			{
-				BlockInfo.Fiducial fid = bin.fiducialMap.get(keys);
-				if(fid.isSeen())
-					{
-					cleanFids.add(fid);//Remove the ones that aren't currently visible
-					cleanIDs.add(keys);
-					}
-			}
-			fids =cleanFids.toArray(fids);			
-			camIDs = cleanIDs.toArray(camIDs);
-			
-			int numFiducials = fids.length;
-			
-			
-			Line[] lines = new Line[numFiducials];
-			for(int k = 0 ; k < fids.length ; k++)
-			{
-				lines[k] = fids[k].getLine(); 
-				lines[k].direction.normalize();
-			}
-			
-			Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
-			
-			
-			//Generate list of the indices (into the smartblock's associatedFiducials list) of the observed fiducials.
-			SmartBlock sBlock =(SmartBlock)(bin.smartBlock);
-			ArrayList<Integer> fiducialIndices = new ArrayList<Integer>();
-			
-			for (int k = 0 ; k < numFiducials ; k++)
-			{
-				int fiducialIndex = -1;
-				for (int i = 0 ; i < sBlock.associatedFiducials.length; i++)
-				{
-					if (sBlock.associatedFiducials[i] == fids[k].fiducialsID)
-					{
-						fiducialIndex = i;
-						fiducialIndices.add(i);
-						break;
-					}
-				}
-				
-				if(fiducialIndex == -1)
-				{
-					throw new RuntimeException("Smart Block fiducials don't match");
-				}
-				
-				fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
-			}
-			
-			double[] dists = new double[numFiducials*(numFiducials-1)/2];
-			int count = 0;
-			for (int k = 0; k < numFiducials-1; k++)
-			{
-				for (int i = k+1; i < numFiducials; i++)
-				{
-					dists[count++] = fidCoordsM[k].distance(fidCoordsM[i]);
-				}
-			}
-			
-			double[] x0 = new double[numFiducials];
-			for (int k = 0; k < numFiducials; k++)
-				x0[k] = 20;
-			
-			BPos bpos = new BPos(numFiducials, lines, dists);
-			ErrorFunction errorFunc = new ErrorFunction(bpos);
-			Matrix lambdas = Newton.go(new Matrix(x0, true), errorFunc);
-			
-			if (lambdas == null)
-			{
-				ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, fids.length));
-				Particle bestabc = null;
-				bestabc = system.go();
-				lambdas = new Matrix(bestabc.bestPosition);
-				Logger.log("PSO gives: "+errorFunc.calcError(lambdas), 30);
-			}
-			////Bin should have enough information to get position.
-			
-			Vec3 [] fiducialWorld = new Vec3[numFiducials];
-			Vec3 [] upRotWorld = new Vec3[numFiducials];
-			for(int k = 0 ; k < numFiducials ; k++)
-			{
-				fids[k].worldPosition = fiducialWorld[k] = Vec3.add(lines[k].point,  Vec3.scalar(lambdas.data[k][0], lines[k].direction));
-				//Vec3 PSORes = Vec3.add(lines[k].point, Vec3.scalar(bestabc.bestPosition[k], lines[k].direction));
-				//System.out.println(fids[k].worldPosition.distance(PSORes));
-				RotationMatrix3D rot = new RotationMatrix3D(fids[k].rotation, Matrix.Axis.Z_AXIS);	
-				upRotWorld[k] = getUpVector(camIDs[k].cameraID);
-				upRotWorld[k] =  Matrix.multiply(rot, upRotWorld[k]);
-			}
-			
-			Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(new Integer[0]));
-			
-			double MTCScore =  getTransformationScore(transform,sBlock, fiducialWorld, fiducialIndices.toArray(new Integer[0]));
-			
-			if(MTCScore > 3.0)
-			{
-				Matrix PSOtransform = PSOPosition.getModelTransformationMatrix(upRotWorld, sBlock, fiducialWorld, fiducialIndices.toArray(new Integer[0]));
-				
-				double PSOScore = getTransformationScore(PSOtransform,sBlock, fiducialWorld, fiducialIndices.toArray(new Integer[0]));
-				
-				if(PSOScore < MTCScore)
-				{
-					System.err.println("PSO beat MTC");	
-					transform = PSOtransform;
-				}
-				
-				System.out.println("Transformation score(MTC):"+MTCScore);
-				System.out.println("Transformation score(PSO):"+PSOScore);
-			}
-			
-			Logger.log("Transform: "+transform, 50);
-			
-			bin.transform = transform;
-			bin.removed = false;
-			
-			ModelBlock mbToAdd = (new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE));
-			
-			mbToAdd.debugLines = lines;
-			mbToAdd.debugPoints = fiducialWorld;
-			
-			BlockInfo [] bis = allPossibleReadditions();
-			
-			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
-			//eddy.updateModel(mbToAdd);
-			doReadditions(bis);
-		}
-		else
-		{
-			Logger.log("Attempting to process a Command Block, but this is not yet supported", 1);
-		}
-	}
-	
-	private double getTransformationScore(Matrix transform,SmartBlock sBlock, Vec3[] positions, Integer[] fidIDs)
-	{
-		Vec3[] modelFidCoords = new Vec3[positions.length];
-		for (int k = 0; k < modelFidCoords.length; k++)
-		{
-			modelFidCoords[k] = sBlock.fiducialCoordinates[fidIDs[k]];
+			lines[k] = fids[k].getLine(); 
+			lines[k].direction.normalize();
 		}
 		
+		Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
+		
+		//Generate list of the indices (into the smartblock's associatedFiducials list) of the observed fiducials.
+		SmartBlock sBlock = (SmartBlock)(bin.smartBlock);
+		
+		for (int k = 0 ; k < numFiducials ; k++)
+		{
+			int fiducialIndex = -1;
+			for (int i = 0 ; i < sBlock.associatedFiducials.length; i++)
+			{
+				if (sBlock.associatedFiducials[i] == fids[k].fiducialsID)
+				{
+					fiducialIndex = i;
+					break;
+				}
+			}
+			
+			if(fiducialIndex == -1)
+			{
+				throw new RuntimeException("Smart Block fiducials don't match");
+			}
+			
+			fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
+		}
+		
+		Matrix lambdas = calculateLambdas(fidCoordsM, lines);
+		
+		Vec3 [] fiducialWorld = new Vec3[numFiducials];
+		for(int k = 0 ; k < numFiducials ; k++)
+		{
+			fids[k].worldPosition = fiducialWorld[k] = Vec3.add(lines[k].point,  Vec3.scalar(lambdas.data[k][0], lines[k].direction));
+		}
+		
+		Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(sBlock, fiducialWorld, fidCoordsM);
+		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
+		
+		if(MTCScore > errorThreshold)
+		{
+			Matrix PSOtransform = PSOPosition.getModelTransformationMatrix(sBlock, fiducialWorld, fidCoordsM);
+			double PSOScore = getTransformationScore(PSOtransform, fiducialWorld, fidCoordsM);
+			
+			if(PSOScore < MTCScore)
+			{
+				transform = PSOtransform;
+			}
+			
+			Logger.log("Transformation score(MTC):"+MTCScore, 4);
+			Logger.log("Transformation score(PSO):"+PSOScore, 4);
+		}
+		
+		Logger.log("Transform: "+transform, 50);
+		
+		bin.setTransform(transform, numFiducials);
+		bin.removed = false;
+		
+		ModelBlock mbToAdd = new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE);
+		
+		mbToAdd.debugLines = lines;
+		mbToAdd.debugPoints = fiducialWorld;
+		
+		BlockInfo [] bis = allPossibleReadditions();
+		
+		eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
+		//eddy.updateModel(mbToAdd);
+		doReadditions(bis);
+	}
+	
+	private Matrix calculateLambdas(Vec3[] fidCoordsM, Line[] lines)
+	{
+		int numFiducials = fidCoordsM.length;
+		double[] dists = new double[numFiducials*(numFiducials-1)/2];
+		int count = 0;
+		for (int k = 0; k < numFiducials-1; k++)
+		{
+			for (int i = k+1; i < numFiducials; i++)
+			{
+				dists[count++] = fidCoordsM[k].distance(fidCoordsM[i]);
+			}
+		}
+		
+		double[] x0 = new double[numFiducials];
+		for (int k = 0; k < numFiducials; k++)
+			x0[k] = 20;
+		
+		Matrix lambdasNewton = null;
+		Matrix lambdasPSO = null;
+		BPos bpos = new BPos(numFiducials, lines, dists);
+		ErrorFunction errorFunc = new ErrorFunction(bpos);
+		
+		try
+		{
+			lambdasNewton = Newton.go(new Matrix(x0, true), errorFunc);
+		}
+		catch(Exception e)
+		{
+			
+		}
+		
+		double newtonError = 0;
+		if(lambdasNewton == null ||  (newtonError = errorFunc.calcError(lambdasNewton))  > 12)
+		{
+			Logger.log("Engaging PSO", 1);
+			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, numFiducials));
+			Particle bestabc = null;
+			bestabc = system.go();
+			lambdasPSO = new Matrix(bestabc.bestPosition);
+			
+			if(lambdasNewton == null)
+				return lambdasPSO;
+			
+			double psoError = errorFunc.calcError(lambdasPSO);
+			
+			Logger.log("--PSO error "+psoError+"--", 4);
+			
+			if(newtonError > psoError)
+				return lambdasPSO;
+			else
+				return lambdasNewton;
+		}
+		
+		return lambdasNewton;		
+	}
+	
+	private double getTransformationScore(Matrix transform, Vec3[] positions, Vec3[] fidCoordsM)
+	{
 		double error = 1;
        	for(int k = 0 ; k < positions.length ;k++)
        	{
-       		double temp = positions[k].distance(Matrix.multiply(transform, modelFidCoords[k].padVec3()).toVec3());
+       		double temp = positions[k].distance(Matrix.multiply(transform, fidCoordsM[k].padVec3()).toVec3());
        		error += temp*temp;
        	}
 		
@@ -495,38 +483,6 @@ public class ModelConstructor implements Runnable
 		settings.momentum = 1.4;
 		settings.MaxComponentVelocity = 0.75;
 		return settings;
-	}
-	
-	private Vec3 getUpVector(int camID)
-	{
-		Vec3[] landmarkToCamera = new Vec3[4];
-		for (int k = 0; k < 4; k++)
-		{
-			landmarkToCamera[k] = Vec3.subtract(RuntimeData.getCameraPosition(camID), Settings.landmarks[k]);
-		}
-		
-		double[] angles = new double[4];
-		for (int k = 0; k < 4; k++)
-		{
-			angles[k] = RuntimeData.getAngle(camID, k, 0.5, 0.5+0.01);
-		}
-		// Do calculation 
-		Vec3 lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
-		Line top = new Line(RuntimeData.getCameraPosition(camID), lineDirection);
-		
-		angles = new double[4];
-		for (int k = 0; k < 4; k++)
-		{
-			angles[k] = RuntimeData.getAngle(camID, k, 0.5, 0.5-0.01);
-		}
-		// Do calculation 
-		lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
-		Line bottom = new Line(RuntimeData.getCameraPosition(camID), lineDirection);
-		
-		top.direction.normalize();
-		bottom.direction.normalize();
-		
-		return Vec3.subtract(top.direction, bottom.direction);
 	}
 }
 

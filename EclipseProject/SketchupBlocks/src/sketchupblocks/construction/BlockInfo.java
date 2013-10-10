@@ -14,6 +14,7 @@ import sketchupblocks.base.Logger;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Matrix;
+import sketchupblocks.math.SingularMatrixException;
 import sketchupblocks.math.Vec3;
 
 public class BlockInfo 
@@ -27,7 +28,8 @@ public class BlockInfo
 	
 	//Variables for removal logic.
 	public boolean removed = true;
-	public Matrix transform = null;
+	private Matrix transform = null;
+	private int numFiducialsUsed = 0;
 	
 	protected Map<CamFidIdentifier,Fiducial> fiducialMap;
 
@@ -38,6 +40,39 @@ public class BlockInfo
 		fiducialMap = new HashMap<CamFidIdentifier,Fiducial>();
 		smartBlock = _smartBlock;
 		lastChange = new Date();
+	}
+	
+	public Matrix getTransform()
+	{
+		return transform;
+	}
+	
+	public int getNumFiducialsUsed()
+	{
+		return numFiducialsUsed;
+	}
+	
+	public void setTransform(Matrix _transform, int _numFiducialsUsed)
+	{
+		transform = _transform;
+		numFiducialsUsed = _numFiducialsUsed;
+	}
+	
+	public Fiducial[] getCleanFiducials()
+	{
+		BlockInfo.Fiducial [] fids = new BlockInfo.Fiducial[0];
+		
+		ArrayList<BlockInfo.Fiducial> cleanFids = new ArrayList<BlockInfo.Fiducial>(); //Get all fiducials ever seen
+		
+		for(BlockInfo.CamFidIdentifier keys : fiducialMap.keySet())
+		{
+			BlockInfo.Fiducial fid = fiducialMap.get(keys);
+			if(fid.isSeen())
+			{
+				cleanFids.add(fid);//Remove the ones that aren't currently visible
+			}
+		}
+		return cleanFids.toArray(fids);	
 	}
 	
 	public Date getLastSeen()
@@ -75,11 +110,11 @@ public class BlockInfo
 			{
 				if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
 				{
-					count ++;
 					if(data[k].seen)
 					{
+						count ++;
 						if( !fiducialList.contains(new Integer(data[k].fiducialsID)))
-						fiducialList.add(data[k].fiducialsID);
+							fiducialList.add(data[k].fiducialsID);
 					}
 				}
 				else
@@ -123,6 +158,7 @@ public class BlockInfo
 			camViewY = _camViewY;
 			camID = _camID;
 			seen = true;
+			lastSeen = new Date();
 		}
 		
 		public Line getLine()
@@ -142,7 +178,16 @@ public class BlockInfo
 				angles[k] = RuntimeData.getAngle(camID, k, camViewX, camViewY);
 			}
 			// Do calculation 
-			Vec3 lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
+			Vec3 lineDirection;
+			try
+			{
+				lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
+			}
+			catch(SingularMatrixException s)
+			{
+				s.printStackTrace();
+				throw new RuntimeException("No valid line direction");
+			}
 			
 			Logger.log("Camera position: "+ RuntimeData.getCameraPosition(camID), 90);
 			Logger.log("Line direction: "+lineDirection, 90);

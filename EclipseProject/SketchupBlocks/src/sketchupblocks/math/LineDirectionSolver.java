@@ -2,7 +2,7 @@ package sketchupblocks.math;
 
 public class LineDirectionSolver
 {
-	public static Vec3 solve(Vec3[] input, double[] angles)
+	public static Vec3 solve(Vec3[] input, double[] angles) throws SingularMatrixException
     {
     	if (angles.length != 4)
     		throw new RuntimeException("Invalid pararmeters to line direction solver");
