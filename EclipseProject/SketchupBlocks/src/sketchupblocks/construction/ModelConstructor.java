@@ -38,7 +38,7 @@ public class ModelConstructor implements Runnable
 	
 	private Calibrator cally;
 	
-	private int changeWindow = 100;
+	private int changeWindow = 10;
 	private double errorThreshold = 5; //Error threshold for calculating transformation matrix before resorting to PSO.
 	
 	public ModelConstructor(SessionManager _sessMan)
@@ -363,6 +363,9 @@ public class ModelConstructor implements Runnable
 			fids[k].worldPosition = fiducialWorld[k] = Vec3.add(lines[k].point,  Vec3.scalar(lambdas.data[k][0], lines[k].direction));
 		}
 		
+		if(samePosition(bin,fidCoordsM,fiducialWorld))
+			return;
+		
 		Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(sBlock, fiducialWorld, fidCoordsM);
 		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
 		
@@ -395,6 +398,30 @@ public class ModelConstructor implements Runnable
 		eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
 		//eddy.updateModel(mbToAdd);
 		doReadditions(bis);
+	}
+	
+	private boolean samePosition(BlockInfo bin,Vec3 [] model,Vec3 [] fids)
+	{
+		if(bin.getTransform() == null)
+			return false;
+		double error =0;
+		for(int k = 0 ;  k < fids.length ; k++ )
+		{
+			double temp = fids[k].distance(Matrix.multiply(bin.getTransform(), model[k].padVec3()).toVec3());
+			error +=temp*temp;
+		}
+		
+		error /= fids.length;
+		
+		
+		
+		if(error < 0.3 && fids.length < bin.getNumFiducialsUsed())
+		{
+			System.err.println("Same error:"+error+" num:"+fids.length);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	private Matrix calculateLambdas(Vec3[] fidCoordsM, Line[] lines)
