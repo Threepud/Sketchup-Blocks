@@ -18,7 +18,9 @@ import sketchupblocks.calibrator.*;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Matrix;
+import sketchupblocks.math.NoConvergenceException;
 import sketchupblocks.math.RotationMatrix3D;
+import sketchupblocks.math.SingularMatrixException;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.nonlinearmethods.BPos;
 import sketchupblocks.math.nonlinearmethods.ErrorFunction;
@@ -113,6 +115,7 @@ public class ModelConstructor implements Runnable
 			BlockInfo.Fiducial fid = block.fiducialMap.get(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
 			if(fid == null) return;
 			
+			boolean blockWasRemoved = false;
 			fid.setSeen(false);
 			block.lastChange = new Date();
 						
@@ -123,25 +126,30 @@ public class ModelConstructor implements Runnable
 					if(expectedToSeeBlock(block))
 					{
 						block.removed = true;						
-						eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));			
+						eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));		
+						blockWasRemoved = true;
 					}
 				}
 			}
 			
-			//Check ALLLLLL the blocks
-			for(BlockInfo blokkie : blockMap.values())
+			if (blockWasRemoved)
 			{
-				if(!blokkie.removed)
+				//Check ALLLLLL the blocks
+				for(BlockInfo blokkie : blockMap.values())
 				{
-					if(blockNotSeen(blokkie))
+					if(!blokkie.removed)
 					{
-						if(expectedToSeeBlock(blokkie))
+						if(blockNotSeen(blokkie))
 						{
-							blokkie.removed = true;						
-							eddy.updateModel(new ModelBlock((SmartBlock)blokkie.smartBlock, null, ModelBlock.ChangeType.REMOVE));			
+							if(expectedToSeeBlock(blokkie))
+							{
+								blokkie.removed = true;						
+								eddy.updateModel(new ModelBlock((SmartBlock)blokkie.smartBlock, null, ModelBlock.ChangeType.REMOVE));			
+							}
 						}
-					}
+					}				
 				}
+					
 			}
 		}
 	}
@@ -331,12 +339,13 @@ public class ModelConstructor implements Runnable
 		}
 		
 		Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
-		
+		int [] cameraIds = new int[numFiducials];
 		//Generate list of the indices (into the smartblock's associatedFiducials list) of the observed fiducials.
 		SmartBlock sBlock = (SmartBlock)(bin.smartBlock);
 		
 		for (int k = 0 ; k < numFiducials ; k++)
 		{
+			cameraIds[k] = fids[k].camID;
 			int fiducialIndex = -1;
 			for (int i = 0 ; i < sBlock.associatedFiducials.length; i++)
 			{
@@ -355,7 +364,7 @@ public class ModelConstructor implements Runnable
 			fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
 		}
 		
-		Matrix lambdas = calculateLambdas(fidCoordsM, lines);
+		Matrix lambdas = calculateLambdas(bin.getTransform(),cameraIds,fidCoordsM, lines);
 		
 		Vec3 [] fiducialWorld = new Vec3[numFiducials];
 		for(int k = 0 ; k < numFiducials ; k++)
@@ -415,16 +424,16 @@ public class ModelConstructor implements Runnable
 		
 		
 		
-		if(error < 0.3 && fids.length < bin.getNumFiducialsUsed())
+		if(error < 1 && fids.length < bin.getNumFiducialsUsed())
 		{
-			System.err.println("Same error:"+error+" num:"+fids.length);
+			//System.err.println("Same error:"+error+" num:"+fids.length);
 			return true;
 		}
 		
 		return false;
 	}
 	
-	private Matrix calculateLambdas(Vec3[] fidCoordsM, Line[] lines)
+	private Matrix calculateLambdas(Matrix tranformation, int [] camIds, Vec3[] fidCoordsM, Line[] lines)
 	{
 		int numFiducials = fidCoordsM.length;
 		double[] dists = new double[numFiducials*(numFiducials-1)/2];
@@ -438,25 +447,45 @@ public class ModelConstructor implements Runnable
 		}
 		
 		double[] x0 = new double[numFiducials];
+		double[] xt = new double[numFiducials];
 		for (int k = 0; k < numFiducials; k++)
-			x0[k] = 20;
+		{
+			if(tranformation != null)
+			{
+				x0[k] = Matrix.multiply(tranformation,fidCoordsM[k].padVec3()).toVec3().distance(RuntimeData.getCameraPosition(camIds[k]));
+			}
+			else
+			{
+				x0[k] = 20;
+			}
+			xt[k] = 20;
+		}
 		
 		Matrix lambdasNewton = null;
 		Matrix lambdasPSO = null;
+		double errorNewton = Double.MAX_VALUE;
 		BPos bpos = new BPos(numFiducials, lines, dists);
 		ErrorFunction errorFunc = new ErrorFunction(bpos);
 		
 		try
 		{
 			lambdasNewton = Newton.go(new Matrix(x0, true), errorFunc);
+			Matrix lambdasD = Newton.go(new Matrix(xt, true), errorFunc);
+			double error1 = errorFunc.calcError(lambdasNewton);
+			double error2 = errorFunc.calcError(lambdasD);
+			if (error2 < error1)
+			{
+				lambdasNewton = lambdasD;
+				errorNewton = error2;
+			}
+			else
+			{
+				errorNewton = error1;
+			}
 		}
-		catch(Exception e)
-		{
-			
-		}
+		catch(SingularMatrixException e) {}
 		
-		double newtonError = 0;
-		if(lambdasNewton == null ||  (newtonError = errorFunc.calcError(lambdasNewton))  > 12)
+		if(lambdasNewton == null ||  (errorNewton)  > 12)
 		{
 			Logger.log("Engaging PSO", 6);
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, numFiducials));
@@ -471,12 +500,13 @@ public class ModelConstructor implements Runnable
 			
 			Logger.log("--PSO error "+psoError+"--", 6);
 			
-			if(newtonError > psoError)
+			if(errorNewton > psoError)
+			{
 				return lambdasPSO;
+			}
 			else
 				return lambdasNewton;
 		}
-		
 		return lambdasNewton;		
 	}
 	
