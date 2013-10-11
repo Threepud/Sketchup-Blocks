@@ -166,23 +166,15 @@ public class EnvironmentAnalyzer
 				min2 = proj < min2 ? proj : min2;
 				max2 = proj > max2 ? proj : max2;
 			}
-			//System.out.println("***");
 			if (min1 > max2 || min2 > max1)
 			{
-				//No overlap! Done.
-				//System.out.println("No Narrow Overlap "+one.modelBlock.smartBlock.blockId+" and "+two.modelBlock.smartBlock.blockId);
-				//System.out.println("***");
 				return false;
 			}
 			else if ((max2 - min1 < thresh  && (max2 - min1  > 0)) || (max1 - min2 < thresh && max1 - min2 > 0))
 			{
-				//System.out.println("No threshold narrow overlap "+one.modelBlock.smartBlock.blockId+" and "+two.modelBlock.smartBlock.blockId);
-				//System.out.println("***");
 				return false;
 			}
 		}
-		//System.out.println("Narrow Overlap "+one.modelBlock.smartBlock.blockId+" and "+two.modelBlock.smartBlock.blockId);
-		//System.out.println("***");
 		return true;
 		
 	}
