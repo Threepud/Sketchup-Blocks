@@ -54,7 +54,7 @@ public class Newton
         }
             
        // Logger.log("Max iterations exceeded in Newton Method", 1);
-        Logger.log("--Math error"+G.calcError(x)+"--", 1);
+        Logger.log("--Math error"+G.calcError(x)+"--", 6);
         //throw new NoConvergenceException();
         return x;
         

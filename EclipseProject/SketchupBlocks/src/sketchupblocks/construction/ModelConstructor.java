@@ -379,8 +379,8 @@ public class ModelConstructor implements Runnable
 				transform = PSOtransform;
 			}
 			
-			Logger.log("Transformation score(MTC):"+MTCScore, 4);
-			Logger.log("Transformation score(PSO):"+PSOScore, 4);
+			Logger.log("Transformation score(MTC):"+MTCScore, 10);
+			Logger.log("Transformation score(PSO):"+PSOScore, 10);
 		}
 		
 		Logger.log("Transform: "+transform, 50);
@@ -458,7 +458,7 @@ public class ModelConstructor implements Runnable
 		double newtonError = 0;
 		if(lambdasNewton == null ||  (newtonError = errorFunc.calcError(lambdasNewton))  > 12)
 		{
-			Logger.log("Engaging PSO", 1);
+			Logger.log("Engaging PSO", 6);
 			ParticleSystem system = new ParticleSystem(getPSOConfiguration(fidCoordsM, lines, numFiducials));
 			Particle bestabc = null;
 			bestabc = system.go();
@@ -469,7 +469,7 @@ public class ModelConstructor implements Runnable
 			
 			double psoError = errorFunc.calcError(lambdasPSO);
 			
-			Logger.log("--PSO error "+psoError+"--", 4);
+			Logger.log("--PSO error "+psoError+"--", 6);
 			
 			if(newtonError > psoError)
 				return lambdasPSO;
