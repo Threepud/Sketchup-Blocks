@@ -29,7 +29,6 @@ public class EnvironmentAnalyzer
 			BoundingBox newBB = BoundingBox.generateBoundingBox(newBlock);
 			Collection<ModelBlock> blocks = eddy.getModel().getBlocks();
 			
-			ModelBlock below = null;
 			BoundingBox belowBB = null;
 			
 			for (ModelBlock modelBlock : blocks)
@@ -38,25 +37,24 @@ public class EnvironmentAnalyzer
 				{
 					BoundingBox modelBB = BoundingBox.generateBoundingBox(modelBlock);
 	
-					boolean overlap = checkXYOverlap(newBB, modelBB);
+					boolean overlap = checkOverlap(newBB, modelBB);
 					
 					if (overlap)
 					{
-						if (below != null && higherThan(modelBB, belowBB) && higherThan(newBB, modelBB))
+						if (belowBB != null && higherThan(modelBB, belowBB) && higherThan(newBB, modelBB))
 						{
-							below = modelBlock;
 							belowBB = modelBB;
 						}
-						else if (below == null && higherThan(newBB, modelBB))
+						else if (belowBB == null && higherThan(newBB, modelBB))
 						{
-							below = modelBlock;
 							belowBB = modelBB;
 						}
 					}
 				}
 			}
-			
-			return below;
+			if (belowBB == null)
+				return null;
+			return belowBB.modelBlock;
 		}
 		catch(Exception e)
 		{
@@ -97,6 +95,19 @@ public class EnvironmentAnalyzer
 		
 		return worldFaces[largestDotIndex];
 	}
+
+	
+	public static Face[] getFaces(SmartBlock block)
+	{
+		Face[] result = new Face[block.indices.length/3];
+		int c = 0;
+		for (int k = 0; k < block.indices.length; k += 3)
+		{
+			result[c++] = new Face(block.vertices[block.indices[k+0]], block.vertices[block.indices[k+1]], block.vertices[block.indices[k+2]]);
+		}
+		
+		return result;
+	}
 	
 	public static Matrix extractRotationMatrix(Matrix mat)
 	{
@@ -114,7 +125,69 @@ public class EnvironmentAnalyzer
 		return new Matrix(data);
 	}
 	
-	private static boolean checkXYOverlap(BoundingBox one, BoundingBox two)
+	private static boolean checkOverlap(BoundingBox one, BoundingBox two)
+	{
+		if (checkBroad(one, two))
+		{
+			//System.out.println("Broad check between "+one.modelBlock.smartBlock.blockId+" and "+two.modelBlock.smartBlock.blockId);
+			if (checkSAT(one, two))
+				return true;
+		}
+		return false;
+	}
+	
+	private static boolean checkSAT(BoundingBox one, BoundingBox two)
+	{
+		double thresh = 2;
+		ArrayList<Vec3> sepAxes = new ArrayList<Vec3>();
+		sepAxes = one.generate2DSeparationAxes(sepAxes);
+		sepAxes = two.generate2DSeparationAxes(sepAxes);
+		
+		for (int a = 0; a < sepAxes.size(); a++)
+		{
+		
+			double min1 = Double.MAX_VALUE;
+			double max1 = -Double.MAX_VALUE;
+			Vec3[] worldVertices1 = one.generate2DWorldVertices();
+			for (int k = 0; k < worldVertices1.length; k++)
+			{
+				double proj = Vec3.dot(worldVertices1[k], sepAxes.get(a));
+				min1 = proj < min1 ? proj : min1;
+				max1 = proj > max1 ? proj : max1;
+			}
+			
+			double min2 = Double.MAX_VALUE;
+			double max2 = -Double.MAX_VALUE;
+			
+			Vec3[] worldVertices2 = two.generate2DWorldVertices();
+			for (int k = 0; k < two.worldVertices.length; k++)
+			{
+				double proj = Vec3.dot(worldVertices2[k], sepAxes.get(a));
+				min2 = proj < min2 ? proj : min2;
+				max2 = proj > max2 ? proj : max2;
+			}
+			System.out.println("***");
+			if (min1 > max2 || min2 > max1)
+			{
+				//No overlap! Done.
+				//System.out.println("No Narrow Overlap "+one.modelBlock.smartBlock.blockId+" and "+two.modelBlock.smartBlock.blockId);
+				//System.out.println("***");
+				return false;
+			}
+			else if ((max2 - min1 < thresh  && (max2 - min1  > 0)) || (max1 - min2 < thresh && max1 - min2 > 0))
+			{
+				//System.out.println("No threshold narrow overlap "+one.modelBlock.smartBlock.blockId+" and "+two.modelBlock.smartBlock.blockId);
+				//System.out.println("***");
+				return false;
+			}
+		}
+		//System.out.println("Narrow Overlap "+one.modelBlock.smartBlock.blockId+" and "+two.modelBlock.smartBlock.blockId);
+		//System.out.println("***");
+		return true;
+		
+	}
+	
+	private static boolean checkBroad(BoundingBox one, BoundingBox two)
 	{
 		double error = -3;
 		if (error < two.min.x - one.max.x)
@@ -127,16 +200,7 @@ public class EnvironmentAnalyzer
 			return false;
 		return true;
 	}
-	
-	
-	/**
-	 * @param one
-	 * First BoundingBox
-	 * @param two
-	 * Second BoundingBox
-	 * @return
-	 * Returns true if the first bounding box is higher than the second.
-	 */
+
 	/**TODO: There was some argument here that I have forgotten.
 	 */
 	private static boolean higherThan(BoundingBox one, BoundingBox two)
@@ -144,18 +208,6 @@ public class EnvironmentAnalyzer
 		if (one.max.z > two.max.z)
 			return true;
 		return false;
-	}
-	
-	private static Face[] getFaces(SmartBlock block)
-	{
-		Face[] result = new Face[block.indices.length/3];
-		int c = 0;
-		for (int k = 0; k < block.indices.length; k += 3)
-		{
-			result[c++] = new Face(block.vertices[block.indices[k+0]], block.vertices[block.indices[k+1]], block.vertices[block.indices[k+2]]);
-		}
-		
-		return result;
 	}
 	
 	/*
