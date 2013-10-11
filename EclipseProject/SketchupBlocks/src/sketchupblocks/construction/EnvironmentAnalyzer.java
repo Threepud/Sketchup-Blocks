@@ -166,7 +166,7 @@ public class EnvironmentAnalyzer
 				min2 = proj < min2 ? proj : min2;
 				max2 = proj > max2 ? proj : max2;
 			}
-			System.out.println("***");
+			//System.out.println("***");
 			if (min1 > max2 || min2 > max1)
 			{
 				//No overlap! Done.
