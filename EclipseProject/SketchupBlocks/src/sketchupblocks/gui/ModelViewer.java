@@ -1,6 +1,7 @@
 package sketchupblocks.gui;
 
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import processing.core.*;
 import processing.event.*;
@@ -223,7 +224,7 @@ public class ModelViewer
 		if(showOutputLines)
 		{
 			window.stroke(222, 3, 255);
-			ArrayList<Line> outputLines = RuntimeData.outputLines;
+			LinkedBlockingQueue<Line> outputLines = RuntimeData.outputLines;
 			if(outputLines != null)
 			{
 				for(Line line: outputLines)

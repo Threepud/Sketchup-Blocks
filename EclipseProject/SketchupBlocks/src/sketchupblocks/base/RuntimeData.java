@@ -3,6 +3,7 @@ package sketchupblocks.base;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import sketchupblocks.math.Face;
 import sketchupblocks.math.Line;
@@ -15,7 +16,7 @@ public class RuntimeData
 	private static Map<Integer, Boolean> cameraCalibrated = new ConcurrentHashMap<Integer, Boolean>();
 	
 	public static Line debugLine; 
-	public static ArrayList<Line> outputLines = new ArrayList<Line>();
+	public static LinkedBlockingQueue<Line> outputLines = new LinkedBlockingQueue<Line>();
 	
 	public static double[][][] cameraCalibrationDetails;
 	public static boolean[][] haveCalibrationDetails;

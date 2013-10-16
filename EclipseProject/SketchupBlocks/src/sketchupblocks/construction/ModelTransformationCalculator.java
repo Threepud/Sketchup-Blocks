@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import sketchupblocks.base.Logger;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
-import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Line;
@@ -75,7 +74,9 @@ public class ModelTransformationCalculator
 					
 					rot = Matrix.multiply(new RotationMatrix3D(axis, angle), rot);
 					
-					RuntimeData.outputLines.add(new Line(camPos, up));
+					RuntimeData.outputLines.add(new Line(camPos, Vec3.normalize(rf)));
+					//System.out.println(up.length());
+					//RuntimeData.outputLines.add(new Line(positions[k], fidUpAxis));
 					
 					transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(transformMatrices[0], rot).padMatrix());
 					
