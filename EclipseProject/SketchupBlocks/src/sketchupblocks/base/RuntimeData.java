@@ -1,5 +1,6 @@
 package sketchupblocks.base;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,6 +15,7 @@ public class RuntimeData
 	private static Map<Integer, Boolean> cameraCalibrated = new ConcurrentHashMap<Integer, Boolean>();
 	
 	public static Line debugLine; 
+	public static ArrayList<Line> outputLines = new ArrayList<Line>();
 	
 	public static double[][][] cameraCalibrationDetails;
 	public static boolean[][] haveCalibrationDetails;

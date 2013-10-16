@@ -26,7 +26,7 @@ public class ModelTransformationCalculator
 			
 			Matrix transform = Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
 			
-			/*if (numUniqueFids == 2)
+			if (numUniqueFids == 2)
 			{
 				//Find unique points:
 				ArrayList<Integer> uniqueIndices =  new ArrayList<Integer>();
@@ -52,6 +52,7 @@ public class ModelTransformationCalculator
 				for (int k = 0; k < positions.length; k++)
 				{ 
 					Vec3 up = getUpVector(fids[k].camID);
+					Vec3 camPos = fids[k].getLine().point;
 					RotationMatrix3D rotUp = new RotationMatrix3D(RuntimeData.getCameraViewVector(fids[k].camID), fids[k].rotation);
 					Vec3 r = Matrix.multiply(rotUp, up);
 					//Project r onto basis of plane perpendicular to line b/w fiducial & camera.
@@ -74,10 +75,12 @@ public class ModelTransformationCalculator
 					
 					rot = Matrix.multiply(new RotationMatrix3D(axis, angle), rot);
 					
-					transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(transformMatrices[0], rot).padMatrix());
+					RuntimeData.outputLines.add(new Line(up, camPos));
+					
+					//transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(transformMatrices[0], rot).padMatrix());
 					
 				}
-			}*/
+			}
 			
 			return transform;
 		}
