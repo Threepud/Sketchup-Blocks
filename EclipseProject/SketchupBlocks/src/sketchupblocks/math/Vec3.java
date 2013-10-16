@@ -116,6 +116,15 @@ public class Vec3 implements Serializable
     	return Math.sqrt((this.x - vec.x) * (this.x - vec.x) + (this.y - vec.y) * (this.y - vec.y) + (this.z - vec.z) * (this.z - vec.z)); 
     }
     
+    public Vec3 project(Vec3 b1, Vec3 b2)
+    {
+    	b1 = Vec3.normalize(b1);
+    	b2 = Vec3.normalize(b2);
+    	Vec3 one = Vec3.scalar(Vec3.dot(b1,  this), b1);
+    	Vec3 two = Vec3.scalar(Vec3.dot(b2,  this), b2);
+    	return Vec3.add(one, two);
+    }
+    
     public Vec4 padVec3()
     {
     	return new Vec4(x, y, z, 1);
