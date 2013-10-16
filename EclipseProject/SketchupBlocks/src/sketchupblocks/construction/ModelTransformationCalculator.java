@@ -61,13 +61,13 @@ public class ModelTransformationCalculator
 					Vec3 wfn = Matrix.multiply(rot, Matrix.multiply(transformMatrices[0], Vec3.normalize(fidCoordsM[k]))); //World fiducial Normal
 					wfn.normalize();
 					
-					Line[] fidNormBasis = getPlaneBasis(new Line(wfn, positions[k]));
+					Line[] fidNormBasis = getPlaneBasis(new Line(positions[k], wfn));
 					Vec3 rn = rf.project(fidNormBasis[0].direction, fidNormBasis[1].direction);
 					Vec3 fidUpWPre = Matrix.multiply(rot, Matrix.multiply(transformMatrices[0], fidUpM[k]));
 					rn.normalize();
 					fidUpWPre.normalize();
 					
-					Line[] axisBasis = getPlaneBasis(new Line(axis, positions[k]));
+					Line[] axisBasis = getPlaneBasis(new Line(positions[k], axis));
 					Vec3 ra = rn.project(axisBasis[0].direction, axisBasis[1].direction);
 					Vec3 fidUpAxis = fidUpWPre.project(axisBasis[0].direction, axisBasis[1].direction);
 					
@@ -77,7 +77,7 @@ public class ModelTransformationCalculator
 					
 					RuntimeData.outputLines.add(new Line(camPos, up));
 					
-					//transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(transformMatrices[0], rot).padMatrix());
+					transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(transformMatrices[0], rot).padMatrix());
 					
 				}
 			}
