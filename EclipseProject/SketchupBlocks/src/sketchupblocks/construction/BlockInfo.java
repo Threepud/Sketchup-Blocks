@@ -129,6 +129,38 @@ public class BlockInfo
 		else 
 			return false;
 	}
+	
+	public int getNumUniqueFiducials()
+	{
+		Fiducial[] data = new Fiducial[0];
+		boolean tryToArray = true;
+		
+		while(tryToArray)
+		try
+		{
+			data = fiducialMap.values().toArray(data);
+			tryToArray = false;
+		}
+		catch(ConcurrentModificationException e)
+		{
+			//Do nothing
+		}
+		
+		ArrayList<Integer> fiducialList = new ArrayList<Integer>();
+		for (int k = 0; k < data.length; k++)
+		{
+			if (data[k] != null)
+			{
+				if(data[k].seen)
+				{
+					if( !fiducialList.contains(new Integer(data[k].fiducialsID)))
+						fiducialList.add(data[k].fiducialsID);
+				}
+			}
+		}
+
+		return fiducialList.size();
+	}
 
 	protected class Fiducial
 	{
@@ -160,6 +192,8 @@ public class BlockInfo
 			seen = true;
 			lastSeen = new Date();
 		}
+		
+		
 		
 		public Line getLine()
 		{
