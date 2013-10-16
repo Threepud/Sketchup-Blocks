@@ -60,11 +60,12 @@ public class Vec3 implements Serializable
     {
         double magnitude = Math.sqrt(one.x * one.x + one.y * one.y + one.z * one.z);
 
-        one.x = one.x / magnitude;
-        one.y = one.y / magnitude;
-        one.z = one.z / magnitude;
+        Vec3 two = new Vec3(one);
+        two.x = two.x / magnitude;
+        two.y = two.y / magnitude;
+        two.z = two.z / magnitude;
 
-        return one;
+        return two;
     }
     
     public double dot(Vec3 other)
