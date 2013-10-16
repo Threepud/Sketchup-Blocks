@@ -216,7 +216,7 @@ public class ModelViewer
 	
 	private void drawOutputLines()
 	{
-		final float olLength = 400.0f;
+		final float olLength = 10.0f;
 		
 		window.pushMatrix();
 		window.scale(1f);
