@@ -2,12 +2,10 @@ package sketchupblocks.math;
 
 public class LineDirectionSolver
 {
-	public static Vec3 solve(Vec3[] input, double[] angles) 
+	public static Vec3 solve(Vec3[] input, double[] angles) throws SingularMatrixException
     {
     	if (angles.length != 4)
-    	{
-    		throw new RuntimeException();
-    	}
+    		throw new RuntimeException("Invalid pararmeters to line direction solver");
     	
         Matrix A = new Matrix(input, false);
         
@@ -16,29 +14,6 @@ public class LineDirectionSolver
         {
             bVecData[k] = input[k].length()*Math.cos(angles[k]);
         }
-        //Vec4 BVec = new Vec4(bVecData);
-        
-       
-       /* Matrix At = A.transpose();
-        
-        Matrix BMat = new Matrix(BVec);
-        Matrix AtB = Matrix.multiply(At, BMat);
-        Matrix AtA = Matrix.multiply(At, A);
-        
-        Matrix[] lup = LUDecomposer.decompose(AtA);*/
-        try
-        {
-        	//double[] res = LUDecomposer.solve(AtB.toArray(), lup);
-            //return new Vec3(res);
-        	
-        	return LinearSystemSolver.solve(A, bVecData).toVec3();
-        	
-        }
-        catch(Exception e)
-        {
-        	e.printStackTrace();
-        }
-        
-        return null;
+    	return LinearSystemSolver.solve(A, bVecData).toVec3();
     }
 }

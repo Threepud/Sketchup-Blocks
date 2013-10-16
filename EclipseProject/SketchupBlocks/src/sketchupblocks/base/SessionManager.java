@@ -3,18 +3,20 @@ package sketchupblocks.base;
 import java.util.ArrayList;
 
 import processing.core.PApplet;
+import processing.event.KeyEvent;
+import sketchupblocks.construction.EnvironmentAnalyzer;
+import sketchupblocks.construction.ModelBlock;
+import sketchupblocks.construction.ModelConstructor;
 import sketchupblocks.database.Block;
 import sketchupblocks.database.BlockDatabase;
+import sketchupblocks.database.CommandBlock;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.database.UserBlock;
 import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.gui.Menu;
 import sketchupblocks.gui.ModelViewer;
-import sketchupblocks.math.Vec3;
-import sketchupblocks.network.Lobby;
-import sketchupblocks.network.LocalLobby;
+import sketchupblocks.network.*;
 import sketchupblocks.recording.Feeder;
-import sketchupblocks.math.Line;
 
 public class SessionManager
 {
@@ -22,103 +24,113 @@ public class SessionManager
 	private ModelConstructor jimmy;
 	private Exporter kreshnik;
 	private Lobby lobby;
+	private Server server;
 	private ModelViewer sarah;
 	private ModelLoader modelLoader;
 	private BlockDatabase blockDB;
 	private Menu menu;
 	private String[] dbPaths;
-	private Vec3 [] cameraPositions;
+	private Interpreter[] wimpie;
 	
-	public SessionManager(PApplet _parent)
+	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
+	
+	private boolean spectating = false;
+	private boolean connecting = false;
+	
+	private boolean startupStatus = false;
+	
+	public SessionManager(PApplet _parent, boolean status)
 	{
 		parent = _parent;
+		startupStatus = status;
+		parent.registerMethod("keyEvent", modelViewerEventListener);
 		
 		lobby = new LocalLobby();
 		lobby.setModel(new Model());
 		
-		sarah = new ModelViewer();
-		try 
+		try
 		{
-			sarah.setLobby(lobby);
-		} 
-		catch (Exception e1) 
+			server = new Server(lobby, Settings.hostPort);
+		}
+		catch(Exception e)
 		{
-			System.out.println("The catz of the universe hate our programmer guts. (Just the programmer guts)");
-			e1.printStackTrace();
+			System.out.println(e);
 			System.exit(-1);
 		}
-		sarah.setWindow(parent);
-		menu = new Menu(this, parent);
+		server.start();
 		
-		lobby.registerChangeListener(sarah);
+		sarah = new ModelViewer();
 		
-		jimmy = new ModelConstructor(this);
-		jimmy.setLobby(lobby);
+		try 
+		{
+			EnvironmentAnalyzer.setLobby(lobby);
+			
+			sarah.setLobby(lobby);
+			sarah.setWindow(parent);
+			menu = new Menu(this, parent, startupStatus);
+			
+			jimmy = new ModelConstructor(this);
+			jimmy.setLobby(lobby);
+			
+			dbPaths = new String[3];
+			dbPaths[0] = "./dbs/SmartBlock.dat";
+			dbPaths[1] = "./dbs/CommandBlock.dat";
+			dbPaths[2] = "./dbs/UserBlock.dat";
 		
-		dbPaths = new String[3];
-		dbPaths[0] = "./dbs/SmartBlock.dat";
-		dbPaths[1] = "./dbs/CommandBlock.dat";
-		dbPaths[2] = "./dbs/UserBlock.dat";
-		
-    	try 
-    	{
 			blockDB = new BlockDatabase(dbPaths[0], dbPaths[1], dbPaths[2]);
 		} 
     	catch (Exception e) 
     	{
 			e.printStackTrace();
 		}
-    	
-    	cameraPositions = new Vec3[Settings.numCameras];
 	}
 	
     public void onCameraEvent(CameraEvent cameraEvent)
     {
     	//We still require some sort of menu traversal scheme...
     	Block block = blockDB.findBlock(cameraEvent.fiducialID);
+    	
     	if(block instanceof UserBlock)
     	{
-    		System.out.println("This feature is not yet supported");
+    		menu.handleInput(block, cameraEvent);
     	}
     	else if (block instanceof CommandBlock)
     	{
-    		if (Settings.verbose >= 3)
-    			System.out.println("--Recognized command block--");
+    		Logger.log("--Recognized command block--", 99);
     		//Rotate model viewer
     		if(((CommandBlock) block).type == CommandBlock.CommandType.ROTATE)
     		{
     			sarah.rotateView(cameraEvent);
     		}
-    		else if(((CommandBlock) block).type == CommandBlock.CommandType.CALIBRATE)
+    		else if(((CommandBlock) block).type == CommandBlock.CommandType.CALIBRATE && !spectating)
     		{
     			InputBlock iblock = new InputBlock(block, cameraEvent);
         		jimmy.receiveBlock(iblock);
     		}
     		else
     		{
-    			menu.handleInput((CommandBlock)block, cameraEvent);
+    			menu.handleInput(block, cameraEvent);
     		}
     	}
-    	else if (block instanceof SmartBlock)
+    	else if (block instanceof SmartBlock && !spectating)
     	{
-    		if (Settings.verbose >= 3)
-    		{
-    			System.out.println("--Recognized smart block--");
-    			System.out.println("Camera ID: " + cameraEvent.cameraID);
-    		}
+    		Logger.log("--Recognized smart block--\n"+"Camera ID: " + cameraEvent.cameraID, 98);
     		InputBlock iblock = new InputBlock(block, cameraEvent);
 			jimmy.receiveBlock(iblock);
     	}
+    	else if(spectating)
+    	{
+    		Logger.log("Spectating. No live data accepted.", 90);
+    	}
     	else
     	{
-    		if (Settings.verbose >= 1)
-    			System.out.println("--Unrecognized block!!--"+ cameraEvent.fiducialID);
+    		Logger.log("--Unrecognized block!!--"+ cameraEvent.fiducialID, 87);
     	}
     }
     
     public void createInterpreters()
     {
-    	Interpreter[] wimpie = new Interpreter[Settings.numCameras];
+    	wimpie = new Interpreter[Settings.numCameras];
 		if (Settings.liveData)
 		{
 			for (int k = 0;  k < Settings.numCameras; k++)
@@ -136,18 +148,9 @@ public class SessionManager
 		}
     }
     
-    public void updateCalibratedCameras(boolean[] calibrated)
+    public void clearState()
     {
-    	//TODO: Replace with listener stuff...
-    	menu.updateCalibratedCameras(calibrated);
-    }
-    
-    public void updateCameraPosition(int cameraID, Vec3 camPosition)
-    {
-    	cameraPositions[cameraID] = camPosition;
-    	if(sarah != null)
-    		sarah.updateSystemCameraPosition(cameraID, camPosition);
-    	
+    	lobby.setModel(new Model());
     }
     
     public void setModelConstructor(ModelConstructor _jimmy)
@@ -174,28 +177,12 @@ public class SessionManager
 			e.printStackTrace();
 			System.exit(-1);
 		}
-    	for(int k = 0 ; k < cameraPositions.length ; k++)
-    	{
-	    	if(cameraPositions[k] != null)
-	    		sarah.updateSystemCameraPosition(k, cameraPositions[k]);
-    	}
-    	
     }
     
     public void setModelLoader(ModelLoader _modelLoader)
     {
     	modelLoader = _modelLoader;
     	modelLoader.setLobby(lobby);
-    }
-    
-    public void loadProject(int slotNumber)
-    {
-      
-    }
-    
-    public void newProject()
-    {
-      
     }
     
     public boolean checkModelExists()
@@ -210,7 +197,7 @@ public class SessionManager
 		}
 		catch (ModelNotSetException e) 
 		{
-			System.out.println(e);
+			e.printStackTrace();
 			return false;
 		}
     }
@@ -227,30 +214,105 @@ public class SessionManager
 		}
 		catch(ModelNotSetException e)
 		{
-			System.out.println(e);
+			e.printStackTrace();
 			return;
 		}
 		ArrayList<ModelBlock> blocks = new ArrayList<>(model.getBlocks());
 		ColladaLoader.export(blocks);
     }
     
-    public void saveProject(int slotNumber)
+    public void spectate(final UserBlock uBlock)
     {
-    }
-    
-    public void spectate(UserBlock  user)
-    {
-      
-    }
-    
-    public void debugLines(String[] IDS, Line[] lines)
-    {
-    	sarah.setDebugLines(IDS, lines);
-    }
-    
-    public void debugPoints(String[] IDS, Vec3[] points)
-    {
-    	sarah.setDebugPoints(IDS, points);
+    	if(spectating)
+    	{
+    		((NetworkedLobby)lobby).stopLobby();
+    		lobby = null;
+    		lobby = new LocalLobby();
+    		lobby.setModel(new Model());
+    		try 
+    		{
+				sarah.setLobby(lobby);
+				EnvironmentAnalyzer.setLobby(lobby);
+				jimmy.setLobby(lobby);
+			} 
+    		catch (Exception e1) 
+    		{
+				e1.printStackTrace();
+				System.exit(-1);
+			}
+    		
+    		try
+    		{
+    			server = new Server(lobby, Settings.hostPort);
+    		}
+    		catch(Exception e)
+    		{
+    			System.out.println(e);
+    			System.exit(-1);
+    		}
+    		server.start();
+    		
+    		menu.forceStopConnectPopup();
+    		menu.checkCalibrated();
+    		
+    		spectating = !spectating;
+    		
+    		if(Settings.verbose >= 3)
+    			System.out.println("Disconnected.");
+    	}
+    	else
+    	{
+    		if(!spectating && connecting)
+    			return;
+    		
+    		connecting = true;
+    		final SessionManager sessionManager = this;
+    		
+    		Thread t = new Thread()
+    		{
+    			public void run()
+    			{
+    				try
+    	    		{
+    					menu.createConnectPopup();
+    					
+    					NetworkedLobby temp;
+    					if(uBlock == null)
+    						//debug: manual address here
+    						temp = new NetworkedLobby("192.168.137.221", Settings.connectPort, menu, sessionManager);
+    					else
+    						temp = new NetworkedLobby(uBlock.address, Settings.connectPort, menu, sessionManager); 
+    	    			lobby = temp;
+    	    			
+    	    			server.stopServer();
+    	    			server = null;
+    	        		
+    	            	lobby.setModel(new Model());
+    	            	sarah.setLobby(lobby);
+    	            	((NetworkedLobby)lobby).start();
+    	            	
+    	            	spectating = !spectating;
+    	            	connecting = false;
+    	            	
+    	            	menu.updateNetworkStatus(true);
+    	            	
+    	            	if(Settings.verbose >= 3)
+    	        			System.out.println("Connected.");
+    	    		}
+    	    		catch(Exception e)
+    	    		{
+    	    			menu.updateNetworkStatus(false);
+    	    			connecting = false;
+    	    			menu.checkCalibrated();
+    	    			
+    	    			System.out.println(e);
+    	    			return;
+    	    		}
+    			}
+    		};
+    		
+    		t.start();
+    	}
     }
     
     public void drawGUI()
@@ -258,4 +320,35 @@ public class SessionManager
     	sarah.drawModel();
     	menu.drawMenuOverlay();
     }
+    
+    private void viewerFeedKeyboard(KeyEvent event)
+    {
+    	sarah.setKeyboardInput(event);
+    }
+    
+    //keyboard listener
+    protected class ModelViewerEventListener
+	{
+		public void keyEvent(final KeyEvent e) 
+		{
+			if(e.getKey() == 's')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+					spectate(null);
+			}
+			else if(e.getKeyCode() == 19)
+			{
+				if(e.getAction() == KeyEvent.PRESS)
+				{
+					for (int k = 0; k < wimpie.length; k++)
+					{
+						wimpie[k].paused = !wimpie[k].paused;
+					}
+				}
+			
+			}
+			
+			viewerFeedKeyboard(e);
+		}
+	}
 }

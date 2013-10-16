@@ -1,7 +1,10 @@
 package sketchupblocks.math;
 
-public class Vec3 
+import java.io.Serializable;
+
+public class Vec3 implements Serializable
 {
+	private static final long serialVersionUID = 1L;
     public double x;
     public double y;
     public double z;
@@ -63,6 +66,11 @@ public class Vec3
 
         return one;
     }
+    
+    public double dot(Vec3 other)
+    {
+    	return (x*other.x + y*other.y + z*other.z);
+    }
 
     public void normalize()
     {
@@ -117,5 +125,17 @@ public class Vec3
     public String toString()
     {
         return "["+x+"; "+y+"; "+z+"]";
+    }
+    
+    @Override
+    public boolean equals(Object o)
+    {
+    	if (o instanceof Vec3)
+    	{
+    		Vec3 v = (Vec3)o;
+    		if (x == v.x && y == v.y && z == v.z)
+    		return true;
+    	}
+		return false;
     }
 }

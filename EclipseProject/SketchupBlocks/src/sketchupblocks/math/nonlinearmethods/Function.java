@@ -15,14 +15,14 @@ public abstract class Function
         numParameters = _numParams;
     }
     
-    public abstract Matrix calcF(Matrix inputs) throws Exception;
-    public abstract Matrix calcJ(Matrix inputs) throws Exception;
+    public abstract Matrix calcFunction(Matrix inputs);
+    public abstract Matrix calcJacobian(Matrix inputs);
     
     
-    protected double[] extractInput(Matrix inputs) throws Exception
+    protected double[] extractInput(Matrix inputs)
     {
         if (inputs.cols != 1)
-            throw new Exception("Invalid dimensions for input");
+            throw new RuntimeException("Invalid dimensions for input");
         double[] res = new double[inputs.rows];
         for (int k = 0; k < res.length; k++)
             res[k] = inputs.data[k][0];

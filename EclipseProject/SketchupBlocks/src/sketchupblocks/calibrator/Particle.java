@@ -4,6 +4,11 @@ import java.io.Serializable;
 
 public class Particle implements Serializable 
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public double [] attributes;
 	
 	public double scoreNow;
@@ -19,8 +24,6 @@ public class Particle implements Serializable
 	
 	private double [] lastDirection;
 	
-	private int dimesion;
-	
 	Random rand;
 	
 	public Particle(double sC,double cC,double mC,double Cmax,int pDim)
@@ -29,7 +32,6 @@ public class Particle implements Serializable
 		cognitiveComponent = cC;
 		momentumComponent = mC;
 		ComponentMax = Cmax;
-		dimesion = pDim;
 		rand = new Random();
 		bestScore = -Double.MAX_VALUE;
 		

@@ -11,13 +11,11 @@ public class LinearSystemSolver
      * @param args the command line arguments
      */
     
-    public static Matrix solve(Matrix input, double[] b) throws Exception
+    public static Matrix solve(Matrix input, double[] b) throws SingularMatrixException
     {
     	//r1*c1*r2*c2 = r1*c2
     	if (b.length != input.rows)
-    	{
-    		throw new Exception("No unique solution");
-    	}
+    		throw new RuntimeException("No unique solution");
     	
     	Matrix A = input;
     	Matrix B = new Matrix(b);
@@ -34,16 +32,7 @@ public class LinearSystemSolver
     	}
         
         Matrix[] lup = LUDecomposer.decompose(A);
-        try
-        {
-        	double[] res = LUDecomposer.solve(B.toArray(), lup);
-            return new Matrix(res);
-        }
-        catch(Exception e)
-        {
-        	e.printStackTrace();
-        }
-        
-        return null;
+    	double[] res = LUDecomposer.solve(B.toArray(), lup);
+        return new Matrix(res);
     }
 }

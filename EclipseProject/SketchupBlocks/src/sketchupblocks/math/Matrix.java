@@ -1,10 +1,18 @@
 package sketchupblocks.math;
-import sketchupblocks.exception.UnexpectedNonSquareMatrixException;
-import sketchupblocks.exception.UnexpectedVectorConversionException;
-import sketchupblocks.exception.UnexpectedArrayConversionException;
 
-public class Matrix 
+import java.io.Serializable;
+
+import sketchupblocks.base.Logger;
+
+
+public class Matrix implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
+	public enum Axis
+	{
+		X_AXIS, Y_AXIS, Z_AXIS
+	}
     public double[][] data;
     public int rows;
     public int cols;
@@ -59,6 +67,38 @@ public class Matrix
             }
         }
     }
+    
+    public Matrix(double[] vdata, boolean colVec)
+    {
+        if (colVec)
+        {
+            rows = vdata.length;
+            cols = 1;
+            data = new double[rows][cols];
+
+            for (int k = 0; k < cols; k++)
+            {
+                for (int i = 0; i < rows; i++)
+                {
+                    data[i][k] = vdata[i];
+                }
+            }
+        }
+        else
+        {
+            rows = 1;
+            cols = vdata.length;
+            data = new double[rows][cols];
+
+            for (int k = 0; k < rows; k++)
+            {
+                for (int i = 0; i < cols; i++)
+                {
+                    data[k][i] = vdata[i];
+                }
+            }
+        }
+    }
 
     //Constructor 4
     public Matrix(Vec3 v)
@@ -97,6 +137,15 @@ public class Matrix
         }
     }
     
+    public Matrix clone()
+    {
+    	double[][] nd = new double[rows][cols];
+    	for (int k = 0; k < rows; k++)
+    		for (int i = 0; i < cols; i++)
+    			nd[k][i] = data[k][i];
+    	return new Matrix(nd);
+    }
+    
     public void repeatAsRows(Vec3 v, int numRows)
     {
         cols = 3;
@@ -126,10 +175,10 @@ public class Matrix
         }
     }
     
-    public static double determinant(Matrix m) throws UnexpectedNonSquareMatrixException
+    public static double determinant(Matrix m)
     {
     	if (!m.isSquare())
-    		throw new UnexpectedNonSquareMatrixException("Cannot calculate determinant of nonsquare matrix");
+    		throw new RuntimeException("Cannot calculate determinant of nonsquare matrix");
     	if (m.rows == 1 && m.cols == 1)
     	{
     		return m.data[0][0];
@@ -170,10 +219,10 @@ public class Matrix
     	return new Matrix(d);
     }
     
-    public Matrix padMatrix() throws UnexpectedNonSquareMatrixException
+    public Matrix padMatrix()
     {
     	if(!isSquare())
-    		throw new UnexpectedNonSquareMatrixException("I'm really not that square.");
+    		throw new RuntimeException("Cannot pad nonsquare matrix");
     	
     	Matrix result = new Matrix(rows + 1, cols + 1);
     	for(int x = 0; x < cols; ++x)
@@ -192,11 +241,23 @@ public class Matrix
         else return false;
     }
     
+    public boolean isSingular()
+    {
+    	for (int k = 0; k < rows; k++)
+    		for (int i = 0; i < cols; i++)
+    			if (data[k][i] == Double.NaN || data[k][i] == Double.POSITIVE_INFINITY || data[k][i] == Double.NEGATIVE_INFINITY)
+    			{
+    		    	Logger.log("Singular matrix encountered", 1);
+    				return true;
+    			}
+    	return false;
+    }
     
-    public Matrix getInverse() throws UnexpectedNonSquareMatrixException, UnexpectedArrayConversionException
+    
+    public Matrix getInverse() throws SingularMatrixException
     {
     	if (!isSquare())
-    		throw new UnexpectedNonSquareMatrixException("Cannot invert a nonsquare matrix");
+    		throw new RuntimeException("Cannot invert a nonsquare matrix");
     	
     	double[][] d = new double[rows][rows];
     	Matrix[] lup = LUDecomposer.decompose(this);
@@ -217,10 +278,7 @@ public class Matrix
     public static Matrix add(Matrix A, Matrix B)
     {
         if (A.cols != B.cols || A.rows != B.rows)
-        {
-            System.out.println("Cannot add these matrices");
-            throw new RuntimeException();
-        }
+        	throw new RuntimeException("Cannot addd matrices of non-equal dimension");
         
         double[][] data = new double[A.rows][A.cols];
         
@@ -237,10 +295,7 @@ public class Matrix
     public static Matrix subtract(Matrix A, Matrix B)
     {
         if (A.cols != B.cols || A.rows != B.rows)
-        {
-            System.out.println("Cannot subtract these matrices");
-            throw new RuntimeException();
-        }
+        	throw new RuntimeException("Cannot addd matrices of non-equal dimension");
         
         double[][] data = new double[A.rows][A.cols];
         
@@ -258,8 +313,7 @@ public class Matrix
     {
         if (cols != 1)
         {
-            System.out.println("Norm for multi-col matrix is not supported");
-            throw new RuntimeException();
+            throw new RuntimeException("Norm for multi-col matrix is not supported");
         }
         double sum = 0;
         for (int k = 0; k < rows; k++)
@@ -267,11 +321,11 @@ public class Matrix
         return Math.sqrt(sum);
     }
     
-    public double[] toArray() throws UnexpectedArrayConversionException
+    public double[] toArray()
     {
         if (cols != 1)
         {
-             throw new UnexpectedArrayConversionException("Cannot convert matrix to Array");
+             throw new RuntimeException("Cannot convert matrix to Array");
         }
         double[] res = new double[rows];
         for (int k = 0; k < rows; k++)
@@ -281,11 +335,11 @@ public class Matrix
         return res;
     }
     
-	 public Vec3 toVec3() throws UnexpectedVectorConversionException 
+	 public Vec3 toVec3()
 	 {
 	     if (cols != 1 || rows < 3)
 	     {
-			throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3");
+			throw new RuntimeException("Cannot convert matrix to vec3");
 	    	 
 	     }
 	     else
@@ -295,11 +349,40 @@ public class Matrix
 	     }
 	 }
 	
-	 public Vec4 toVec4() throws UnexpectedVectorConversionException
+	 public Vec4 colToVec4(int index)
 	 {
-	     if (cols != 1 || rows != 4)
+		 if (rows < 4) 
+			 throw new RuntimeException("Cannot convert this column to Vec4");
+		 return new Vec4(data[0][index], data[1][index], data[2][index], data[3][index]);
+	 }
+	 
+	 public Vec4 rowToVec4(int index)
+	 {
+		 if (cols < 4) 
+			 throw new RuntimeException("Cannot convert this row to Vec4");
+		 return new Vec4(data[index][0], data[index][1], data[index][2], data[index][3]);
+	 }
+	 
+	 public Vec3 colToVec3(int index)
+	 {
+		 if (rows < 3) 
+			 throw new RuntimeException("Cannot convert this column to Vec3");
+		 return new Vec3(data[0][index], data[1][index], data[2][index]);
+	 }
+	 
+	 public Vec3 rowToVec3(int index)
+	 {
+		 if (cols < 3) 
+			 throw new RuntimeException("Cannot convert this row to Vec3");
+		 return new Vec3(data[index][0], data[index][1], data[index][2]);
+	 }
+	 
+	 
+	 public Vec4 toVec4()
+	 {
+	     if (cols != 1 || rows < 4)
 	     {
-	         throw new UnexpectedVectorConversionException("Cannot convert matrix to vec4");
+	         throw new RuntimeException("Cannot convert matrix to vec4");
 	     }
 	     else
 	     {
@@ -308,11 +391,11 @@ public class Matrix
 	     }
 	 }
 	
-	public Vec3[] toVec3Array() throws UnexpectedVectorConversionException
+	public Vec3[] toVec3Array()
 	{
-	    if (rows != 3)
+	    if (rows < 3)
 	    {
-	        throw new UnexpectedVectorConversionException("Cannot convert matrix to vec3Array");
+	        throw new RuntimeException("Cannot convert matrix to vec3Array");
 	    }
 	
 	    Vec3[] res = new Vec3[cols];
@@ -329,8 +412,7 @@ public class Matrix
 	{
 		if (m1.cols != 3)
 		{
-			System.out.println("Error!! Cannot multiply with vec3 "+m1.cols);
-			throw new RuntimeException();
+			throw new RuntimeException("Error!! Cannot multiply with vec3 "+m1.cols);
 		}
 		
 		double[] vdata = v.toArray();
@@ -353,8 +435,7 @@ public class Matrix
 	{
 		if (m1.cols != 4)
 		{
-			System.out.println("Error!! Cannot multiply with vec4 "+m1.cols);
-			throw new RuntimeException();
+			throw new RuntimeException("Error!! Cannot multiply with vec4 "+m1.cols);
 		}
 		
 		double[] vdata = v.toArray();
@@ -377,15 +458,7 @@ public class Matrix
 	    {
 	        if (m1.cols != m2.rows)
 	        {
-	            System.out.println("Invalid multiplication\nm1.cols: "+m1.cols+"\tm2.rows: "+m2.rows);
-	            try
-	            {
-	            	throw new RuntimeException();
-	            }
-	            catch(Exception e)
-	            {
-	            	e.printStackTrace();
-	            }
+	            throw new RuntimeException("Invalid multiplication\nm1.cols: "+m1.cols+"\tm2.rows: "+m2.rows);
 		    }
 		    Matrix res = new Matrix(m1.rows, m2.cols);
 		

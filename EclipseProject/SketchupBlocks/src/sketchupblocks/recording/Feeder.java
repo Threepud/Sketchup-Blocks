@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import processing.core.PApplet;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.Interpreter;
+import sketchupblocks.base.Logger;
 import sketchupblocks.base.SessionManager;
 import sketchupblocks.base.Settings;
 
@@ -67,40 +68,45 @@ public class Feeder extends Interpreter
 			e.printStackTrace();
 		}
 	}
-}
 
-class Firer extends Thread
-{
-	LinkedList<CameraEvent> events;
-	LinkedList<Double> waitTimes;
-	SessionManager sessMan;
-	int cameraID;
-	
-	Firer(LinkedList<CameraEvent> _events, LinkedList<Double> _waitTimes, SessionManager _sessMan, int _cameraID)
+
+	class Firer extends Thread
 	{
-		events = _events;
-		waitTimes = _waitTimes;
-		cameraID = _cameraID;
-		sessMan = _sessMan;
-	}
-	
-	@Override
-	public void run()
-	{
-		while(!events.isEmpty())
+		LinkedList<CameraEvent> events;
+		LinkedList<Double> waitTimes;
+		SessionManager sessMan;
+		int cameraID;
+		
+		
+		Firer(LinkedList<CameraEvent> _events, LinkedList<Double> _waitTimes, SessionManager _sessMan, int _cameraID)
 		{
-			try
-			{
-				sleep(waitTimes.remove(0).longValue());
-				sessMan.onCameraEvent(events.remove(0));
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-			
+			events = _events;
+			waitTimes = _waitTimes;
+			cameraID = _cameraID;
+			sessMan = _sessMan;
 		}
-		if (Settings.verbose > 2)
-			System.out.println(cameraID+" is done");
+		
+		@Override
+		public void run()
+		{
+			while(!events.isEmpty())
+			{
+				try
+				{
+					if(!paused)
+					{
+						sleep(waitTimes.remove(0).longValue());
+						sessMan.onCameraEvent(events.remove(0));
+					}
+					else sleep(1);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				
+			}
+			Logger.log(cameraID+" is done", 10);
+		}
 	}
 }

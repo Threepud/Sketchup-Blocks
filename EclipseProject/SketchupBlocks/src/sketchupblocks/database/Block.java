@@ -1,9 +1,13 @@
 package sketchupblocks.database;
 
+import java.io.Serializable;
+
 import sketchupblocks.math.Vec3;
 
-public class Block
+public class Block implements Serializable
 {
+	private static final long serialVersionUID = 6282612248719679661L;
+	
 	public enum BlockType
 	{
 		SMART,

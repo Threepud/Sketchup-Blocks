@@ -2,6 +2,8 @@ package sketchupblocks.math;
 
 public class RotationMatrix2D extends Matrix
 {
+	private static final long serialVersionUID = 1L;
+
 	RotationMatrix2D(double theta)
 	{
 		super(2, 2);

@@ -1,34 +1,37 @@
 package sketchupblocks.gui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 import processing.core.*;
 import processing.event.*;
+import processing.opengl.PShader;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.ColladaLoader;
+import sketchupblocks.base.Logger;
 import sketchupblocks.base.Model;
-import sketchupblocks.base.ModelBlock;
-import sketchupblocks.base.ModelChangeListener;
+import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.Settings;
+import sketchupblocks.construction.EnvironmentAnalyzer;
+import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.database.SmartBlock;
-import sketchupblocks.exception.BlockNoTypeException;
+import sketchupblocks.exception.ModelNotSetException;
+import sketchupblocks.math.Face;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
-public class ModelViewer implements ModelChangeListener
+public class ModelViewer
 {
 	private PApplet window;
 	private Lobby lobby;
-	private HashMap<Integer,ModelBlock> blockMap;
 	private Camera userCamera;
 	private Camera[] systemCameras;
 	private Camera currentCamera;
-	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
 	private int selectCamera = 0;
+	
+	//shaders
+	private PShader fog;
 	
 	//fiducial
 	private double velocityScalar = 2.0;
@@ -53,7 +56,6 @@ public class ModelViewer implements ModelChangeListener
 	
 	//fiducial debug lines
 	private boolean showDebugLines = false;
-	private ConcurrentHashMap<String, Line> debugLines = new ConcurrentHashMap<>();
 	private int lineLength = 80;
 	private int lineRate = 1;
 	private boolean lineShorter = false;
@@ -61,7 +63,6 @@ public class ModelViewer implements ModelChangeListener
 	
 	//fiducial debug points
 	private boolean showDebugPoints = false;
-	private ConcurrentHashMap<String, Vec3> debugPointsMap = new ConcurrentHashMap<>();
 	
 	//debug model
 	private boolean showModel = true;
@@ -69,6 +70,15 @@ public class ModelViewer implements ModelChangeListener
 	
 	//transparent construction floor
 	private boolean alphaBlendFloor = false;
+	
+	//debug faces
+	private boolean showDebugFaces = false;
+	
+	//debug line intersections
+	private boolean showDebugLineIntersection = false;
+	
+	//debug ghost blocks - pre sudo physics
+	private boolean showGhostBlocks = false;
 	
 	private PImage tilesTexture;
 	 
@@ -78,6 +88,7 @@ public class ModelViewer implements ModelChangeListener
 		Vec3 at = new Vec3();
 		Vec3 eye = new Vec3();
 		
+		currentRotation = 2.5;
 		eye.x = cameraRadius * Math.cos(currentRotation);
 		eye.z = cameraRadius * Math.sin(currentRotation);
 		eye.y = cameraHeight;
@@ -93,77 +104,18 @@ public class ModelViewer implements ModelChangeListener
 		currentCamera = userCamera;
 	}
 	
-	public void updateSystemCameraPosition(int cameraId, Vec3 pos)
-	{
-		systemCameras[cameraId].eye.x = pos.y * 10.2;
-		systemCameras[cameraId].eye.y = -pos.z * 10.2;
-		systemCameras[cameraId].eye.z = pos.x * 10.2;
-	}
-	
-	public void setSystemCamera(int index, Camera newCamera)
-	{
-		systemCameras[index] = newCamera;
-	}
-	
-	public void setDebugLines(String[] IDS, Line[] lines)
-	{
-		if(IDS.length != lines.length)
-		{
-			System.out.println("ERROR: Debug lines, lengths don't match.");
-			return;
-		}
-		
-		for(int x = 0; x < IDS.length; ++x)
-		{
-			debugLines.put(IDS[x], lines[x]);
-		}
-	}
-	
-	public void setDebugPoints(String[] IDS, Vec3[] points)
-	{
-		if(IDS.length != points.length)
-		{
-			System.out.println("ERROR: Debug points, lengths don't match.");
-			return;
-		}
-		
-		for(int x = 0; x < IDS.length; ++x)
-		{
-			debugPointsMap.put(IDS[x], points[x]);
-		}
-	}
-	
 	public void setWindow(PApplet _window)
 	{
 		window = _window;
-		window.registerMethod("keyEvent", modelViewerEventListener);
 		
 		tilesTexture = window.loadImage("./images/FloorTile.png");
+		
+		fog = window.loadShader("./shaders/constructionFloor/fogFrag.glsl", "./shaders/constructionFloor/fogVert.glsl");
 	}
 	
 	public void setLobby(Lobby _lobby) throws Exception
 	{
 	    lobby = _lobby;
-	    try
-	    {
-		    Model model = lobby.getModel();
-	    	ArrayList<ModelBlock> blockList = new ArrayList<>(model.getBlocks());
-	    	blockMap = new HashMap<>();
-	    	for(ModelBlock mBlock: blockList)
-	    		blockMap.put(new Integer(mBlock.smartBlock.blockId), mBlock);
-	    }
-	    catch(Exception e)
-	    {
-	    	throw e;
-	    }
-	}
-	  
-	public void fireModelChangeEvent(ModelBlock change) throws BlockNoTypeException
-	{
-		if(change.type == ModelBlock.ChangeType.UPDATE)
-			blockMap.put(new Integer(change.smartBlock.blockId), change);
-		else
-			blockMap.remove(new Integer(change.smartBlock.blockId));
 	}
 	
 	public void rotateView(CameraEvent event)
@@ -191,47 +143,219 @@ public class ModelViewer implements ModelChangeListener
 		final float aspectR = 1280.0f / 720.0f;
 		window.perspective(fov, aspectR, cameraZ/100.0f, cameraZ*100.0f);
 		
-		window.directionalLight(150, 150, 150, 0.2f, 0.8f, 0f);
-		window.pointLight(200, 200, 200, 100, -1000, 400);
+		float pwr = 150.0f;
+		if(!Settings.fancyShaders)
+			pwr = 200.0f;
+		
+		window.directionalLight(pwr, pwr, pwr, 0.2f, 0.8f, 0f);
+		window.pointLight(pwr, pwr, pwr, 100, -1000, 400);
 		window.ambientLight(50, 50, 50);
 		
 		window.background(100);
 		
-		drawDebugLines();
-		drawDebugPoints();
+		drawDebugStuff();
 		drawBlocks();
+		drawGhostBlocks();
+		drawSkyBox();
 		drawConstructionFloor();
 	}
 	
-	private void drawConstructionFloor()
+	private void drawDebugStuff()
 	{
+		drawDebugLines();
+		drawDebugLinesIntersections();
+		drawDebugPoints();
+		drawDebugFaces();
+	}
+	
+	private void drawDebugLines()
+	{
+		if(lineShorter)
+			lineLength -= lineRate;
+		if(lineLonger)
+			lineLength += lineRate;
+		
 		window.pushMatrix();
-		
-		window.noStroke();
-		window.fill(window.color(255));
-		
-		if(alphaBlendFloor)
-			window.tint(255, 50);
-		else
-			window.tint(255, 255);
-		
-		window.beginShape();
-		
-		window.texture(tilesTexture);
-		window.textureMode(PConstants.NORMAL);
-		window.textureWrap(PConstants.REPEAT);
-		
-		final int point = 5000;
-		final int repeat = 100;
-		
-		window.vertex(-point, 0, -point, 0, 0);
-		window.vertex(point, 0, -point, repeat, 0);
-		window.vertex(point, 0, point, repeat, repeat);
-		window.vertex(-point, 0, point, 0, repeat);
-				
-		window.endShape(PConstants.CLOSE);
-		
+		window.scale(1f);
+		if(showDebugLines)
+		{
+			window.stroke(255, 0, 0);
+			Model model;
+			try 
+			{
+				model = lobby.getModel();
+			} 
+			catch (ModelNotSetException e) 
+			{
+				e.printStackTrace();
+				return;
+			}
+			for(ModelBlock mBlock: model.getBlocks())
+			{
+				for(int x = 0; x < mBlock.debugLines.length; ++x)
+				{
+					Line line = mBlock.debugLines[x];
+					
+					Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
+					Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
+					
+					start = Vec3.scalar(10, start);
+					end = Vec3.scalar(lineLength * 10, end);
+					end = Vec3.add(start, end);
+					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+				}
+			}
+		}
 		window.popMatrix();
+	}
+	
+	private void drawDebugLinesIntersections()
+	{
+		if(showDebugLineIntersection)
+		{
+			window.pushMatrix();
+			window.fill(255);
+			
+			Line debugLine = RuntimeData.debugLine;
+			if(debugLine != null)
+			{
+				Vec3 start = new Vec3(10 * debugLine.point.y, 10 * -debugLine.point.z, 10 * debugLine.point.x);
+				Vec3 end = new Vec3(10 * debugLine.direction.y, 10 * -debugLine.direction.z, 10 * debugLine.direction.x);
+				window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+			}
+			
+			window.popMatrix();
+		}
+	}
+	
+	private void drawDebugPoints()
+	{
+		if(showDebugPoints)
+		{
+			window.pushMatrix();
+			window.noStroke();
+			window.fill(0, 255, 0);
+			
+			Model model;
+			try 
+			{
+				model = lobby.getModel();
+			} 
+			catch (ModelNotSetException e) 
+			{
+				e.printStackTrace();
+				return;
+			}
+			for(ModelBlock mBlock: model.getBlocks())
+			{
+				for(int x = 0; x < mBlock.debugPoints.length; ++x)
+				{
+					Vec3 point = mBlock.debugPoints[x];
+					
+					window.pushMatrix();
+					
+					point = Vec3.scalar(10, point);
+					window.translate((float)point.y, (float)-point.z, (float)point.x);
+					window.sphere(5);
+					
+					window.popMatrix();
+				}
+			}
+			window.fill(255);
+			window.popMatrix();
+		}
+	}
+	
+	private void drawDebugFaces()
+	{
+		if(showDebugFaces)
+		{
+			window.pushMatrix();
+			window.fill(0, 162, 237);
+			
+			Face f = RuntimeData.topFace;
+			if(f != null)
+			{
+				window.beginShape();
+				for(int x = 0; x < f.corners.length; ++x)
+				{
+					window.vertex(10 * (float)f.corners[x].y, 10 * -(float)f.corners[x].z, 10 * (float)f.corners[x].x);
+				}
+				window.endShape(PConstants.CLOSE);
+			}
+			
+			window.fill(206, 27, 167);
+			f = RuntimeData.bottomFace;
+			if(f != null)
+			{
+				window.beginShape();
+				for(int x = 0; x < f.corners.length; ++x)
+				{
+					window.vertex(10 * (float)f.corners[x].y, 10 * -(float)f.corners[x].z, 10 * (float)f.corners[x].x);
+				}
+				window.endShape(PConstants.CLOSE);
+			}
+			window.popMatrix();
+		}
+	}
+	
+	private void drawGhostBlocks()
+	{
+		if(showGhostBlocks)
+		{
+			window.pushMatrix();
+			window.noStroke();
+			window.fill(200, 255, 0, 100);
+			window.scale(10, 10, 10);
+			
+			//draw block list
+			Model model;
+			try 
+			{
+				model = lobby.getModel();
+			} 
+			catch (ModelNotSetException e) 
+			{
+				e.printStackTrace();
+				return;
+			}
+			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
+			{
+				if(showDebugLineIntersection)
+				{
+					Line line = RuntimeData.debugLine;
+					if(line != null)
+					{
+						if(EnvironmentAnalyzer.isIntersecting(line, block))
+						{
+							window.fill(0, 255, 0);
+						}
+						else
+						{
+							window.fill(255);
+						}
+					}
+				}
+				if (block.type == ModelBlock.ChangeType.REMOVE)
+				{
+					Logger.log("Drawing removed block!", 1);
+					return;
+				}
+				
+				SmartBlock smartBlock = block.smartBlock;
+				window.beginShape(PConstants.TRIANGLES);
+				for(int x = 0; x < smartBlock.indices.length; ++x)
+				{
+					Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
+					
+					vertex = Matrix.multiply(block.rawMatrix, vertex.padVec3()).toVec3();
+					window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
+				}
+				
+				window.endShape();
+			}
+			window.popMatrix();
+		}
 	}
 	
 	private void drawBlocks()
@@ -247,17 +371,45 @@ public class ModelViewer implements ModelChangeListener
 			window.scale(10, 10, 10);
 			
 			//draw block list
-			for(ModelBlock block: new ArrayList<ModelBlock>(blockMap.values()))
+			Model model;
+			try 
 			{
-				if(block.type == ModelBlock.ChangeType.REMOVE)
-					System.out.println("Drawing removed block!");
+				model = lobby.getModel();
+			} 
+			catch (ModelNotSetException e) 
+			{
+				e.printStackTrace();
+				return;
+			}
+			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
+			{
+				if(showDebugLineIntersection)
+				{
+					Line line = RuntimeData.debugLine;
+					if(line != null)
+					{
+						if(EnvironmentAnalyzer.isIntersecting(line, block))
+						{
+							window.fill(0, 255, 0);
+						}
+						else
+						{
+							window.fill(255);
+						}
+					}
+				}
+				if (block.type == ModelBlock.ChangeType.REMOVE)
+				{
+					Logger.log("Drawing removed block!", 1);
+					return;
+				}
 				
 				SmartBlock smartBlock = block.smartBlock;
 				window.beginShape(PConstants.TRIANGLES);
 				for(int x = 0; x < smartBlock.indices.length; ++x)
 				{
 					Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
-					//System.out.println(block.transformationMatrix);
+					
 					vertex = Matrix.multiply(block.transformationMatrix, vertex.padVec3()).toVec3();
 					window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
 				}
@@ -265,103 +417,75 @@ public class ModelViewer implements ModelChangeListener
 				window.endShape();
 			}
 			window.popMatrix();
-			
-			if(transparentModel)
-				window.fill(255);
 		}
 	}
 	
-	private void drawDebugPoints()
+	private void drawSkyBox()
 	{
-		if(showDebugPoints)
-		{
-			window.noStroke();
-			window.fill(0, 255, 0);
-			
-			ArrayList<Vec3> points = new ArrayList<>(debugPointsMap.values());
-			ArrayList<String> IDS = new ArrayList<>(debugPointsMap.keySet());
-			for(int x = 0; x < points.size(); ++x)
-			{
-				Vec3 point = null;
-				
-				if(selectCamera == 0)
-				{
-					point = points.get(x);
-				}
-				else
-				{
-					String temp = IDS.get(x);
-					String id = (temp.split(","))[0];
-					if((Integer.parseInt(id)) == selectCamera - 1)
-						point = points.get(x);
-				}
-				
-				if(point != null)
-				{
-					window.pushMatrix();
-					
-					point = Vec3.scalar(10, point);
-					window.translate((float)point.y, (float)-point.z, (float)point.x);
-					window.sphere(5);
-					
-					window.popMatrix();
-				}
-			}
-			window.fill(255);
-		}
-	}
-	
-	private void drawDebugLines()
-	{
-		if(lineShorter)
-			lineLength -= lineRate;
-		if(lineLonger)
-			lineLength += lineRate;
-		
 		window.pushMatrix();
-		window.scale(1f);
-		if(showDebugLines)
+		
+		window.translate(0, -1000, 0);
+		window.fill(74, 154, 225);
+		window.sphere(10000);
+		
+		window.popMatrix();	
+	}
+	
+	private void drawConstructionFloor()
+	{
+		window.pushMatrix();
+		
+		if(!Settings.fancyShaders)
 		{
-			window.stroke(255, 0, 0);
-			ArrayList<Line> lines = new ArrayList<>(debugLines.values());
-			ArrayList<String> IDS = new ArrayList<>(debugLines.keySet());
-			for(int x = 0; x < lines.size(); ++x)
-			{
-				Line line = null;
-				if(selectCamera == 0)
-				{
-					line = lines.get(x);
-				}
-				else
-				{
-					String temp = IDS.get(x);
-					String id = (temp.split(","))[0];
-					if((Integer.parseInt(id)) == selectCamera - 1)
-						line = lines.get(x);
-				}
-				
-				if(line != null)
-				{
-					Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
-					Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
-					
-					start = Vec3.scalar(10, start);
-					end = Vec3.scalar(lineLength * 10, end);
-					end = Vec3.add(start, end);
-					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
-				}
-			}
+			if(alphaBlendFloor)
+				window.tint(255, 100);
+			else
+				window.tint(255);
 		}
+		
+		window.noStroke();
+		window.fill(window.color(255));
+		
+		window.beginShape();
+		
+		window.texture(tilesTexture);
+		window.textureMode(PConstants.NORMAL);
+		window.textureWrap(PConstants.REPEAT);
+		
+		final int point = 100000;
+		final int repeat = 2000;
+		
+		if(Settings.fancyShaders)
+		{
+			fog.set("trans", (alphaBlendFloor) ? 1 : 0);
+			window.shader(fog);
+		}
+		
+		window.vertex(-point, 0, -point, 0, 0);
+		window.vertex(point, 0, -point, repeat, 0);
+		window.vertex(point, 0, point, repeat, repeat);
+		window.vertex(-point, 0, point, 0, repeat);
+				
+		window.endShape(PConstants.CLOSE);
+		
+		if(Settings.fancyShaders)
+			window.resetShader();
+		
 		window.popMatrix();
 	}
-
+	
 	private void switchCamera()
 	{
 		if(selectCamera == 0)
 			currentCamera = userCamera;
-		else if(selectCamera <= Settings.numCameras)
+		else if(selectCamera <= Settings.numCameras && RuntimeData.isSystemCalibrated())
 		{
-			currentCamera = systemCameras[selectCamera - 1];
+			Vec3 up = new Vec3(0, 1, 0);
+			Vec3 eye = new Vec3(RuntimeData.getCameraPosition(selectCamera - 1).y, -RuntimeData.getCameraPosition(selectCamera - 1).z, RuntimeData.getCameraPosition(selectCamera - 1).x);
+			eye = Vec3.scalar(10, eye);
+			Vec3 at = new Vec3(RuntimeData.getCameraViewVector(selectCamera - 1).y, -RuntimeData.getCameraViewVector(selectCamera - 1).z, RuntimeData.getCameraViewVector(selectCamera - 1).x);
+			at = Vec3.add(at, eye);
+			currentCamera = new Camera(up, at, eye);
 		}
 	}
 	
@@ -410,98 +534,129 @@ public class ModelViewer implements ModelChangeListener
 		userCamera.eye.y = cameraHeight;
 	}
 	
-	protected class ModelViewerEventListener
+	public void setKeyboardInput(KeyEvent e)
 	{
-		public void keyEvent(final KeyEvent e) 
+		if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() < (49 + Settings.numCameras)))
 		{
-			if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() < (49 + Settings.numCameras)))
+			if(e.getKeyCode() == 192)
+				selectCamera = 0;
+			else
+				selectCamera = e.getKeyCode() - 48;
+			switchCamera();
+		}
+		//zoom in
+		else if(e.getKeyCode() == 38)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				zoomIn = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				zoomIn = false;
+		}
+		//zoom out
+		else if(e.getKeyCode() == 40)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				zoomOut = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				zoomOut = false;
+		}
+		//right
+		else if(e.getKeyCode() == 39)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				rotateRight = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				rotateRight = false;
+		}
+		//left
+		else if(e.getKeyCode() == 37)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				rotateLeft = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				rotateLeft = false;
+		}
+		else if(e.getKey() == 'e')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
 			{
-				if(e.getKeyCode() == 192)
-					selectCamera = 0;
-				else
-					selectCamera = e.getKeyCode() - 48;
-				switchCamera();
+				Model model;
+				try 
+				{
+					model = lobby.getModel();
+				}
+				catch (ModelNotSetException e1) 
+				{
+					e1.printStackTrace();
+					return;
+				}
+				ColladaLoader.export(new ArrayList<ModelBlock>(model.getBlocks()));
 			}
-			//zoom in
-			else if(e.getKeyCode() == 38)
+		}
+		else if(e.getKey() == 'm')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				showModel = !showModel;
+		}
+		else if(e.getKey() == 'n')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				transparentModel = !transparentModel;
+		}
+		else if(e.getKey() == 'l')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				showDebugLines = !showDebugLines;
+		}
+		else if(e.getKey() == 'p')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				showDebugPoints = !showDebugPoints;
+		}
+		else if(e.getKey() == 't')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				alphaBlendFloor = !alphaBlendFloor;
+		}
+		else if(e.getKey() == '[')
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				lineShorter = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				lineShorter = false;
+		}
+		else if(e.getKey() == ']')
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				lineLonger = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				lineLonger = false;
+		}
+		else if(e.getKey() == 'c')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
 			{
-				if(e.getAction() == KeyEvent.PRESS)
-					zoomIn = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					zoomIn = false;
-			}
-			//zoom out
-			else if(e.getKeyCode() == 40)
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					zoomOut = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					zoomOut = false;
-			}
-			//right
-			else if(e.getKeyCode() == 39)
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					rotateRight = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					rotateRight = false;
-			}
-			//left
-			else if(e.getKeyCode() == 37)
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					rotateLeft = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					rotateLeft = false;
-			}
-			else if(e.getKey() == 'e')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					ColladaLoader.export(new ArrayList<ModelBlock>(blockMap.values()));
-			}
-			else if(e.getKey() == 'm')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					showModel = !showModel;
-			}
-			else if(e.getKey() == 'm')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					showModel = !showModel;
-			}
-			else if(e.getKey() == 'n')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
+				if(transparentModel == showDebugFaces)
+				{
+					showDebugFaces = !showDebugFaces;
 					transparentModel = !transparentModel;
+				}
+				else
+					showDebugFaces = !showDebugFaces;
 			}
-			else if(e.getKey() == 'l')
+		}
+		else if(e.getKey() == 'i')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
 			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					showDebugLines = !showDebugLines;
+				showDebugLineIntersection = !showDebugLineIntersection;
 			}
-			else if(e.getKey() == 'p')
+		}
+		else if(e.getKey() == 'g')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
 			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					showDebugPoints = !showDebugPoints;
-			}
-			else if(e.getKey() == 't')
-			{
-				if(e.getAction() == KeyEvent.RELEASE)
-					alphaBlendFloor = !alphaBlendFloor;
-			}
-			else if(e.getKey() == '[')
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					lineShorter = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					lineShorter = false;
-			}
-			else if(e.getKey() == ']')
-			{
-				if(e.getAction() == KeyEvent.PRESS)
-					lineLonger = true;
-				else if(e.getAction() == KeyEvent.RELEASE)
-					lineLonger = false;
+				showGhostBlocks = !showGhostBlocks; 
 			}
 		}
 	}

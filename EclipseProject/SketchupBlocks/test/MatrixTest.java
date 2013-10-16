@@ -1,7 +1,6 @@
 
 import static org.junit.Assert.*;
 import org.junit.*;
-import org.junit.rules.ExpectedException;
 import org.junit.runners.*;
 import org.junit.runner.RunWith;
 
@@ -67,9 +66,6 @@ public class MatrixTest
 		Matrix m = new Matrix(data);
 		assertTrue("Column and row numbers incorrectly initialized (Constructor 2)",m.cols == 2 && m.rows == 1);
 		assertTrue("Data incorrectly initialized", m.data[0][0] == 1 && m.data[0][1] == 2);
-		
-		m = new Matrix(data);
-		assertTrue("Matrix size error not noticed", m.data == null);
 	}
 	
 	@Test
@@ -222,7 +218,7 @@ public class MatrixTest
 		}
 	}
 
-	@Test
+	@Test (expected = RuntimeException.class)
 	public void testMatrixMultiplication()
 	{
 		//Square-square
@@ -244,7 +240,7 @@ public class MatrixTest
 		assertTrue("Incorrect square-rectangular multiplication", matchMatrices(ss, ssC));
 		
 		//Invalid multiplication
-		assertTrue("Muliplication should be invalid", Matrix.multiply(rectangle, square) == null);
+		 Matrix.multiply(rectangle, square) ;
 	}
 	
 	@Test

@@ -14,17 +14,24 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import processing.data.XML;
+import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 
+/**
+ * ColladaLoader manages the importing and exporting of Collada files.
+ * 
+ * @author Jacques
+ *
+ */
 public class ColladaLoader 
 {
-	public ColladaLoader()
-	{
-		
-	}
 	
+	/**
+	 * @param fileName
+	 * @return
+	 */
 	public static SmartBlock getSmartBlock(String fileName)
 	{
 		XML xml = null;

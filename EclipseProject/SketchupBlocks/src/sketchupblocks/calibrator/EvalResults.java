@@ -4,7 +4,7 @@ public class EvalResults
 {
 	public double score;
 	
-	EvalResults()
+	public EvalResults()
 	{
 		score =0;
 	}

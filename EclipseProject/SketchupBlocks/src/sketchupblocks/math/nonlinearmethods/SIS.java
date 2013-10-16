@@ -9,6 +9,7 @@ import sketchupblocks.math.Matrix;
 /**
  *
  * @author user
+ * @about Sphere intersection method
  */
 public class SIS extends Function
 {
@@ -29,7 +30,7 @@ public class SIS extends Function
     
     
     @Override
-    public Matrix calcF(Matrix inputs) throws Exception
+    public Matrix calcFunction(Matrix inputs)
     {
         double[] res = new double[numEquations];
         double[] ABCD = extractInput(inputs);
@@ -44,7 +45,7 @@ public class SIS extends Function
     }
 
     @Override
-    public Matrix calcJ(Matrix inputs) throws Exception
+    public Matrix calcJacobian(Matrix inputs)
     {
         double[][] data = new double[numEquations][];
         double[] ABCD = extractInput(inputs);

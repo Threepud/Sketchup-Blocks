@@ -1,38 +1,48 @@
 package sketchupblocks.base;
 
 import java.io.File;
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
 import processing.data.XML;
 import sketchupblocks.math.Vec3;
 
 public class Settings 
 {
 	//System
-	public static String versionNr;
-	public static int verbose; //0 is default. From there, higher is more verbose.
+	public static String versionNr = "1.0";
+	public static int verbose = 0; //0 is default. From there, higher is more verbose.
 
 	//Cameras
-	public static int numCameras;
-	public static CameraSettings [] cameraSettings;
+	public static int numCameras = 0;
+	public static CameraSettings[] cameraSettings = 
+	{
+		new CameraSettings(68.5, 1280.0/720.0, 3333),
+		new CameraSettings(68.5, 1280.0/720.0, 3334),
+		new CameraSettings(68.5, 1280.0/720.0, 3335)
+	};
 	
 	//Calibration
-	public static Vec3[] landmarks;
+	public static Vec3[] landmarks = 
+	{
+		new Vec3(-2.9,-2.9,0),
+		new Vec3(-2.9,2.9,0),
+		new Vec3(2.9,2.9,0),
+		new Vec3(2.9,-2.9,0)
+	};
 	
 	//GUI
-	public static boolean showSplash;
-	public static int splashTTL;
-	public static int commandWaitTime;
-	public static int progressBarRotationSpeed;
+	public static boolean fancyShaders = true;
+	public static boolean showSplash = false;
+	public static int splashTTL = 3000;
+	public static int commandWaitTime = 3000;
+	public static int progressBarRotationSpeed = 500;
 	
 	//Debug recording
-	public static boolean liveData;
-	public static String recordingInputFileName;
-	public static boolean timeDelay;
+	public static boolean liveData = true;
+	public static String recordingInputFileName = "debugOutput(JustSomeData)/output";
+	public static boolean timeDelay = true;
+	
+	//Network
+	public static short hostPort = 5555;
+	public static short connectPort = 5555;
 	
 	public Settings()
 	{
@@ -44,18 +54,22 @@ public class Settings
 		readSettings(fileName);
 	}
 	
-	public static void readSettings(String fileName)
+	public static boolean readSettings(String fileName)
 	{
+		boolean result = true;
+		
 		XML settings = null;
 		try 
 		{
 			 settings = new XML(new File(fileName));
 			
 		}
-		catch (IOException | ParserConfigurationException | SAXException e) 
+		catch (Exception e) 
 		{
+			Logger.log("ERROR: Set settings.", 1);
 			e.printStackTrace();
-			System.exit(-1);
+			result = false;
+			return result;
 		}
 		
 		//System
@@ -77,18 +91,28 @@ public class Settings
 			XML camera = cameras.getChild(x);
 			if(camera.getName().equals("CameraSettings") && cameraCount < numCameras)
 			{
-				double fov = Double.parseDouble(camera.getChild("FOV").getContent());
-				double width = Double.parseDouble(camera.getChild("Width").getContent());
-				double height = Double.parseDouble(camera.getChild("Height").getContent());
-				int port = Integer.parseInt(camera.getChild("Port").getContent());
-				cameraSettings[cameraCount++] = new CameraSettings(fov, width/height, port);
+				try
+				{
+					double fov = Double.parseDouble(camera.getChild("FOV").getContent());
+					double width = Double.parseDouble(camera.getChild("Width").getContent());
+					double height = Double.parseDouble(camera.getChild("Height").getContent());
+					int port = Integer.parseInt(camera.getChild("Port").getContent());
+					cameraSettings[cameraCount++] = new CameraSettings(fov, width/height, port);
+				}
+				catch(NumberFormatException e)
+				{
+					Logger.log("ERROR: Set settings.", 1);
+					e.printStackTrace();
+					result = false;
+				}
 			}
 		}
 		
 		if(numCameras > cameraCount)
 		{
+			Logger.log("ERROR: Set settings.", 1);
 			System.err.println("Settings: Too many suggested number of cameras.");
-			System.exit(-1);
+			result = false;
 		}
 		
 		//Calibration
@@ -114,31 +138,51 @@ public class Settings
 				if(coordsString.length != 3)
 				{
 					System.err.println("Landmark coordinates incomplete.");
-					System.exit(-1);
+					result = false;
 				}
 				
-				double[] coords = 
+				try
 				{
-					Double.parseDouble(coordsString[0]),
-					Double.parseDouble(coordsString[1]),
-					Double.parseDouble(coordsString[2])
-				};
-				landmarks[landmarkCount++] = new Vec3(coords[0], coords[1], coords[2]);
+					double[] coords = 
+					{
+						Double.parseDouble(coordsString[0]),
+						Double.parseDouble(coordsString[1]),
+						Double.parseDouble(coordsString[2])
+					};
+					landmarks[landmarkCount++] = new Vec3(coords[0], coords[1], coords[2]);
+				}
+				catch(NumberFormatException e)
+				{
+					Logger.log("ERROR: Set settings.", 1);
+					e.printStackTrace();
+					result = false;
+				}
 			}
 		}
 		
 		//GUI
 		XML gui = settings.getChild("GUI");
 		
+		XML fancyShadersNode = gui.getChild("FancyShaders");
 		XML showSplashNode = gui.getChild("ShowSplash");
 		XML splashTTLNode = gui.getChild("SplashTTL");
 		XML commandWaitTimeNode = gui.getChild("CommandWaitTime");
 		XML progressBarRotationSpeedNode = gui.getChild("ProgressBarRotationSpeed");
 		
-		showSplash = Boolean.parseBoolean(showSplashNode.getContent());
-		splashTTL = Integer.parseInt(splashTTLNode.getContent());
-		commandWaitTime = Integer.parseInt(commandWaitTimeNode.getContent());
-		progressBarRotationSpeed = Integer.parseInt(progressBarRotationSpeedNode.getContent());
+		try
+		{
+			fancyShaders = Boolean.parseBoolean(fancyShadersNode.getContent());
+			showSplash = Boolean.parseBoolean(showSplashNode.getContent());
+			splashTTL = Integer.parseInt(splashTTLNode.getContent());
+			commandWaitTime = Integer.parseInt(commandWaitTimeNode.getContent());
+			progressBarRotationSpeed = Integer.parseInt(progressBarRotationSpeedNode.getContent());
+		}
+		catch(Exception e)
+		{
+			Logger.log("ERROR: Set settings.", 1);
+			e.printStackTrace();
+			result = false;
+		}
 		
 		//Debug recording
 		XML debugRecordingNode = settings.getChild("DebugRecording");
@@ -149,6 +193,25 @@ public class Settings
 		liveData = Boolean.parseBoolean(liveDataNode.getContent());
 		recordingInputFileName = recordingInputFilenameNode.getContent();
 		timeDelay = Boolean.parseBoolean(timeDelayNode.getContent());
+		
+		//Network
+		XML network = settings.getChild("Network");
+		XML hostPortNode = network.getChild("HostPort");
+		XML connectPortNode = network.getChild("ConnectPort");
+		
+		try
+		{
+			hostPort = Short.parseShort(hostPortNode.getContent());
+			connectPort = Short.parseShort(connectPortNode.getContent());
+		}
+		catch(NumberFormatException e)
+		{
+			Logger.log("ERROR: Set settings.", 1);
+			e.printStackTrace();
+			result = false;
+		}
+		
+		return result;
 	}
 	
 	public static class CameraSettings

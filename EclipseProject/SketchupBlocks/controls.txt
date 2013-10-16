@@ -10,3 +10,8 @@ l - toggle debug lines
 
 m - toggle model
 n - toggle transparent model
+
+c - toggle debug faces
+i - toggle dubug line intersections
+
+g - toggle ghost blocks

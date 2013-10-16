@@ -26,7 +26,7 @@ public class SphereEval implements Evaluator
 		l4 = _l4;
 	
 	if(l1 == null || l2 == null || l3 == null|| l3 == null)
-		System.out.println("NULL");
+		throw new NullPointerException();
 	}
 
 	public EvalResults [] evaluate(Particle [] p)
@@ -64,7 +64,7 @@ public class SphereEval implements Evaluator
             else
                 result.score = 100;
 		if(l1 == null || l2 == null || l3 == null || l4 == null)
-			System.out.println("NULL");
+			throw new NullPointerException();
 		
 		double error1 = (a*a)-(Math.pow(l1.x-pa[0],2) + Math.pow(l1.y-pa[1],2) +Math.pow(l1.z-pa[2],2));
 		error1 *= error1;

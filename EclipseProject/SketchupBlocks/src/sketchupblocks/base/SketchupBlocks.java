@@ -1,8 +1,6 @@
 package sketchupblocks.base;
 
 import processing.core.*;
-import sketchupblocks.recording.Feeder;
-import sketchupblocks.recording.Recorder;
 
 public class SketchupBlocks extends PApplet 
 {
@@ -23,8 +21,10 @@ public class SketchupBlocks extends PApplet
 			frame.setResizable(false);
 		}
 		
-		Settings.readSettings("Settings.xml");
-		sessMan = new SessionManager(this);
+		boolean status = Settings.readSettings("Settings.xml");
+		RuntimeData.init();
+		sessMan = new SessionManager(this, status);
+		
 		startTime = System.currentTimeMillis();
 	}
 
