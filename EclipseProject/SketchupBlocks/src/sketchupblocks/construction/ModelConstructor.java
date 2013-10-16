@@ -89,7 +89,7 @@ public class ModelConstructor implements Runnable
 	 * The thread will only process the data once there is enough.
 	 * @param iBlock
 	 */
-	private void store(InputBlock iBlock)
+	private synchronized void store(InputBlock iBlock)
 	{
 		if (iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
@@ -340,6 +340,7 @@ public class ModelConstructor implements Runnable
 		
 		Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
 		int [] cameraIds = new int[numFiducials];
+		Vec3[] fidUpM = new Vec3[numFiducials];
 		//Generate list of the indices (into the smartblock's associatedFiducials list) of the observed fiducials.
 		SmartBlock sBlock = (SmartBlock)(bin.smartBlock);
 		
@@ -362,6 +363,7 @@ public class ModelConstructor implements Runnable
 			}
 			
 			fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
+			fidUpM[k] = sBlock.fiducialOrient[fiducialIndex];
 		}
 		
 		Matrix lambdas = calculateLambdas(bin.getTransform(),cameraIds,fidCoordsM, lines);
@@ -375,7 +377,7 @@ public class ModelConstructor implements Runnable
 		if(samePosition(bin,fidCoordsM,fiducialWorld))
 			return;
 		
-		Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(sBlock, fiducialWorld, fidCoordsM);
+		Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
 		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
 		
 		if(MTCScore > errorThreshold)
