@@ -75,7 +75,7 @@ public class ModelTransformationCalculator
 					
 					rot = Matrix.multiply(new RotationMatrix3D(axis, angle), rot);
 					
-					RuntimeData.outputLines.add(new Line(up, camPos));
+					RuntimeData.outputLines.add(new Line(camPos, up));
 					
 					//transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(transformMatrices[0], rot).padMatrix());
 					
