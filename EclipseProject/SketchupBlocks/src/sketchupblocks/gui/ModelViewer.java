@@ -80,6 +80,9 @@ public class ModelViewer
 	//debug ghost blocks - pre sudo physics
 	private boolean showGhostBlocks = false;
 	
+	//debug - general output lines
+	private boolean showOutputLines = false;
+	
 	private PImage tilesTexture;
 	 
 	public ModelViewer()
@@ -157,12 +160,13 @@ public class ModelViewer
 		drawBlocks();
 		drawGhostBlocks();
 		drawSkyBox();
-		drawConstructionFloor();
+		//drawConstructionFloor();
 	}
 	
 	private void drawDebugStuff()
 	{
 		drawDebugLines();
+		drawOutputLines();
 		drawDebugLinesIntersections();
 		drawDebugPoints();
 		drawDebugFaces();
@@ -201,6 +205,34 @@ public class ModelViewer
 					
 					start = Vec3.scalar(10, start);
 					end = Vec3.scalar(lineLength * 10, end);
+					end = Vec3.add(start, end);
+					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
+				}
+			}
+		}
+		window.popMatrix();
+	}
+	
+	private void drawOutputLines()
+	{
+		final float olLength = 200.0f;
+		
+		window.pushMatrix();
+		window.scale(1f);
+		
+		if(showOutputLines)
+		{
+			window.stroke(222, 3, 255);
+			ArrayList<Line> outputLines = RuntimeData.outputLines;
+			if(outputLines != null)
+			{
+				for(Line line: outputLines)
+				{
+					Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
+					Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
+					
+					start = Vec3.scalar(10, start);
+					end = Vec3.scalar(olLength * 10, end);
 					end = Vec3.add(start, end);
 					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
 				}
@@ -657,6 +689,13 @@ public class ModelViewer
 			if(e.getAction() == KeyEvent.RELEASE)
 			{
 				showGhostBlocks = !showGhostBlocks; 
+			}
+		}
+		else if(e.getKey() == 'o')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+			{
+				showOutputLines = !showOutputLines; 
 			}
 		}
 	}
