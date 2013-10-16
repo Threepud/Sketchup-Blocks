@@ -35,6 +35,24 @@ public class RotationMatrix3D extends Matrix
         }
         this.data = d;
     }
+    
+    public RotationMatrix3D(Vec3 ArbitraryAxis, double angle)
+    {
+    	super(3,3);
+    	Vec3 nsaa = Vec3.normalize(ArbitraryAxis); //NotSoArbitraryAxis
+    	
+    	double[][] d = new double[3][3];
+		d[0][0] = Math.cos(angle) + nsaa.x*nsaa.x *(1- Math.cos(angle));
+		d[0][1] = nsaa.x*nsaa.y*(1 - Math.cos(angle)) - nsaa.z*Math.sin(angle);
+		d[0][2] = nsaa.x*nsaa.z*(1 - Math.cos(angle)) + nsaa.y*Math.sin(angle);
+		d[1][0] = nsaa.y*nsaa.x*(1 - Math.cos(angle)) + nsaa.z*Math.sin(angle);
+		d[1][1] = Math.cos(angle) + nsaa.y*nsaa.y*(1 - Math.cos(angle));
+		d[1][2] = nsaa.y*nsaa.z*(1 - Math.cos(angle)) - nsaa.x*Math.sin(angle);
+		d[2][0] = nsaa.z*nsaa.x*(1 - Math.cos(angle)) - nsaa.y*Math.sin(angle);
+		d[2][1] = nsaa.z*nsaa.y*(1 - Math.cos(angle)) + nsaa.x*Math.sin(angle);
+		d[2][2] = Math.cos(angle) + nsaa.z*nsaa.z*(1 - Math.cos(angle));
+		data = d;
+    }
 
     public RotationMatrix3D(double x, double y, double z)
     {
