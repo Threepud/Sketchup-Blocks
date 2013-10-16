@@ -27,6 +27,7 @@ public class ModelTransformationCalculator
 			
 			if (numUniqueFids == 2)
 			{
+				RuntimeData.outputLines.clear();
 				//Find unique points:
 				ArrayList<Integer> uniqueIndices =  new ArrayList<Integer>();
 				ArrayList<Integer> ids = new ArrayList<Integer>();
@@ -48,41 +49,57 @@ public class ModelTransformationCalculator
 				
 				System.out.println("Code has been invoked!");
 				Matrix rot = Matrix.identity(3);
+				RuntimeData.outputLines.clear();
 				for (int k = 0; k < positions.length; k++)
 				{ 
-					Vec3 up = getUpVector(fids[k].camID);
-					Vec3 camPos = fids[k].getLine().point;
-					RotationMatrix3D rotUp = new RotationMatrix3D(RuntimeData.getCameraViewVector(fids[k].camID), fids[k].rotation);
-					Vec3 r = Matrix.multiply(rotUp, up);
+					//Vec3 up = getUpVector(fids[k].camID);
+					//Vec3 camPos = fids[k].getLine().point;
+					//RotationMatrix3D rotUp = new RotationMatrix3D(RuntimeData.getCameraViewVector(fids[k].camID), fids[k].rotation);
+					//Vec3 r = Matrix.multiply(rotUp, up);
 					//Project r onto basis of plane perpendicular to line b/w fiducial & camera.
-					Line[] camFidBasis = getPlaneBasis(fids[k].getLine());
+					/*Line[] camFidBasis = getPlaneBasis(fids[k].getLine());
 					Vec3 rf = r.project(camFidBasis[0].direction, camFidBasis[1].direction);
-					Vec3 wfn = Matrix.multiply(rot, Matrix.multiply(transformMatrices[0], Vec3.normalize(fidCoordsM[k]))); //World fiducial Normal
+					Vec3 wfn = Matrix.multiply(rot, fidNormal); //World fiducial Normal
 					wfn.normalize();
 					
 					Line[] fidNormBasis = getPlaneBasis(new Line(positions[k], wfn));
 					Vec3 rn = rf.project(fidNormBasis[0].direction, fidNormBasis[1].direction);
-					Vec3 fidUpWPre = Matrix.multiply(rot, Matrix.multiply(transformMatrices[0], fidUpM[k]));
 					rn.normalize();
-					fidUpWPre.normalize();
+					fidUpWPre.normalize();*/
 					
+					Vec3 fidUpW = Matrix.multiply(rot, Matrix.multiply(transformMatrices[0], fidUpM[k]));
+					Vec3 fidNormal = Matrix.multiply(rot, Matrix.multiply(transformMatrices[0], Vec3.normalize(fidCoordsM[k])));
+					
+					Vec3 rn = Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), new Vec3(0,0,1)));
 					Line[] axisBasis = getPlaneBasis(new Line(positions[k], axis));
 					Vec3 ra = rn.project(axisBasis[0].direction, axisBasis[1].direction);
-					Vec3 fidUpAxis = fidUpWPre.project(axisBasis[0].direction, axisBasis[1].direction);
+					Vec3 fidUpAxis = (fidUpW).project(axisBasis[0].direction, axisBasis[1].direction);
 					
 					double angle = Math.acos(Vec3.dot(ra, fidUpAxis));
 					
 					rot = Matrix.multiply(new RotationMatrix3D(axis, angle), rot);
 					
-					RuntimeData.outputLines.add(new Line(camPos, Vec3.normalize(rf)));
-					//System.out.println(up.length());
+					//RuntimeData.outputLines.add(new Line(positions[k], )));
+					RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), new Vec3(0,0,1)))));
+					//RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(rn)));
+					//RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(fidNormal)));
 					//RuntimeData.outputLines.add(new Line(positions[k], fidUpAxis));
+					
+					
 					
 					transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(transformMatrices[0], rot).padMatrix());
 					
 				}
+				return transform;
 			}
+			RuntimeData.outputLines.clear();
+			for (int k = 0; k < positions.length; k++)
+			{
+				Vec3 up = getUpVector(fids[k].camID);
+				Vec3 fidNormal = Matrix.multiply(transformMatrices[0], Vec3.normalize(fidCoordsM[k]));
+				RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), /*new Vec3(0,0,1)*/up))));
 			
+			}
 			return transform;
 		}
 		throw new RuntimeException("Invalid number of fiducials observed to calculate position "+(fidCoordsM.length == positions.length));
