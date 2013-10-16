@@ -160,7 +160,7 @@ public class ModelViewer
 		drawBlocks();
 		drawGhostBlocks();
 		drawSkyBox();
-		//drawConstructionFloor();
+		drawConstructionFloor();
 	}
 	
 	private void drawDebugStuff()
