@@ -44,7 +44,10 @@ public class BlockInfo
 	
 	public synchronized Matrix getTransform()
 	{
-		return transform.clone();
+		if (transform != null)
+			return transform.clone();
+		else
+			return null;
 	}
 	
 	public synchronized int getNumFiducialsUsed()
@@ -188,7 +191,10 @@ public class BlockInfo
 			dolly.timestamp = (Date)this.timestamp.clone();
 			dolly.lastSeen = (Date)this.lastSeen.clone();
 			dolly.seen = seen;
-			dolly.worldPosition = worldPosition.clone();
+			if (worldPosition != null)
+				dolly.worldPosition = worldPosition.clone();
+			else
+				dolly.worldPosition = null;
 			return dolly;
 		}
 		

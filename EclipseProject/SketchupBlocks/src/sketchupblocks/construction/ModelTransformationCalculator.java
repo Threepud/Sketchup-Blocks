@@ -41,7 +41,13 @@ public class ModelTransformationCalculator
 				}
 				
 				if(ids.size() != 2)
+				{
+					for (int k = 0; k < ids.size(); k++)
+					{
+						System.out.println(ids.get(k));
+					}
 					throw new RuntimeException("Too many unique fiducials!");
+				}
 				
 
 				Vec3[] axisEnds = new Vec3[]{new Vec3(), new Vec3()};
@@ -96,7 +102,7 @@ public class ModelTransformationCalculator
 					transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(rot, transformMatrices[0]).padMatrix());
 					
 				}
-				return new Matrix[]{transform, Matrix.multiply(transformMatrices[1],  transformMatrices[0])};
+				return new Matrix[]{transform, Matrix.multiply(transformMatrices[1],  transformMatrices[0].padMatrix())};
 			}
 			RuntimeData.outputLines.clear();
 			for (int k = 0; k < positions.length; k++)
@@ -106,7 +112,7 @@ public class ModelTransformationCalculator
 				RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), /*new Vec3(0,0,1)*/up))));
 			
 			}
-			return new Matrix[]{transform, Matrix.multiply(transformMatrices[1], transformMatrices[0])};
+			return new Matrix[]{transform, Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix())};
 		}
 		throw new RuntimeException("Invalid number of fiducials observed to calculate position "+(fidCoordsM.length == positions.length));
 	}
