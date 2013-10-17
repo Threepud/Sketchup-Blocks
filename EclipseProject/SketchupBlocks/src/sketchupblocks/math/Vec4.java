@@ -47,6 +47,12 @@ public class Vec4
     	w = v.w;
     }
     
+
+    public Vec4 clone()
+    {
+    	return new Vec4(x, y, z, w);
+    }
+    
     public static double dot(Vec4 one, Vec4 two)
     {
         return (one.x * two.x + one.y * two.y + one.z * two.z + one.w*two.w);
