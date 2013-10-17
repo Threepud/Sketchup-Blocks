@@ -14,7 +14,7 @@ import sketchupblocks.math.Vec3;
 
 public class ModelTransformationCalculator 
 {
-	public static Matrix getModelTransformationMatrix(BlockInfo.Fiducial[] fids, Vec3[] positions, Vec3[] fidCoordsM, Vec3[] fidUpM, int numUniqueFids)
+	public static Matrix[] getModelTransformationMatrix(BlockInfo.Fiducial[] fids, Vec3[] positions, Vec3[] fidCoordsM, Vec3[] fidUpM, int numUniqueFids)
 	{
 		
 		if (fidCoordsM.length > 2)
@@ -96,7 +96,7 @@ public class ModelTransformationCalculator
 					transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(rot, transformMatrices[0]).padMatrix());
 					
 				}
-				return transform;
+				return new Matrix[]{transform, Matrix.multiply(transformMatrices[1],  transformMatrices[0])};
 			}
 			RuntimeData.outputLines.clear();
 			for (int k = 0; k < positions.length; k++)
@@ -106,7 +106,7 @@ public class ModelTransformationCalculator
 				RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), /*new Vec3(0,0,1)*/up))));
 			
 			}
-			return transform;
+			return new Matrix[]{transform, Matrix.multiply(transformMatrices[1], transformMatrices[0])};
 		}
 		throw new RuntimeException("Invalid number of fiducials observed to calculate position "+(fidCoordsM.length == positions.length));
 	}

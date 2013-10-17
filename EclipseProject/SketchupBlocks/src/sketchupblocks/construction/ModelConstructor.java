@@ -382,7 +382,10 @@ public class ModelConstructor implements Runnable
 			fids[k].setProcessed();
 		}
 		
-		Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
+		//Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
+		/**/
+		Matrix[] transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
+		Matrix transform = transforms[0];
 		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
 		
 		if(MTCScore > errorThreshold)
@@ -405,7 +408,7 @@ public class ModelConstructor implements Runnable
 		bin.removed = false;
 		
 		ModelBlock mbToAdd = new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE);
-		
+		mbToAdd.mediumRareMatrix = transforms[1]; /**/
 		mbToAdd.debugLines = lines;
 		mbToAdd.debugPoints = fiducialWorld;
 		
