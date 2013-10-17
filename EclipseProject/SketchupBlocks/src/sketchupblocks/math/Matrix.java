@@ -512,6 +512,22 @@ public class Matrix implements Serializable
 	}
 	
 	@Override
+	public boolean equals(Object ob)
+	{
+		if (!(ob instanceof Matrix))
+			return false;
+		Matrix m = (Matrix)ob;
+		if (m.cols != cols || m.rows != rows)
+			return false;
+		for (int k = 0; k < rows; k++)
+			for (int i = 0; i < cols; i++)
+				if (m.data[k][i] != data[k][i])
+					return false;
+		return true;
+			
+	}
+	
+	@Override
     public String toString()
     {
         String res = "[";
