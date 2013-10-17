@@ -18,18 +18,18 @@ public class RotationMatrix3D extends Matrix
         {
         	case X_AXIS:
 	        		d[0] = new double[]{1, 0, 0};
-	        		d[1] = new double[]{0, Math.cos(theta), Math.sin(theta)};
-			        d[2] = new double[]{0, -1*Math.sin(theta), Math.cos(theta)};
+	        		d[1] = new double[]{0, Math.cos(theta), -Math.sin(theta)};
+			        d[2] = new double[]{0, Math.sin(theta), Math.cos(theta)};
 	        			
 			break;
         	case Y_AXIS:
-        			d[0] = new double[]{Math.cos(theta), 0, -1*Math.sin(theta)};
+        			d[0] = new double[]{Math.cos(theta), 0, Math.sin(theta)};
 	        		d[1] = new double[]{0, 1, 0};
-			        d[2] = new double[]{Math.sin(theta), 0, Math.cos(theta)};
+			        d[2] = new double[]{-Math.sin(theta), 0, Math.cos(theta)};
 			break;
         	case Z_AXIS:
-	        		d[0] = new double[]{Math.cos(theta), Math.sin(theta), 0};
-			        d[1] = new double[]{-1*Math.sin(theta), Math.cos(theta), 0};
+	        		d[0] = new double[]{Math.cos(theta), -Math.sin(theta), 0};
+			        d[1] = new double[]{Math.sin(theta), Math.cos(theta), 0};
 			        d[2] = new double[]{0, 0, 1};
 			break;
         }
