@@ -42,23 +42,24 @@ public class BlockInfo
 		lastChange = new Date();
 	}
 	
-	public Matrix getTransform()
+	public synchronized Matrix getTransform()
 	{
-		return transform;
+		return transform.clone();
 	}
 	
-	public int getNumFiducialsUsed()
+	public synchronized int getNumFiducialsUsed()
 	{
 		return numFiducialsUsed;
 	}
 	
-	public void setTransform(Matrix _transform, int _numFiducialsUsed)
+	/**/
+	public synchronized void setTransform(Matrix _transform, int _numFiducialsUsed)
 	{
 		transform = _transform;
 		numFiducialsUsed = _numFiducialsUsed;
 	}
 	
-	public Fiducial[] getCleanFiducials()
+	public synchronized Fiducial[] getCleanFiducials()
 	{
 		BlockInfo.Fiducial [] fids = new BlockInfo.Fiducial[0];
 		
@@ -69,24 +70,24 @@ public class BlockInfo
 			BlockInfo.Fiducial fid = fiducialMap.get(keys);
 			if(fid.isSeen())
 			{
-				cleanFids.add(fid);//Remove the ones that aren't currently visible
+				cleanFids.add(fid.clone());//Remove the ones that aren't currently visible
 			}
 		}
 		return cleanFids.toArray(fids);	
 	}
 	
-	public Date getLastSeen()
+	public synchronized Date getLastSeen()
 	{
 		Date result = new Date();
 		for(Fiducial fid : fiducialMap.values())
 		{
 			if(result.getTime() > fid.lastSeen.getTime())
-				result = fid.lastSeen;
+				result = (Date)fid.lastSeen.clone();
 		}
 		return result;
 	}
 	
-	public boolean ready()
+	public synchronized boolean ready()
 	{
 		Fiducial[] data = new Fiducial[0];
 		boolean tryToArray = true;
@@ -130,7 +131,7 @@ public class BlockInfo
 			return false;
 	}
 	
-	public int getNumUniqueFiducials()
+	public synchronized int getNumUniqueFiducials()
 	{
 		Fiducial[] data = new Fiducial[0];
 		boolean tryToArray = true;
@@ -179,6 +180,16 @@ public class BlockInfo
 		{
 			this(camE.fiducialID, camE.rotation, camE.x, camE.y, camE.cameraID);
 			seen = true;
+		}
+		
+		public Fiducial clone()
+		{
+			Fiducial dolly = new Fiducial(fiducialsID, rotation, camViewX, camViewY, camID);
+			dolly.timestamp = (Date)this.timestamp.clone();
+			dolly.lastSeen = (Date)this.lastSeen.clone();
+			dolly.seen = seen;
+			dolly.worldPosition = worldPosition.clone();
+			return dolly;
 		}
 		
 		public Fiducial(int _fiducialsID, double rot, double _camViewX, double _camViewY, int _camID)
@@ -252,7 +263,7 @@ public class BlockInfo
 			}
 			else
 			{
-				return lastSeen;
+				return (Date)lastSeen.clone();
 			}			
 		}
 	
@@ -280,7 +291,7 @@ public class BlockInfo
 		@Override
 		public int hashCode()
 		{
-		return 	(cameraID*256)+fiducialID;
+			return 	(cameraID*256)+fiducialID;
 		}
 	}
 }
