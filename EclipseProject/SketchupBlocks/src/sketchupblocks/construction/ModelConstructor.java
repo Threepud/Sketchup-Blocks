@@ -377,6 +377,11 @@ public class ModelConstructor implements Runnable
 		if(samePosition(bin,fidCoordsM,fiducialWorld))
 			return;
 		
+		for(int k = 0 ; k < numFiducials ; k++)
+		{
+			fids[k].setProcessed();
+		}
+		
 		Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
 		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
 		

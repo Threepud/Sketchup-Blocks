@@ -67,7 +67,7 @@ public class BlockInfo
 		for(BlockInfo.CamFidIdentifier keys : fiducialMap.keySet())
 		{
 			BlockInfo.Fiducial fid = fiducialMap.get(keys);
-			if(fid.isSeen())
+			if(fid.isSeen() && !fid.processed)
 			{
 				cleanFids.add(fid);//Remove the ones that aren't currently visible
 			}
@@ -110,7 +110,7 @@ public class BlockInfo
 			{
 				if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
 				{
-					if(data[k].seen)
+					if(data[k].seen && !data[k].processed)
 					{
 						count ++;
 						if( !fiducialList.contains(new Integer(data[k].fiducialsID)))
@@ -172,6 +172,7 @@ public class BlockInfo
 		public double camViewY;
 		private boolean seen;
 		private Date lastSeen;
+		private boolean processed;
 		
 		public Vec3 worldPosition = null;
 		
@@ -179,6 +180,7 @@ public class BlockInfo
 		{
 			this(camE.fiducialID, camE.rotation, camE.x, camE.y, camE.cameraID);
 			seen = true;
+			processed = false;
 		}
 		
 		public Fiducial(int _fiducialsID, double rot, double _camViewX, double _camViewY, int _camID)
@@ -191,6 +193,7 @@ public class BlockInfo
 			camID = _camID;
 			seen = true;
 			lastSeen = new Date();
+			processed = false;
 		}
 		
 		
@@ -233,6 +236,11 @@ public class BlockInfo
 		{
 			return seen;
 		
+		}
+		
+		public void setProcessed()
+		{
+			processed = true;
 		}
 		
 		public void setSeen(boolean s)
