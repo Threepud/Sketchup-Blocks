@@ -39,6 +39,10 @@ public class SessionManager
 	
 	private boolean startupStatus = false;
 	
+	protected SessionManager()
+	{
+	}
+	
 	public SessionManager(PApplet _parent, boolean status)
 	{
 		parent = _parent;
@@ -159,10 +163,20 @@ public class SessionManager
     	jimmy.setLobby(lobby);
     }
     
+    public ModelConstructor getModelConstructor()
+    {
+    	return jimmy;
+    }
+    
     public void setExporter(Exporter _kreshnik)
     {
     	kreshnik = _kreshnik;
     	kreshnik.setLobby(lobby);
+    }
+    
+    public Exporter getExporter()
+    {
+    	return kreshnik;
     }
     
     public void setModelViewer(ModelViewer _sarah)
@@ -179,10 +193,20 @@ public class SessionManager
 		}
     }
     
+    public ModelViewer getModelViewer()
+    {
+    	return sarah;
+    }
+    
     public void setModelLoader(ModelLoader _modelLoader)
     {
     	modelLoader = _modelLoader;
     	modelLoader.setLobby(lobby);
+    }
+    
+    public ModelLoader getModelLoader()
+    {
+    	return modelLoader;
     }
     
     public boolean checkModelExists()
