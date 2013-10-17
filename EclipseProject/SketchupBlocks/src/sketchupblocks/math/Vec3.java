@@ -36,6 +36,12 @@ public class Vec3 implements Serializable
     	y = oldVec.y;
     	z = oldVec.z;
     }
+    
+
+    public Vec3 clone()
+    {
+    	return new Vec3(x, y, z);
+    }
 
     public static Vec3 midpoint(Vec3 one, Vec3 two)
     {
