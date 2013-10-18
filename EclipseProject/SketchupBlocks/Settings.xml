@@ -39,8 +39,9 @@
 		<ProgressBarRotationSpeed>500</ProgressBarRotationSpeed>
 	</GUI>
 	<DebugRecording>
-		<LiveData>true</LiveData>
-		<RecordingInputFilename>debugOutput(Wall)/output</RecordingInputFilename>
+
+		<LiveData>false</LiveData>
+		<RecordingInputFilename>debugOutput(Cross,EasyRemoveNotTopFirst)/output</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
 	<Network>
