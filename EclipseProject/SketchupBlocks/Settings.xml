@@ -40,7 +40,7 @@
 	</GUI>
 	<DebugRecording>
 		<LiveData>false</LiveData>
-		<RecordingInputFilename>debugOutput(Wall)/output</RecordingInputFilename>
+		<RecordingInputFilename>debugOutput(Cross,EasyRemoveNotTopFirst)/output</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
 	<Network>

@@ -14,7 +14,7 @@ import sketchupblocks.math.Vec3;
 
 public class ModelTransformationCalculator 
 {
-	public static Matrix[] getModelTransformationMatrix(BlockInfo.Fiducial[] fids, Vec3[] positions, Vec3[] fidCoordsM, Vec3[] fidUpM, int numUniqueFids)
+	public static Matrix[] getModelTransformationMatrix(BlockInfo.Fiducial[] fids, Vec3[] positions, Vec3[] fidCoordsM, Vec3[] fidUpM)
 	{
 		
 		if (fidCoordsM.length > 2)
@@ -25,29 +25,20 @@ public class ModelTransformationCalculator
 			
 			Matrix transform = Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix());
 			
-			if (numUniqueFids == 2)
+			ArrayList<Integer> ids = new ArrayList<Integer>();
+			for (int k = 0; k < fids.length; k++)
+			{
+				if (ids.indexOf(fids[k].fiducialsID) == -1)
+				{
+					ids.add(fids[k].fiducialsID);
+				}
+				
+			}
+			
+			
+			if (ids.size() == 2)
 			{
 				RuntimeData.outputLines.clear();
-				
-				//Find unique points:
-				ArrayList<Integer> ids = new ArrayList<Integer>();
-				for (int k = 0; k < fids.length; k++)
-				{
-					if (ids.indexOf(fids[k].fiducialsID) == -1)
-					{
-						ids.add(fids[k].fiducialsID);
-					}
-					
-				}
-				
-				if(ids.size() != 2)
-				{
-					for (int k = 0; k < ids.size(); k++)
-					{
-						System.out.println(ids.get(k));
-					}
-					throw new RuntimeException("Too many unique fiducials!");
-				}
 				
 
 				Vec3[] axisEnds = new Vec3[]{new Vec3(), new Vec3()};
@@ -72,7 +63,7 @@ public class ModelTransformationCalculator
 				Vec3 axis = Vec3.subtract(axisEnds[0], axisEnds[1]);
 				axis.normalize();
 				
-				System.out.println("Code has been invoked!");
+				//System.out.println("Code has been invoked!");
 				Matrix rot = Matrix.identity(3);
 				Matrix rotTest = Matrix.identity(3);
 				RuntimeData.outputLines.clear();
@@ -89,7 +80,7 @@ public class ModelTransformationCalculator
 					rotTest = Matrix.multiply(new RotationMatrix3D(axis, -angle), rotTest);
 					
 					double newTestAngle = GetError(transformMatrices[0],rotTest,fidUpM[k],fidCoordsM[k],positions[k],axis,up,fids[k].rotation);
-					System.out.println("angle:" + Math.toDegrees(angle) + " newAngle:" + Math.toDegrees(newAngle) + " newTestAngle:" + Math.toDegrees(newTestAngle));
+					//System.out.println("angle:" + Math.toDegrees(angle) + " newAngle:" + Math.toDegrees(newAngle) + " newTestAngle:" + Math.toDegrees(newTestAngle));
 					
 					Vec3 fidNormal = Matrix.multiply(rot, Matrix.multiply(transformMatrices[0], Vec3.normalize(fidCoordsM[k])));
 					RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), new Vec3(0,0,1)))));

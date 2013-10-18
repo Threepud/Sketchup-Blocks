@@ -100,12 +100,15 @@ public class ModelConstructor implements Runnable
 				block = new BlockInfo(iBlock.block);
 				blockMap.put(iBlock.block.blockId,block);
 			}
+
+			if (block.blockID == 2)
+				System.out.println("Received add/update for fiducial: "+iBlock.cameraEvent.fiducialID+" (Block "+block.blockID+")");
 			
 			if(!checkReAdd(block,iBlock))
 			{
 				BlockInfo.Fiducial fiducial =  block.new Fiducial(iBlock.cameraEvent);
 				block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
-				block.lastChange = new Date();
+				block.setLastChange(new Date());
 			}
 		}
 		else //When a remove call is received
@@ -114,36 +117,52 @@ public class ModelConstructor implements Runnable
 			if(block == null) return;
 			BlockInfo.Fiducial fid = block.fiducialMap.get(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
 			if(fid == null) return;
-			
+
+			if (block.blockID == 2)
+				System.out.println("Received remove for fiducial: "+iBlock.cameraEvent.fiducialID+" (Block "+block.blockID+")");
 			boolean blockWasRemoved = false;
 			fid.setSeen(false);
-			block.lastChange = new Date();
+			
+			block.setLastChange(new Date());
 						
-			if(!block.removed)
+			if(!block.getRemoved())
 			{
 				if(blockNotSeen(block))
 				{
+					if (block.blockID == 2)
+						System.out.println("Not seeing block 2");
 					if(expectedToSeeBlock(block))
 					{
-						block.removed = true;						
+
+						if (block.blockID == 2)
+							System.out.println("Removed block "+block.blockID);
+						block.setRemoved(true);						
 						eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));		
 						blockWasRemoved = true;
 					}
+					else if (block.blockID == 2)
+						System.out.println("Didn't expect to see block 2");
 				}
+				else if (block.blockID == 2)
+					System.out.println("Seeing block 2");
 			}
 			
+			//As toe-geboude blokkie remove is.
 			if (blockWasRemoved)
 			{
+				if (block.blockID == 2)
+					System.out.println("Checking all blocks");
 				//Check ALLLLLL the blocks
 				for(BlockInfo blokkie : blockMap.values())
 				{
-					if(!blokkie.removed)
+					if(!blokkie.getRemoved())
 					{
 						if(blockNotSeen(blokkie))
 						{
 							if(expectedToSeeBlock(blokkie))
 							{
-								blokkie.removed = true;						
+								System.out.println("******"+ block.blockID);
+								blokkie.setRemoved(true);					
 								eddy.updateModel(new ModelBlock((SmartBlock)blokkie.smartBlock, null, ModelBlock.ChangeType.REMOVE));			
 							}
 						}
@@ -160,19 +179,30 @@ public class ModelConstructor implements Runnable
 	 */
 	private boolean blockNotSeen(BlockInfo block)
 	{
+		boolean seen = false;
 		for(BlockInfo.Fiducial fid : block.fiducialMap.values())
 		{
 			if(fid.isSeen())
 			{
-				return false;
+				if (block.blockID == 2)
+					System.out.println(fid.fiducialsID+" seen");
+				seen = true;
+			}
+			else
+			{
+				if (block.blockID == 2)
+					
+				System.out.println(fid.fiducialsID+" not seen");
 			}
 		}
-		return true;
+		return !seen;
 	}
 	
 	private void reAddBlockToModel(BlockInfo bi)
 	{
-		bi.removed = false;
+		if (bi.blockID == 2)
+			System.out.println("Readding "+bi.blockID);
+		bi.setRemoved(false);
 		ModelBlock mb = new ModelBlock((SmartBlock)bi.smartBlock, bi.getTransform(), ModelBlock.ChangeType.UPDATE);
 		
 		ArrayList<Line> dbLines = new ArrayList<Line>();
@@ -230,7 +260,7 @@ public class ModelConstructor implements Runnable
 		ArrayList<BlockInfo> result = new ArrayList<BlockInfo>();
 		for(BlockInfo bi : blockMap.values())
 		{
-			if(bi.removed && expectedToSeeBlock(bi) && bi.getLastSeen().getTime() < 2*changeWindow)
+			if(bi.getRemoved() && expectedToSeeBlock(bi) && bi.getLastSeen().getTime() < 2*changeWindow)
 				result.add(bi);
 		}
 		BlockInfo [] res = new BlockInfo [0];
@@ -241,7 +271,7 @@ public class ModelConstructor implements Runnable
 	{
 		for(BlockInfo bi : bis)
 		{
-			if(bi.removed && !expectedToSeeBlock(bi))
+			if(bi.getRemoved() && !expectedToSeeBlock(bi))
 			{
 				reAddBlockToModel(bi);
 			}
@@ -260,7 +290,7 @@ public class ModelConstructor implements Runnable
 			if(fid.camID == iBlock.cameraEvent.cameraID && Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.1 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.1) // Seen at the same place
 			{
 				fid.setSeen(true);
-				if(block.removed && block.getTransform() != null) // if all the fiducials are seen we add
+				if(block.getRemoved() && block.getTransform() != null) // if all the fiducials are seen we add
 				{
 					reAddBlockToModel(block);							
 				}
@@ -299,11 +329,11 @@ public class ModelConstructor implements Runnable
 					if (b == null) 
 						continue;
 					
-					double timePassed = Math.abs(b.lastChange.getTime() - new Date().getTime());
+					double timePassed = Math.abs(b.getLastChange().getTime() - new Date().getTime());
 					if(b.ready() && RuntimeData.isSystemCalibrated() && (timePassed > changeWindow) )
 					{
 						Logger.log("Processing "+b.fiducialMap.size()+" number of lines after "+timePassed, 50);
-						processBin(b);
+						processBin(b.clone(), b);
 					}
 				}
 				Thread.sleep(1);
@@ -326,18 +356,27 @@ public class ModelConstructor implements Runnable
 	 * This calculates the block position and adds it to the model.
 	 * @param bin
 	 */
-	private void processBin(BlockInfo bin)
+	private void processBin(BlockInfo bin, BlockInfo binReference)
 	{
+		if (bin.blockID == 2)
+		{
+			System.out.println("The truth beforehand is " + binReference.getRemoved() +" " +bin.getRemoved());
+			System.out.println("---");
+			System.out.println("Starting processBin with");
+			
+		}
 		BlockInfo.Fiducial [] fids = bin.getCleanFiducials();
 		int numFiducials = fids.length;
-		
 		Line[] lines = new Line[numFiducials];
 		for(int k = 0 ; k < fids.length ; k++)
 		{
 			lines[k] = fids[k].getLine(); 
 			lines[k].direction.normalize();
+			if (bin.blockID == 2)
+				System.out.print(" " + fids[k].fiducialsID+" ");
 		}
-		
+		if (bin.blockID == 2)
+			System.out.println("\n---");
 		Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
 		int [] cameraIds = new int[numFiducials];
 		Vec3[] fidUpM = new Vec3[numFiducials];
@@ -365,21 +404,22 @@ public class ModelConstructor implements Runnable
 			fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
 			fidUpM[k] = sBlock.fiducialOrient[fiducialIndex];
 		}
-		
 		Matrix lambdas = calculateLambdas(bin.getTransform(),cameraIds,fidCoordsM, lines);
 		
 		Vec3 [] fiducialWorld = new Vec3[numFiducials];
 		for(int k = 0 ; k < numFiducials ; k++)
 		{
-			fids[k].worldPosition = fiducialWorld[k] = Vec3.add(lines[k].point,  Vec3.scalar(lambdas.data[k][0], lines[k].direction));
+			fiducialWorld[k] = Vec3.add(lines[k].point,  Vec3.scalar(lambdas.data[k][0], lines[k].direction));
+			updateFidPos(fids[k].fiducialsID, fids[k].camID, binReference, fiducialWorld[k]);
+			fids[k].worldPosition = fiducialWorld[k];
 		}
 		
-		if(samePosition(bin,fidCoordsM,fiducialWorld))
+		if(samePosition(bin, fidCoordsM, fiducialWorld))
 			return;
 		
 		//Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
 		/**/
-		Matrix[] transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
+		Matrix[] transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM);
 		Matrix transform = transforms[0];
 		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
 		
@@ -399,39 +439,73 @@ public class ModelConstructor implements Runnable
 		
 		Logger.log("Transform: "+transform, 50);
 		
-		bin.setTransform(transform, numFiducials);
-		bin.removed = false;
 		
-		ModelBlock mbToAdd = new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE);
-		mbToAdd.mediumRareMatrix = transforms[1]; /**/
-		mbToAdd.debugLines = lines;
-		mbToAdd.debugPoints = fiducialWorld;
+		
+		
 		
 		BlockInfo [] bis = allPossibleReadditions();
 		
-		eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
+		
+		if (binReference.getRemoved() == bin.getRemoved())
+		{
+			if (bin.blockID == 2)
+			{
+				System.out.println("Adding block from processBin "+bin.blockID);
+				System.out.println("The truth is " + binReference.getRemoved() +" " +bin.getRemoved());
+			}
+			ModelBlock mbToAdd = new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE);
+			mbToAdd.mediumRareMatrix = transforms[1]; /**/
+			mbToAdd.debugLines = lines;
+			mbToAdd.debugPoints = fiducialWorld;
+			
+			binReference.setTransform(transform, numFiducials);
+			binReference.setRemoved(false);	
+			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
+		}
 		//eddy.updateModel(mbToAdd);
 		doReadditions(bis);
 	}
 	
-	private boolean samePosition(BlockInfo bin,Vec3 [] model,Vec3 [] fids)
+	private void updateFidPos(int fidID, int camID, BlockInfo binReference, Vec3 fidPos)
+	{
+		BlockInfo.Fiducial fid = binReference.fiducialMap.get(binReference.new CamFidIdentifier(camID, fidID));
+		if (fid != null) fid.worldPosition = fidPos;
+	}
+	
+	private boolean samePosition(BlockInfo bin, Vec3 [] model,Vec3 [] fids)
 	{
 		if(bin.getTransform() == null)
 			return false;
-		double error =0;
+		double ERROR_THRESH = 1;
+		double error = 0;
+		Matrix transform = bin.getTransform();
+		
+		int numMatchingPoints = 0;
+		int numDistinctMatchingFiducials = 0;
+		ArrayList<Vec3> considered = new ArrayList<Vec3>();
 		for(int k = 0 ;  k < fids.length ; k++ )
 		{
-			double temp = fids[k].distance(Matrix.multiply(bin.getTransform(), model[k].padVec3()).toVec3());
+			double temp = fids[k].distance(Matrix.multiply(transform, model[k].padVec3()).toVec3());
 			error +=temp*temp;
+			if (temp*temp < ERROR_THRESH*0.5)
+			{
+				numMatchingPoints++;
+				if (!considered.contains(model[k]))
+				{
+					considered.add(model[k]);
+					numDistinctMatchingFiducials++;
+				}
+			}
 		}
 		
 		error /= fids.length;
 		
-		
-		
-		if(error < 1 && fids.length < bin.getNumFiducialsUsed())
+		if(error < ERROR_THRESH && fids.length <= bin.getNumFiducialsUsed())
 		{
-			//System.err.println("Same error:"+error+" num:"+fids.length);
+			return true;
+		}
+		if (error< 1.5*ERROR_THRESH && fids.length >= bin.getNumFiducialsUsed() && fids.length - numMatchingPoints  <= fids.length/4 && numDistinctMatchingFiducials > 1)
+		{
 			return true;
 		}
 		
@@ -461,9 +535,9 @@ public class ModelConstructor implements Runnable
 			}
 			else
 			{
-				x0[k] = 20;
+				x0[k] = 5;
 			}
-			xt[k] = 20;
+			xt[k] = 5;
 		}
 		
 		Matrix lambdasNewton = null;

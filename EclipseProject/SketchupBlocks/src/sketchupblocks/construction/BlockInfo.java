@@ -19,15 +19,16 @@ import sketchupblocks.math.Vec3;
 
 public class BlockInfo 
 {
-	int minEvents = 3;
-	int minFidVis = 2;
-	int LIFETIME = 1500; //ms
 	public int blockID;
 	public Block smartBlock;
-	public Date lastChange;
+	
+	private int minEvents = 3;
+	private int minFidVis = 2;
+	private int LIFETIME = 1500; //ms
+	private Date lastChange;
 	
 	//Variables for removal logic.
-	public boolean removed = true;
+	private boolean removed = true;
 	private Matrix transform = null;
 	private int numFiducialsUsed = 0;
 	
@@ -42,12 +43,54 @@ public class BlockInfo
 		lastChange = new Date();
 	}
 	
+	public synchronized BlockInfo clone()
+	{
+		BlockInfo dolly = new BlockInfo(smartBlock);
+		dolly.lastChange = (Date)lastChange.clone();
+		dolly.removed = removed;
+		dolly.minEvents = minEvents;
+		dolly.minFidVis = minFidVis;
+		if (transform != null)
+			dolly.transform = transform.clone();
+		dolly.numFiducialsUsed = numFiducialsUsed;
+		dolly.fiducialMap = new HashMap<CamFidIdentifier, Fiducial>();
+		
+		for(BlockInfo.CamFidIdentifier keys : fiducialMap.keySet())
+		{
+			BlockInfo.Fiducial fid = fiducialMap.get(keys);
+			dolly.fiducialMap.put(keys, fid.clone());
+		}
+		
+		return dolly;
+	}
+	
+	public synchronized Date getLastChange()
+	{
+		return (Date)lastChange.clone();
+	}
+	
+	public synchronized void setLastChange(Date d)
+	{
+		lastChange = d;
+	}
+	
 	public synchronized Matrix getTransform()
 	{
 		if (transform != null)
 			return transform.clone();
 		else
 			return null;
+	}
+	
+	public synchronized void setRemoved(boolean r)
+	{
+		//System.out.println("Setting removed to:" + r + "for " + blockID);
+		removed = r;
+	}
+	
+	public synchronized boolean getRemoved()
+	{
+		return removed;
 	}
 	
 	public synchronized int getNumFiducialsUsed()

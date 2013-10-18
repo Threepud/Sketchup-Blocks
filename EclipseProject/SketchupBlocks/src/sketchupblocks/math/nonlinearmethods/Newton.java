@@ -7,7 +7,6 @@ package sketchupblocks.math.nonlinearmethods;
 import sketchupblocks.base.Logger;
 import sketchupblocks.math.LinearSystemSolver;
 import sketchupblocks.math.Matrix;
-import sketchupblocks.math.NoConvergenceException;
 import sketchupblocks.math.SingularMatrixException;
 
 /**
