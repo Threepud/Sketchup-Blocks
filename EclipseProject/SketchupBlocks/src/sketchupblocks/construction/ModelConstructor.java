@@ -330,6 +330,8 @@ public class ModelConstructor implements Runnable
 	 */
 	private void processBin(BlockInfo bin, BlockInfo binReference)
 	{
+		//if (bin.blockID == 2)
+		//	System.out.println("Processing bin for 2");
 		BlockInfo.Fiducial [] fids = bin.getCleanFiducials();
 		int numFiducials = fids.length;
 		Line[] lines = new Line[numFiducials];
@@ -399,8 +401,6 @@ public class ModelConstructor implements Runnable
 				transform = PSOtransform;
 			}
 			
-			//if (bin.blockID == 2)
-				//System.out.println("Resorting to PSO");
 			
 			Logger.log("Transformation score(MTC):"+MTCScore, 10);
 			Logger.log("Transformation score(PSO):"+PSOScore, 10);
@@ -434,8 +434,8 @@ public class ModelConstructor implements Runnable
 	
 	private boolean samePosition(BlockInfo bin, Vec3 [] model,Vec3 [] fids)
 	{
-		if (bin.blockID == 2)
-			System.out.println("Getting same for block 2");
+		//if (bin.blockID == 2)
+		//	System.out.println("Getting same for block "+bin.blockID);
 		if(bin.getTransform() == null)
 			return false;
 		double ERROR_THRESH = 1;
@@ -461,7 +461,7 @@ public class ModelConstructor implements Runnable
 		}
 		
 		error /= fids.length;
-		if (bin.blockID == 2)
+		/*if (bin.blockID == 2)
 		{
 			System.out.println("Num points seen: "+fids.length);
 			System.out.println("Error: "+error);
@@ -469,21 +469,21 @@ public class ModelConstructor implements Runnable
 			System.out.println("Num distinct matching points: "+numDistinctMatchingFiducials);
 			System.out.println("Num previously used: "+bin.getNumFiducialsUsed());
 			
-		}
+		}*/
 		if(error < ERROR_THRESH && fids.length <= bin.getNumFiducialsUsed())
 		{
-			if (bin.blockID == 2)
-			System.out.println("NOT Recalculating "+bin.blockID);
+			//if (bin.blockID == 2)
+			//System.out.println("NOT Recalculating "+bin.blockID);
 			return true;
 		}
 		if (error< 1.5*ERROR_THRESH && fids.length >= bin.getNumFiducialsUsed() && fids.length - numMatchingPoints  <= fids.length/4 && numDistinctMatchingFiducials > 1)
 		{
-			if (bin.blockID == 2)
-			System.out.println("NOT Recalculating "+bin.blockID);
+			//if (bin.blockID == 2)
+			//System.out.println("NOT Recalculating "+bin.blockID);
 			return true;
 		}
-		if (bin.blockID == 2)
-		System.out.println("Recalculating "+bin.blockID);
+		//if (bin.blockID == 2)
+		//System.out.println("Recalculating "+bin.blockID);
 		return false;
 	}
 	
