@@ -155,7 +155,7 @@ public class BlockInfo
 		{
 			if (data[k] != null)
 			{
-				if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
+				if (new Date().getTime() - data[k].lastSeen.getTime() < LIFETIME)
 				{
 					if(data[k].seen)
 					{
@@ -214,7 +214,7 @@ public class BlockInfo
 		public int fiducialsID;
 		public int camID;
 		public double rotation;
-		public Date timestamp;
+		//public Date timestamp;
 		public double camViewX;
 		public double camViewY;
 		private boolean seen;
@@ -231,7 +231,7 @@ public class BlockInfo
 		public Fiducial clone()
 		{
 			Fiducial dolly = new Fiducial(fiducialsID, rotation, camViewX, camViewY, camID);
-			dolly.timestamp = (Date)this.timestamp.clone();
+			//dolly.timestamp = (Date)this.timestamp.clone();
 			dolly.lastSeen = (Date)this.lastSeen.clone();
 			dolly.seen = seen;
 			if (worldPosition != null)
@@ -245,7 +245,7 @@ public class BlockInfo
 		{
 			fiducialsID = _fiducialsID;
 			rotation = rot;
-			timestamp = new Date();
+			//timestamp = new Date();
 			camViewX = _camViewX;
 			camViewY = _camViewY;
 			camID = _camID;
