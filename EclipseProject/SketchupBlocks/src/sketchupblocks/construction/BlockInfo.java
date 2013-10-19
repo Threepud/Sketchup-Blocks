@@ -25,7 +25,7 @@ public class BlockInfo
 	
 	private int minEvents = 3;
 	private int minFidVis = 2;
-	private int LIFETIME = 1500; //ms
+	private int LIFETIME = 2500; //ms
 	private Date lastChange;
 	
 	//Variables for removal logic.
@@ -214,8 +214,7 @@ public class BlockInfo
 					/*int camID = data[k].camID;
 					int fidID = data[k].fiducialsID;
 					data[k] = null;
-					numExpired++;
-					System.out.println("Expired is now null: "+(fiducialMap.get(new CamFidIdentifier(camID, fidID))== null));*/
+					numExpired++;*/
 				}
 			}
 		}

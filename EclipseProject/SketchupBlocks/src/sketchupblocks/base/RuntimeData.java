@@ -1,6 +1,5 @@
 package sketchupblocks.base;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -23,7 +22,7 @@ public class RuntimeData
 	
 	public static Face topFace;
 	public static Face bottomFace;
-	public static int blockID = -1;
+	public static int blockID = 3;
 	
 	public static void init()
 	{
