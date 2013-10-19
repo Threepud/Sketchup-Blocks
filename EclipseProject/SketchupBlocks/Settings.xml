@@ -26,10 +26,11 @@
 		</CameraSettings>
 	</Cameras>
 	<Calibration>
-		<Landmark id="0">-2.9,-2.9,0</Landmark>
-		<Landmark id="1">-2.9,2.9,0</Landmark>
-		<Landmark id="2">2.9,2.9,0</Landmark>
-		<Landmark id="3">2.9,-2.9,0</Landmark>
+		<Landmark id="0">-5.0,-5.0,0</Landmark>
+		<Landmark id="1">-5.0,5.0,0</Landmark>
+		<Landmark id="2">5.0,-5.0,0</Landmark>
+		<Landmark id="3">5.0,5.0,0</Landmark>
+		
 	</Calibration>
 	<GUI>
 		<FancyShaders>true</FancyShaders>
