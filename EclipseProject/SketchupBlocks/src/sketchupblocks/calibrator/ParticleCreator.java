@@ -8,6 +8,7 @@ public class ParticleCreator
 	private double  upper;
 	private int dimension;
 	private Random rand;
+	private int counter = 0;
 	
 	public ParticleCreator(int dim,double low, double  up)
 		{
@@ -19,7 +20,7 @@ public class ParticleCreator
 
 	public Particle getParticle(double sC,double cC,double mC,double Cmax)
 	{
-		Particle result = new Particle(sC,cC,mC,Cmax,dimension);
+		Particle result = new Particle(sC,cC,mC,Cmax,dimension,counter++);
 		for(int k = 0 ; k < dimension ; k++)
 			result.attributes[k] = rand.nextDouble()*(upper-lower)+lower;
 			
