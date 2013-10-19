@@ -33,14 +33,14 @@ public class Calibrator
 		if(Settings.numCameras == 0)
 			throw new RuntimeException("ERROR: Settings, no cameras set.");
 		
-		if(iBlock.cameraEvent.fiducialID >= 60 || iBlock.cameraEvent.fiducialID <= 63)
+		if(iBlock.cameraEvent.fiducialID >= 60 && iBlock.cameraEvent.fiducialID <= 63)
 		{
 			RuntimeData.cameraCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][0] = iBlock.cameraEvent.x;
 			RuntimeData.cameraCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][1] = iBlock.cameraEvent.y;
 			RuntimeData.haveCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60] = true;
 		}
 		else
-		if(iBlock.cameraEvent.fiducialID >= 200 || iBlock.cameraEvent.fiducialID <= 203)
+		if(iBlock.cameraEvent.fiducialID >= 200 && iBlock.cameraEvent.fiducialID <= 203)
 		{	
 			RuntimeData.cameraCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-200][0] = iBlock.cameraEvent.x;
 			RuntimeData.cameraCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-200][1] = iBlock.cameraEvent.y;
