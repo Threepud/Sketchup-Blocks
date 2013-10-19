@@ -22,6 +22,8 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
+//TODO: Separate debug mechanics from model viewer
+
 public class ModelViewer
 {
 	private PApplet window;
@@ -78,8 +80,11 @@ public class ModelViewer
 	//debug line intersections
 	private boolean showDebugLineIntersection = false;
 	
-	//debug ghost blocks - pre sudo physics
+	//debug ghost blocks - pre pseudo physics
 	private boolean showGhostBlocks = false;
+	
+	//debug additional ghost blocks - post 2 point wiggling
+	private boolean showMediumRare = false;
 	
 	//debug - general output lines
 	private boolean showOutputLines = false;
@@ -160,6 +165,7 @@ public class ModelViewer
 		drawDebugStuff();
 		drawBlocks();
 		drawGhostBlocks();
+		drawMediumRareBlocks();
 		drawSkyBox();
 		drawConstructionFloor();
 	}
@@ -391,6 +397,54 @@ public class ModelViewer
 		}
 	}
 	
+	private void drawMediumRareBlocks()
+	{
+		if(showMediumRare)
+		{
+			window.pushMatrix();
+			window.noStroke();
+			window.fill(255, 0, 0, 100);
+			window.scale(10, 10, 10);
+			
+			//draw block list
+			Model model;
+			try 
+			{
+				model = lobby.getModel();
+			} 
+			catch (ModelNotSetException e) 
+			{
+				e.printStackTrace();
+				return;
+			}
+			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
+			{
+				if (block.type == ModelBlock.ChangeType.REMOVE)
+				{
+					Logger.log("Drawing removed block!", 1);
+					return;
+				}
+				
+				SmartBlock smartBlock = block.smartBlock;
+				window.beginShape(PConstants.TRIANGLES);
+				for(int x = 0; x < smartBlock.indices.length; ++x)
+				{
+					Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
+					Matrix trans = block.mediumRareMatrix;
+					//TODO: Is sometimes null?
+					if(trans != null)
+					{
+						vertex = Matrix.multiply(trans, vertex.padVec3()).toVec3();
+						window.vertex((float)vertex.y, -(float)vertex.z, (float)vertex.x);
+					}
+				}
+				
+				window.endShape();
+			}
+			window.popMatrix();
+		}
+	}
+	
 	private void drawBlocks()
 	{
 		if(showModel)
@@ -416,6 +470,25 @@ public class ModelViewer
 			}
 			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
 			{
+				//TODO: Please remove this...
+				//###
+				if(block.smartBlock.blockId == RuntimeData.blockID)
+				{
+					if(transparentModel)
+						window.fill(0, 0, 255, 100);
+					else
+						window.fill(0, 0, 255);
+					
+				}
+				else
+				{
+					if(transparentModel)
+						window.fill(255, 255, 255, 100);
+					else
+						window.fill(255);
+				}
+				//###
+				
 				if(showDebugLineIntersection)
 				{
 					Line line = RuntimeData.debugLine;
@@ -698,6 +771,13 @@ public class ModelViewer
 			if(e.getAction() == KeyEvent.RELEASE)
 			{
 				showOutputLines = !showOutputLines; 
+			}
+		}
+		else if(e.getKey() == 'f')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+			{
+				showMediumRare = !showMediumRare; 
 			}
 		}
 	}
