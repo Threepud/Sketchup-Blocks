@@ -37,16 +37,18 @@ public class Calibrator
 		{
 			RuntimeData.cameraCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][0] = iBlock.cameraEvent.x;
 			RuntimeData.cameraCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60][1] = iBlock.cameraEvent.y;
+			RuntimeData.haveCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60] = true;
 		}
 		else
 		if(iBlock.cameraEvent.fiducialID >= 200 || iBlock.cameraEvent.fiducialID <= 203)
 		{	
 			RuntimeData.cameraCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-200][0] = iBlock.cameraEvent.x;
 			RuntimeData.cameraCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-200][1] = iBlock.cameraEvent.y;
+			RuntimeData.haveCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-200] = true;
 		}
 		
 			
-		RuntimeData.haveCalibrationDetails[iBlock.cameraEvent.cameraID][iBlock.cameraEvent.fiducialID-60] = true;
+		
 		if (RuntimeData.haveAllCalibrationDetails(iBlock.cameraEvent.cameraID))
 		{
 			RuntimeData.clearCalibrationDetails(iBlock.cameraEvent.cameraID);
