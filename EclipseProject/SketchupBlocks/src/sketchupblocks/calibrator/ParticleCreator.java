@@ -14,7 +14,7 @@ public class ParticleCreator
 			dimension= dim;
 			lower = low;
 			upper = up;
-			rand = new Random();
+			rand = new Random(42);
 		}
 
 	public Particle getParticle(double sC,double cC,double mC,double Cmax)
