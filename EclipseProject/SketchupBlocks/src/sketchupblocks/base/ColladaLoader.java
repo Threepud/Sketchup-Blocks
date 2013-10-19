@@ -58,6 +58,48 @@ public class ColladaLoader
 		
 		SmartBlock result = new SmartBlock();
 		
+		//get transformation matrix
+		Matrix transM = Matrix.identity(4);
+		XML libraryVisualScenesNode = xml.getChild("library_visual_scenes");
+		XML visualSceneNode = libraryVisualScenesNode.getChild("visual_scene"); 
+		XML nodeNode = visualSceneNode.getChild("node");
+		XML node2Node = nodeNode.getChild("node");
+		if(node2Node != null)
+		{
+			XML matrixNode = node2Node.getChild("matrix");
+			String matrixString = matrixNode.getContent();
+			String[] matrixBits = matrixString.split(" ");
+			int index = 0;
+			double[][] dMatrix = 
+				{
+					{
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+					},
+					{
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+					},
+					{
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+					},
+					{
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+					}
+				};
+			transM = new Matrix(dMatrix);
+		}
+		
 		//get model vertices
 		String[] stringVertices = sources[0].getChild("float_array").getContent().split(" ");
 		Vec3[] vertices = new Vec3[stringVertices.length / 3];
@@ -75,6 +117,8 @@ public class ColladaLoader
 				vertices[x].x = Double.parseDouble(stringVertices[index]) * unitMeter;
 				vertices[x].y = -Double.parseDouble(stringVertices[index + 1]) * unitMeter;
 				vertices[x].z = Double.parseDouble(stringVertices[index + 2]) * unitMeter;
+				
+				vertices[x] = Matrix.multiply(transM, vertices[x].padVec3()).toVec3();
 			}
 			catch(NumberFormatException e)
 			{
