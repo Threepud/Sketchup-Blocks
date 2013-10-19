@@ -100,14 +100,10 @@ public class ModelConstructor implements Runnable
 				block = new BlockInfo(iBlock.block);
 				blockMap.put(iBlock.block.blockId,block);
 			}
-
-			if (block.blockID == 2)
-				System.out.println("Received add/update for fiducial: "+iBlock.cameraEvent.fiducialID+" (Block "+block.blockID+")");
 			
 			if(!checkReAdd(block,iBlock))
 			{
-				BlockInfo.Fiducial fiducial =  block.new Fiducial(iBlock.cameraEvent);
-				block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
+				block.updateFiducial(iBlock.cameraEvent);
 				block.setLastChange(new Date());
 			}
 		}
@@ -115,43 +111,29 @@ public class ModelConstructor implements Runnable
 		{
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
 			if(block == null) return;
-			BlockInfo.Fiducial fid = block.fiducialMap.get(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
+			BlockInfo.Fiducial fid = block.getFiducial(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID);
 			if(fid == null) return;
 
-			if (block.blockID == 2)
-				System.out.println("Received remove for fiducial: "+iBlock.cameraEvent.fiducialID+" (Block "+block.blockID+")");
 			boolean blockWasRemoved = false;
 			fid.setSeen(false);
-			
 			block.setLastChange(new Date());
 						
 			if(!block.getRemoved())
 			{
 				if(blockNotSeen(block))
 				{
-					if (block.blockID == 2)
-						System.out.println("Not seeing block 2");
 					if(expectedToSeeBlock(block))
 					{
-
-						if (block.blockID == 2)
-							System.out.println("Removed block "+block.blockID);
 						block.setRemoved(true);						
 						eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));		
 						blockWasRemoved = true;
 					}
-					else if (block.blockID == 2)
-						System.out.println("Didn't expect to see block 2");
 				}
-				else if (block.blockID == 2)
-					System.out.println("Seeing block 2");
 			}
 			
 			//As toe-geboude blokkie remove is.
 			if (blockWasRemoved)
 			{
-				if (block.blockID == 2)
-					System.out.println("Checking all blocks");
 				//Check ALLLLLL the blocks
 				for(BlockInfo blokkie : blockMap.values())
 				{
@@ -161,7 +143,6 @@ public class ModelConstructor implements Runnable
 						{
 							if(expectedToSeeBlock(blokkie))
 							{
-								System.out.println("******"+ block.blockID);
 								blokkie.setRemoved(true);					
 								eddy.updateModel(new ModelBlock((SmartBlock)blokkie.smartBlock, null, ModelBlock.ChangeType.REMOVE));			
 							}
@@ -174,25 +155,18 @@ public class ModelConstructor implements Runnable
 	}
 	
 	/**
+	 * TODO: fix negative...
 	 * @param block The block being assessed.
 	 * @return true is the block has any visible fiducials
 	 */
 	private boolean blockNotSeen(BlockInfo block)
 	{
 		boolean seen = false;
-		for(BlockInfo.Fiducial fid : block.fiducialMap.values())
+		for(BlockInfo.Fiducial fid : block.getAllFiducials())
 		{
 			if(fid.isSeen())
 			{
-				if (block.blockID == 2)
-					System.out.println(fid.fiducialsID+" seen");
 				seen = true;
-			}
-			else
-			{
-				if (block.blockID == 2)
-					
-				System.out.println(fid.fiducialsID+" not seen");
 			}
 		}
 		return !seen;
@@ -200,24 +174,23 @@ public class ModelConstructor implements Runnable
 	
 	private void reAddBlockToModel(BlockInfo bi)
 	{
-		if (bi.blockID == 2)
-			System.out.println("Readding "+bi.blockID);
 		bi.setRemoved(false);
 		ModelBlock mb = new ModelBlock((SmartBlock)bi.smartBlock, bi.getTransform(), ModelBlock.ChangeType.UPDATE);
 		
 		ArrayList<Line> dbLines = new ArrayList<Line>();
 		ArrayList<Vec3>  dbPoints = new ArrayList<Vec3>();
 		
-		for(BlockInfo.Fiducial fid : bi.fiducialMap.values())
+		for (BlockInfo.Fiducial fid : bi.getAllFiducials())
 		{
-			if(RuntimeData.getCameraPosition(fid.camID) == null)
+			if (RuntimeData.getCameraPosition(fid.camID) == null)
 			{
 				continue;
 			}
-			if(fid.worldPosition == null)
+			if (fid.worldPosition == null)
 			{
 				continue;
 			}
+			
 			Vec3 direction = Vec3.subtract(fid.worldPosition,RuntimeData.getCameraPosition(fid.camID));
 			dbLines.add(new Line(RuntimeData.getCameraPosition(fid.camID),direction));
 			dbPoints.add(fid.worldPosition);
@@ -225,14 +198,13 @@ public class ModelConstructor implements Runnable
 		
 		mb.debugLines = dbLines.toArray(new Line[0]);
 		mb.debugPoints = dbPoints.toArray(new Vec3[0]);
-		//mb.debugPoints;
 		eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mb));	
 	
 	}
 	
 	private boolean expectedToSeeBlock(BlockInfo block)
 	{
-		for(BlockInfo.Fiducial fid : block.fiducialMap.values())
+		for(BlockInfo.Fiducial fid : block.getAllFiducials())
 		{
 			Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
 			Vec3 fidPos = fid.worldPosition;
@@ -249,6 +221,7 @@ public class ModelConstructor implements Runnable
 				return true;
 			}
 		}
+
 		return false;
 	}
 	
@@ -280,11 +253,10 @@ public class ModelConstructor implements Runnable
 	
 	private boolean checkReAdd(BlockInfo block , InputBlock iBlock)
 	{
-		BlockInfo.CamFidIdentifier key = block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID);
-		if(!block.fiducialMap.containsKey(key))
+		if(!block.mapContainsKey(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID))
 			return false; //There is no information to build on
 		
-		BlockInfo.Fiducial fid =  block.fiducialMap.get(key);
+		BlockInfo.Fiducial fid =  block.getFiducial(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID);
 		if(!fid.isSeen()) //The block was removed and we are seeing it again.
 		{
 			if(fid.camID == iBlock.cameraEvent.cameraID && Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.1 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.1) // Seen at the same place
@@ -332,7 +304,7 @@ public class ModelConstructor implements Runnable
 					double timePassed = Math.abs(b.getLastChange().getTime() - new Date().getTime());
 					if(b.ready() && RuntimeData.isSystemCalibrated() && (timePassed > changeWindow) )
 					{
-						Logger.log("Processing "+b.fiducialMap.size()+" number of lines after "+timePassed, 50);
+						Logger.log("Processing "+b.getMapSize()+" number of lines after "+timePassed, 50);
 						processBin(b.clone(), b);
 					}
 				}
@@ -358,13 +330,6 @@ public class ModelConstructor implements Runnable
 	 */
 	private void processBin(BlockInfo bin, BlockInfo binReference)
 	{
-		if (bin.blockID == 2)
-		{
-			System.out.println("The truth beforehand is " + binReference.getRemoved() +" " +bin.getRemoved());
-			System.out.println("---");
-			System.out.println("Starting processBin with");
-			
-		}
 		BlockInfo.Fiducial [] fids = bin.getCleanFiducials();
 		int numFiducials = fids.length;
 		Line[] lines = new Line[numFiducials];
@@ -372,11 +337,7 @@ public class ModelConstructor implements Runnable
 		{
 			lines[k] = fids[k].getLine(); 
 			lines[k].direction.normalize();
-			if (bin.blockID == 2)
-				System.out.print(" " + fids[k].fiducialsID+" ");
 		}
-		if (bin.blockID == 2)
-			System.out.println("\n---");
 		Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
 		int [] cameraIds = new int[numFiducials];
 		Vec3[] fidUpM = new Vec3[numFiducials];
@@ -419,7 +380,12 @@ public class ModelConstructor implements Runnable
 		
 		//Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
 		/**/
-		Matrix[] transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM);
+		Matrix[] transforms;
+		if (bin.blockID == 2)
+			transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, true);
+		else
+			transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, false);
+			
 		Matrix transform = transforms[0];
 		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
 		
@@ -433,15 +399,14 @@ public class ModelConstructor implements Runnable
 				transform = PSOtransform;
 			}
 			
+			//if (bin.blockID == 2)
+				//System.out.println("Resorting to PSO");
+			
 			Logger.log("Transformation score(MTC):"+MTCScore, 10);
 			Logger.log("Transformation score(PSO):"+PSOScore, 10);
 		}
 		
 		Logger.log("Transform: "+transform, 50);
-		
-		
-		
-		
 		
 		BlockInfo [] bis = allPossibleReadditions();
 		
@@ -462,12 +427,15 @@ public class ModelConstructor implements Runnable
 	
 	private void updateFidPos(int fidID, int camID, BlockInfo binReference, Vec3 fidPos)
 	{
-		BlockInfo.Fiducial fid = binReference.fiducialMap.get(binReference.new CamFidIdentifier(camID, fidID));
-		if (fid != null) fid.worldPosition = fidPos;
+		BlockInfo.Fiducial fid = binReference.getFiducial(camID, fidID);
+		if (fid != null) 
+			fid.worldPosition = fidPos;
 	}
 	
 	private boolean samePosition(BlockInfo bin, Vec3 [] model,Vec3 [] fids)
 	{
+		if (bin.blockID == 2)
+			System.out.println("Getting same for block 2");
 		if(bin.getTransform() == null)
 			return false;
 		double ERROR_THRESH = 1;
@@ -480,7 +448,7 @@ public class ModelConstructor implements Runnable
 		for(int k = 0 ;  k < fids.length ; k++ )
 		{
 			double temp = fids[k].distance(Matrix.multiply(transform, model[k].padVec3()).toVec3());
-			error +=temp*temp;
+			error += temp*temp;
 			if (temp*temp < ERROR_THRESH*0.5)
 			{
 				numMatchingPoints++;
@@ -493,16 +461,29 @@ public class ModelConstructor implements Runnable
 		}
 		
 		error /= fids.length;
-		
+		if (bin.blockID == 2)
+		{
+			System.out.println("Num points seen: "+fids.length);
+			System.out.println("Error: "+error);
+			System.out.println("Num matching points: "+numMatchingPoints);
+			System.out.println("Num distinct matching points: "+numDistinctMatchingFiducials);
+			System.out.println("Num previously used: "+bin.getNumFiducialsUsed());
+			
+		}
 		if(error < ERROR_THRESH && fids.length <= bin.getNumFiducialsUsed())
 		{
+			if (bin.blockID == 2)
+			System.out.println("NOT Recalculating "+bin.blockID);
 			return true;
 		}
 		if (error< 1.5*ERROR_THRESH && fids.length >= bin.getNumFiducialsUsed() && fids.length - numMatchingPoints  <= fids.length/4 && numDistinctMatchingFiducials > 1)
 		{
+			if (bin.blockID == 2)
+			System.out.println("NOT Recalculating "+bin.blockID);
 			return true;
 		}
-		
+		if (bin.blockID == 2)
+		System.out.println("Recalculating "+bin.blockID);
 		return false;
 	}
 	

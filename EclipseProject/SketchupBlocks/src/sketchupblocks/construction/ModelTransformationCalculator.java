@@ -14,11 +14,13 @@ import sketchupblocks.math.Vec3;
 
 public class ModelTransformationCalculator 
 {
-	public static Matrix[] getModelTransformationMatrix(BlockInfo.Fiducial[] fids, Vec3[] positions, Vec3[] fidCoordsM, Vec3[] fidUpM)
+	public static Matrix[] getModelTransformationMatrix(BlockInfo.Fiducial[] fids, Vec3[] positions, Vec3[] fidCoordsM, Vec3[] fidUpM, boolean care)
 	{
 		
 		if (fidCoordsM.length > 2)
 		{	
+			if (care)
+				System.out.println("Calculating transform for "+fidCoordsM.length+" many fiducials seen");
 			Matrix[] transformMatrices = TransformationCalculator.calculateTransformationMatrices(fidCoordsM, positions);
 			Logger.log("ROTATION: "+transformMatrices[0], 60);
 			Logger.log("TRANSLATION: "+transformMatrices[1], 60);
@@ -37,6 +39,8 @@ public class ModelTransformationCalculator
 
 			if (ids.size() == 2)
 			{
+				if (care)
+					System.out.println("Only saw two unique fiducials");
 				Vec3[] axisEnds = new Vec3[]{new Vec3(), new Vec3()};
 				int[] counts = new int[2];
 				int firstID = ids.get(0);
@@ -97,6 +101,14 @@ public class ModelTransformationCalculator
 				RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), /*new Vec3(0,0,1)up))));
 			
 			}*/
+			
+
+			if (care)
+			{
+				System.out.println("Transform: "+transform);
+				System.out.println("Super raw: "+Matrix.multiply(transformMatrices[1],  transformMatrices[0].padMatrix()));
+			}
+			
 			return new Matrix[]{transform, Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix())};
 		}
 		throw new RuntimeException("Invalid number of fiducials observed to calculate position "+(fidCoordsM.length == positions.length));

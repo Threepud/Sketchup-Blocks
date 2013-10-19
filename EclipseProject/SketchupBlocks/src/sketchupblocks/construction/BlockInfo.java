@@ -1,6 +1,7 @@
 package sketchupblocks.construction;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ public class BlockInfo
 	private Matrix transform = null;
 	private int numFiducialsUsed = 0;
 	
-	protected Map<CamFidIdentifier,Fiducial> fiducialMap;
+	private Map<CamFidIdentifier,Fiducial> fiducialMap;
 
 	
 	public BlockInfo(Block _smartBlock)
@@ -64,9 +65,47 @@ public class BlockInfo
 		return dolly;
 	}
 	
+	public synchronized Fiducial getFiducial(int camID, int fidID)
+	{
+		return fiducialMap.get(new CamFidIdentifier(camID, fidID));
+	}
+	
+	public synchronized Collection<Fiducial> getAllFiducials()
+	{
+		return fiducialMap.values();
+	}
+	
+	public synchronized void updateFiducial(CameraEvent cam)
+	{
+		Fiducial fid = fiducialMap.get(new CamFidIdentifier(cam.cameraID, cam.fiducialID));
+		if (fid != null)
+		{
+			fid.camViewX = cam.x;
+			fid.camViewY = cam.y;
+			fid.lastSeen = new Date();
+			fid.rotation = cam.rotation;
+			fid.seen = true;
+		}
+		else
+		{
+			fid = new Fiducial(cam);
+			fiducialMap.put(new CamFidIdentifier(cam.cameraID, cam.fiducialID), fid);
+		}
+	}
+	
+	public synchronized int getMapSize()
+	{
+		return fiducialMap.values().size();
+	}
+	
+	public synchronized boolean mapContainsKey(int camID, int fidID)
+	{
+		return fiducialMap.containsKey(new CamFidIdentifier(camID, fidID));
+	}
+	
 	public synchronized Date getLastChange()
 	{
-		return (Date)lastChange.clone();
+		return lastChange;
 	}
 	
 	public synchronized void setLastChange(Date d)
@@ -77,7 +116,7 @@ public class BlockInfo
 	public synchronized Matrix getTransform()
 	{
 		if (transform != null)
-			return transform.clone();
+			return transform;
 		else
 			return null;
 	}
@@ -116,7 +155,7 @@ public class BlockInfo
 			BlockInfo.Fiducial fid = fiducialMap.get(keys);
 			if(fid.isSeen())
 			{
-				cleanFids.add(fid.clone());//Remove the ones that aren't currently visible
+				cleanFids.add(fid);//Remove the ones that aren't currently visible
 			}
 		}
 		return cleanFids.toArray(fids);	
@@ -128,7 +167,7 @@ public class BlockInfo
 		for(Fiducial fid : fiducialMap.values())
 		{
 			if(result.getTime() > fid.lastSeen.getTime())
-				result = (Date)fid.lastSeen.clone();
+				result = fid.lastSeen;
 		}
 		return result;
 	}
@@ -151,6 +190,8 @@ public class BlockInfo
 		
 		ArrayList<Integer> fiducialList = new ArrayList<Integer>();
 		int count = 0;
+		//int numExpired = 0;
+		//int numNotSeen = 0;
 		for (int k = 0; k < data.length; k++)
 		{
 			if (data[k] != null)
@@ -163,14 +204,28 @@ public class BlockInfo
 						if( !fiducialList.contains(new Integer(data[k].fiducialsID)))
 							fiducialList.add(data[k].fiducialsID);
 					}
+					else
+					{
+						//numNotSeen++;
+					}
 				}
 				else
 				{
+					/*int camID = data[k].camID;
+					int fidID = data[k].fiducialsID;
 					data[k] = null;
+					numExpired++;
+					System.out.println("Expired is now null: "+(fiducialMap.get(new CamFidIdentifier(camID, fidID))== null));*/
 				}
 			}
 		}
-		
+		/*if (blockID == 2)
+		{
+			System.out.println(fiducialList.size()+" many fiducials observed");
+			System.out.println("Number of events seen & alive: "+count);
+			System.out.println("Number of events expired: "+numExpired);
+			System.out.println("Number of events alive, but not seen: "+numNotSeen);
+		}*/
 		if (fiducialList.size() >= minFidVis && count >= minEvents)
 			return true;
 		else 
@@ -214,7 +269,6 @@ public class BlockInfo
 		public int fiducialsID;
 		public int camID;
 		public double rotation;
-		//public Date timestamp;
 		public double camViewX;
 		public double camViewY;
 		private boolean seen;
@@ -231,7 +285,6 @@ public class BlockInfo
 		public Fiducial clone()
 		{
 			Fiducial dolly = new Fiducial(fiducialsID, rotation, camViewX, camViewY, camID);
-			//dolly.timestamp = (Date)this.timestamp.clone();
 			dolly.lastSeen = (Date)this.lastSeen.clone();
 			dolly.seen = seen;
 			if (worldPosition != null)
@@ -245,7 +298,6 @@ public class BlockInfo
 		{
 			fiducialsID = _fiducialsID;
 			rotation = rot;
-			//timestamp = new Date();
 			camViewX = _camViewX;
 			camViewY = _camViewY;
 			camID = _camID;
