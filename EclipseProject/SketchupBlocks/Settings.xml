@@ -41,7 +41,7 @@
 	</GUI>
 	<DebugRecording>
 		<LiveData>false</LiveData>
-		<RecordingInputFilename>dbo/CustomBlocks(withRemoval)</RecordingInputFilename>
+		<RecordingInputFilename>dbo/CrossSideRemove2</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
 	<Network>
