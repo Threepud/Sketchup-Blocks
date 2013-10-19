@@ -36,7 +36,7 @@ public class Feeder extends Interpreter
 	{
 		try
 		{
-			BufferedReader reader = new BufferedReader(new FileReader(new File(Settings.recordingInputFileName + cameraID)));
+			BufferedReader reader = new BufferedReader(new FileReader(new File(Settings.recordingInputFileName + "/output"+cameraID)));
 			
 			String line = "";
 			

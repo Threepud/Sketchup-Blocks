@@ -91,7 +91,6 @@ public class SessionManager
 	
     public void onCameraEvent(CameraEvent cameraEvent)
     {
-    	//We still require some sort of menu traversal scheme...
     	Block block = blockDB.findBlock(cameraEvent.fiducialID);
     	
     	if(block instanceof UserBlock)
