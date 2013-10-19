@@ -430,7 +430,7 @@ public class ModelViewer
 				for(int x = 0; x < smartBlock.indices.length; ++x)
 				{
 					Vec3 vertex = smartBlock.vertices[smartBlock.indices[x]];
-					Matrix trans = block.mediumRareMatrix;
+					Matrix trans = block.mooingMatrix;
 					//TODO: Is sometimes null?
 					if(trans != null)
 					{

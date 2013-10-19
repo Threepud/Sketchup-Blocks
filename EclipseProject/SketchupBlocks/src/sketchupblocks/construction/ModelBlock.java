@@ -19,7 +19,7 @@ public class ModelBlock implements Serializable
 	public SmartBlock smartBlock;
 	public Matrix transformationMatrix;
 	public Matrix rawMatrix;
-	public Matrix mediumRareMatrix;
+	public Matrix mooingMatrix;
 	public ChangeType type;
 	public Line [] debugLines = new Line[0];
 	public Vec3 [] debugPoints = new Vec3[0];
@@ -38,7 +38,7 @@ public class ModelBlock implements Serializable
 		else 
 		{
 			rawMatrix = null; 
-			mediumRareMatrix = Matrix.identity(4);
+			mooingMatrix = Matrix.identity(4);
 		}
 		type = _type;
 	}
@@ -48,7 +48,7 @@ public class ModelBlock implements Serializable
 		ModelBlock dolly = new ModelBlock();
 		dolly.smartBlock = smartBlock;
 		dolly.transformationMatrix = transformationMatrix.clone();
-		dolly.mediumRareMatrix = mediumRareMatrix.clone();
+		dolly.mooingMatrix = mooingMatrix.clone();
 		dolly.rawMatrix = transformationMatrix.clone();
 		dolly.type = type;
 		dolly.debugLines = new Line[debugLines.length];

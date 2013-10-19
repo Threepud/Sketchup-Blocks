@@ -453,13 +453,8 @@ public class ModelConstructor implements Runnable
 		
 		if (binReference.getRemoved() == bin.getRemoved())
 		{
-			if (bin.blockID == 2)
-			{
-				System.out.println("Adding block from processBin "+bin.blockID);
-				System.out.println("The truth is " + binReference.getRemoved() +" " +bin.getRemoved());
-			}
 			ModelBlock mbToAdd = new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE);
-			mbToAdd.mediumRareMatrix = transforms[1]; /**/
+			mbToAdd.mooingMatrix = transforms[1]; /**/
 			mbToAdd.debugLines = lines;
 			mbToAdd.debugPoints = fiducialWorld;
 			
@@ -467,7 +462,6 @@ public class ModelConstructor implements Runnable
 			binReference.setRemoved(false);	
 			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
 		}
-		//eddy.updateModel(mbToAdd);
 		doReadditions(bis);
 	}
 	

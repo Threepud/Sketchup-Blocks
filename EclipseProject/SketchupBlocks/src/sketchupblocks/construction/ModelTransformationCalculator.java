@@ -34,13 +34,9 @@ public class ModelTransformationCalculator
 				}
 				
 			}
-			
-			
+
 			if (ids.size() == 2)
 			{
-				RuntimeData.outputLines.clear();
-				
-
 				Vec3[] axisEnds = new Vec3[]{new Vec3(), new Vec3()};
 				int[] counts = new int[2];
 				int firstID = ids.get(0);
@@ -63,10 +59,9 @@ public class ModelTransformationCalculator
 				Vec3 axis = Vec3.subtract(axisEnds[0], axisEnds[1]);
 				axis.normalize();
 				
-				//System.out.println("Code has been invoked!");
 				Matrix rot = Matrix.identity(3);
 				Matrix rotTest = Matrix.identity(3);
-				RuntimeData.outputLines.clear();
+				
 				for (int k = 0; k < positions.length; k++)
 				{ 
 					
@@ -80,7 +75,6 @@ public class ModelTransformationCalculator
 					rotTest = Matrix.multiply(new RotationMatrix3D(axis, -angle), rotTest);
 					
 					double newTestAngle = GetError(transformMatrices[0],rotTest,fidUpM[k],fidCoordsM[k],positions[k],axis,up,fids[k].rotation);
-					//System.out.println("angle:" + Math.toDegrees(angle) + " newAngle:" + Math.toDegrees(newAngle) + " newTestAngle:" + Math.toDegrees(newTestAngle));
 					
 					Vec3 fidNormal = Matrix.multiply(rot, Matrix.multiply(transformMatrices[0], Vec3.normalize(fidCoordsM[k])));
 					RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), new Vec3(0,0,1)))));
@@ -95,14 +89,14 @@ public class ModelTransformationCalculator
 				}
 				return new Matrix[]{transform, Matrix.multiply(transformMatrices[1],  transformMatrices[0].padMatrix())};
 			}
-			RuntimeData.outputLines.clear();
+			/*RuntimeData.outputLines.clear();
 			for (int k = 0; k < positions.length; k++)
 			{
 				Vec3 up = getUpVector(fids[k].camID);
 				Vec3 fidNormal = Matrix.multiply(transformMatrices[0], Vec3.normalize(fidCoordsM[k]));
-				RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), /*new Vec3(0,0,1)*/up))));
+				RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), /*new Vec3(0,0,1)up))));
 			
-			}
+			}*/
 			return new Matrix[]{transform, Matrix.multiply(transformMatrices[1], transformMatrices[0].padMatrix())};
 		}
 		throw new RuntimeException("Invalid number of fiducials observed to calculate position "+(fidCoordsM.length == positions.length));
