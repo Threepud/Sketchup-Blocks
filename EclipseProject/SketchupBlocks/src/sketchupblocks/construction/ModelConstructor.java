@@ -13,13 +13,9 @@ import sketchupblocks.base.InputBlock;
 import sketchupblocks.base.Logger;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.SessionManager;
-import sketchupblocks.base.Settings;
 import sketchupblocks.calibrator.*;
 import sketchupblocks.math.Line;
-import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Matrix;
-import sketchupblocks.math.NoConvergenceException;
-import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.SingularMatrixException;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.nonlinearmethods.BPos;
@@ -330,8 +326,6 @@ public class ModelConstructor implements Runnable
 	 */
 	private void processBin(BlockInfo bin, BlockInfo binReference)
 	{
-		//if (bin.blockID == 2)
-		//	System.out.println("Processing bin for 2");
 		BlockInfo.Fiducial [] fids = bin.getCleanFiducials();
 		int numFiducials = fids.length;
 		Line[] lines = new Line[numFiducials];
@@ -387,11 +381,7 @@ public class ModelConstructor implements Runnable
 		
 		//Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
 		/**/
-		Matrix[] transforms;
-		if (bin.blockID == 2)
-			transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, true);
-		else
-			transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, false);
+		Matrix[] transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM);
 			
 		Matrix transform = transforms[0];
 		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
@@ -439,8 +429,6 @@ public class ModelConstructor implements Runnable
 	
 	private boolean samePosition(BlockInfo bin, Vec3 [] model,Vec3 [] fids)
 	{
-		//if (bin.blockID == 2)
-		//	System.out.println("Getting same for block "+bin.blockID);
 		if(bin.getTransform() == null)
 			return false;
 		double ERROR_THRESH = 1;
@@ -466,29 +454,14 @@ public class ModelConstructor implements Runnable
 		}
 		
 		error /= fids.length;
-		/*if (bin.blockID == 2)
-		{
-			System.out.println("Num points seen: "+fids.length);
-			System.out.println("Error: "+error);
-			System.out.println("Num matching points: "+numMatchingPoints);
-			System.out.println("Num distinct matching points: "+numDistinctMatchingFiducials);
-			System.out.println("Num previously used: "+bin.getNumFiducialsUsed());
-			
-		}*/
 		if(error < ERROR_THRESH && fids.length <= bin.getNumFiducialsUsed())
 		{
-			//if (bin.blockID == 2)
-			//System.out.println("NOT Recalculating "+bin.blockID);
 			return true;
 		}
 		if (error< 1.5*ERROR_THRESH && fids.length >= bin.getNumFiducialsUsed() && fids.length - numMatchingPoints  <= fids.length/4 && numDistinctMatchingFiducials > 1)
 		{
-			//if (bin.blockID == 2)
-			//System.out.println("NOT Recalculating "+bin.blockID);
 			return true;
 		}
-		//if (bin.blockID == 2)
-		//System.out.println("Recalculating "+bin.blockID);
 		return false;
 	}
 	

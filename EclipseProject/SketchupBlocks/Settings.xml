@@ -41,7 +41,7 @@
 	</GUI>
 	<DebugRecording>
 		<LiveData>false</LiveData>
-		<RecordingInputFilename>dbo/CrossSideRemove2</RecordingInputFilename>
+		<RecordingInputFilename>dbo/Wierd2</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
 	<Network>
