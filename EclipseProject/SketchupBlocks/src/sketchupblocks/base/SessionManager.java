@@ -71,6 +71,7 @@ public class SessionManager
 			
 			sarah.setLobby(lobby);
 			sarah.setWindow(parent);
+			sarah.createDebugViewer();
 			menu = new Menu(this, parent, startupStatus);
 			
 			jimmy = new ModelConstructor(this);
@@ -255,6 +256,7 @@ public class SessionManager
     		try 
     		{
 				sarah.setLobby(lobby);
+				sarah.createDebugViewer();
 				EnvironmentAnalyzer.setLobby(lobby);
 				jimmy.setLobby(lobby);
 			} 
@@ -312,6 +314,7 @@ public class SessionManager
     	        		
     	            	lobby.setModel(new Model());
     	            	sarah.setLobby(lobby);
+    	            	sarah.createDebugViewer();
     	            	((NetworkedLobby)lobby).start();
     	            	
     	            	spectating = !spectating;
