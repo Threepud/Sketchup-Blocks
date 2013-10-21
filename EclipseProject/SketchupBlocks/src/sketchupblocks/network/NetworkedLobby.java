@@ -115,9 +115,10 @@ public class NetworkedLobby extends Thread implements Lobby
 								} 
 								catch (Exception e) 
 								{
-									e.printStackTrace();
 									menu.updateNetworkStatus(false);
+									menu.checkCalibrated();
 									sessMan.spectate(null);
+									e.printStackTrace();
 								}
 							}
 						};
