@@ -99,23 +99,99 @@ public class ModelViewer
 	    lobby = _lobby;
 	}
 	
+	public void setKeyboardInput(KeyEvent e)
+	{
+		if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() < (49 + Settings.numCameras)))
+		{
+			if(e.getKeyCode() == 192)
+				selectCamera = 0;
+			else
+				selectCamera = e.getKeyCode() - 48;
+			switchCamera();
+		}
+		//zoom in
+		else if(e.getKeyCode() == 38)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				zoomIn = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				zoomIn = false;
+		}
+		//zoom out
+		else if(e.getKeyCode() == 40)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				zoomOut = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				zoomOut = false;
+		}
+		//right
+		else if(e.getKeyCode() == 39)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				rotateRight = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				rotateRight = false;
+		}
+		//left
+		else if(e.getKeyCode() == 37)
+		{
+			if(e.getAction() == KeyEvent.PRESS)
+				rotateLeft = true;
+			else if(e.getAction() == KeyEvent.RELEASE)
+				rotateLeft = false;
+		}
+		else if(e.getKey() == 'e')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+			{
+				Model model;
+				try 
+				{
+					model = lobby.getModel();
+				}
+				catch (ModelNotSetException e1) 
+				{
+					e1.printStackTrace();
+					return;
+				}
+				ColladaLoader.export(new ArrayList<ModelBlock>(model.getBlocks()));
+			}
+		}
+		else if(e.getKey() == 'm')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				showModel = !showModel;
+		}
+		else if(e.getKey() == 'n')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				transparentModel = !transparentModel;
+		}
+		else if(e.getKey() == 't')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+				transparentConstructionFloor = !transparentConstructionFloor;
+		}
+		/*else if(e.getKey() == 'i')
+		{
+			if(e.getAction() == KeyEvent.RELEASE)
+			{
+				showDebugLineIntersection = !showDebugLineIntersection;
+			}
+		}*/
+		else
+		{
+			debugViewer.setKeyboardInput(e);
+		}
+	}
+	
 	public void createDebugViewer() throws Exception
 	{
 		if(lobby == null || window == null)
 			throw new Exception("Lobby or window not set.");
 		
 		debugViewer = new DebugViewer(lobby, window);
-	}
-	
-	public void rotateView(CameraEvent event)
-	{
-		if(event.type == CameraEvent.EVENT_TYPE.ADD || event.type == CameraEvent.EVENT_TYPE.UPDATE)
-		{
-			if(event.xVelocity < 0)
-				rightVel = -1 * (event.xVelocity / velocityScalar);
-			else if(event.xVelocity > 0)
-				leftVel = (event.xVelocity / velocityScalar);
-		}
 	}
 	
 	public void drawModel()
@@ -285,6 +361,17 @@ public class ModelViewer
 		window.popMatrix();
 	}
 	
+	public void rotateView(CameraEvent event)
+	{
+		if(event.type == CameraEvent.EVENT_TYPE.ADD || event.type == CameraEvent.EVENT_TYPE.UPDATE)
+		{
+			if(event.xVelocity < 0)
+				rightVel = -1 * (event.xVelocity / velocityScalar);
+			else if(event.xVelocity > 0)
+				leftVel = (event.xVelocity / velocityScalar);
+		}
+	}
+	
 	private void switchCamera()
 	{
 		if(selectCamera == 0)
@@ -343,92 +430,5 @@ public class ModelViewer
 		userCamera.eye.x = cameraRadius * Math.cos(currentRotation);
 		userCamera.eye.z = cameraRadius * Math.sin(currentRotation);
 		userCamera.eye.y = cameraHeight;
-	}
-	
-	public void setKeyboardInput(KeyEvent e)
-	{
-		if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() < (49 + Settings.numCameras)))
-		{
-			if(e.getKeyCode() == 192)
-				selectCamera = 0;
-			else
-				selectCamera = e.getKeyCode() - 48;
-			switchCamera();
-		}
-		//zoom in
-		else if(e.getKeyCode() == 38)
-		{
-			if(e.getAction() == KeyEvent.PRESS)
-				zoomIn = true;
-			else if(e.getAction() == KeyEvent.RELEASE)
-				zoomIn = false;
-		}
-		//zoom out
-		else if(e.getKeyCode() == 40)
-		{
-			if(e.getAction() == KeyEvent.PRESS)
-				zoomOut = true;
-			else if(e.getAction() == KeyEvent.RELEASE)
-				zoomOut = false;
-		}
-		//right
-		else if(e.getKeyCode() == 39)
-		{
-			if(e.getAction() == KeyEvent.PRESS)
-				rotateRight = true;
-			else if(e.getAction() == KeyEvent.RELEASE)
-				rotateRight = false;
-		}
-		//left
-		else if(e.getKeyCode() == 37)
-		{
-			if(e.getAction() == KeyEvent.PRESS)
-				rotateLeft = true;
-			else if(e.getAction() == KeyEvent.RELEASE)
-				rotateLeft = false;
-		}
-		else if(e.getKey() == 'e')
-		{
-			if(e.getAction() == KeyEvent.RELEASE)
-			{
-				Model model;
-				try 
-				{
-					model = lobby.getModel();
-				}
-				catch (ModelNotSetException e1) 
-				{
-					e1.printStackTrace();
-					return;
-				}
-				ColladaLoader.export(new ArrayList<ModelBlock>(model.getBlocks()));
-			}
-		}
-		else if(e.getKey() == 'm')
-		{
-			if(e.getAction() == KeyEvent.RELEASE)
-				showModel = !showModel;
-		}
-		else if(e.getKey() == 'n')
-		{
-			if(e.getAction() == KeyEvent.RELEASE)
-				transparentModel = !transparentModel;
-		}
-		else if(e.getKey() == 't')
-		{
-			if(e.getAction() == KeyEvent.RELEASE)
-				transparentConstructionFloor = !transparentConstructionFloor;
-		}
-		/*else if(e.getKey() == 'i')
-		{
-			if(e.getAction() == KeyEvent.RELEASE)
-			{
-				showDebugLineIntersection = !showDebugLineIntersection;
-			}
-		}*/
-		else
-		{
-			debugViewer.setKeyboardInput(e);
-		}
 	}
 }
