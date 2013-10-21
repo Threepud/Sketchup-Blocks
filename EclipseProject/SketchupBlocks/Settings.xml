@@ -30,7 +30,6 @@
 		<Landmark id="1">-5.0,5.0,0</Landmark>
 		<Landmark id="2">5.0,-5.0,0</Landmark>
 		<Landmark id="3">5.0,5.0,0</Landmark>
-		
 	</Calibration>
 	<GUI>
 		<FancyShaders>false</FancyShaders>
@@ -41,7 +40,7 @@
 	</GUI>
 	<DebugRecording>
 		<LiveData>false</LiveData>
-		<RecordingInputFilename>dbo/Wierd2</RecordingInputFilename>
+		<RecordingInputFilename>dbo/CustomBlocks(withRemoval)</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
 	<Network>
