@@ -156,9 +156,9 @@ public class ColladaLoader
 		ArrayList<ModelBlock> blocks = new ArrayList<>();
 		ModelBlock mBlock = new ModelBlock();
 		mBlock.smartBlock = block;
+		mBlock.transformationMatrix = Matrix.identity(4);
 		blocks.add(mBlock);
-		String path = "./models/";
-		makeCollada(path + block.name, blocks);
+		makeCollada(block.name, blocks);
 	}
 	
 	public static void export(ArrayList<ModelBlock> blocks)
@@ -305,7 +305,7 @@ public class ColladaLoader
 			{
 				vector = Matrix.multiply(blocks.get(x).transformationMatrix, vector.padVec3()).toVec3();
 				vectorString += vector.x / 0.02539999969303608 + " ";
-				vectorString += vector.y / 0.02539999969303608 + " ";
+				vectorString += -(vector.y / 0.02539999969303608) + " ";
 				vectorString += vector.z / 0.02539999969303608 + " ";
 			}
 			floatArray.setContent(vectorString.substring(0, vectorString.length() - 1));
