@@ -32,6 +32,43 @@ public class Server extends Thread implements ModelChangeListener
 		blockMap = new ConcurrentHashMap<>();
 	}
   
+	public void replaceLobby(Lobby _lobby)
+	{
+		lobby = _lobby;
+		lobby.registerChangeListener(this);
+		clearNetworkModel();
+		blockMap.clear();
+	}
+	
+	private void clearNetworkModel()
+	{
+		ArrayList<ModelBlock> blocks = new ArrayList<>(blockMap.values());
+		
+		//relay to each client
+		Socket[] connections = new Socket[0];
+		connections = clients.toArray(connections);
+		
+		for(int k = connections.length - 1 ; k >= 0; k--)
+		{
+			try 
+			{
+				for(int x = 0; x < blocks.size(); ++x)
+				{
+					blocks.get(x).type = ModelBlock.ChangeType.REMOVE;
+					sendData(connections[k], blocks.get(x));
+				}
+			}
+			catch (Exception e) 
+			{
+				System.out.println(e);
+				if(Settings.verbose >= 3)
+					System.out.println("Closing connection to client: " + k);
+				
+				clients.remove(k);
+			}
+		}
+	}
+	
 	@Override
 	public void fireModelChangeEvent(ModelBlock change)
 	{

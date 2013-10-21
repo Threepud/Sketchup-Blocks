@@ -352,6 +352,49 @@ public class SessionManager
     	sarah.setKeyboardInput(event);
     }
     
+    private void resetSystem()
+    {
+    	String resetString = 
+    			  "#################################\n"
+    			+ "#             RESET             #\n"
+    			+ "#################################\n";
+    	Logger.log(resetString, 1);
+    	
+    	pauseInput();
+    	
+    	lobby = new LocalLobby();
+		lobby.setModel(new Model());
+		
+		server.replaceLobby(lobby);
+		
+		EnvironmentAnalyzer.setLobby(lobby);
+		
+		sarah.setLobby(lobby);
+		sarah.setWindow(parent);
+		try 
+		{
+			sarah.createDebugViewer();
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		
+		jimmy = null;
+		jimmy = new ModelConstructor(this);
+		jimmy.setLobby(lobby);
+		
+		createInterpreters();
+    }
+    
+    private void pauseInput()
+    {
+    	for (int k = 0; k < wimpie.length; k++)
+		{
+			wimpie[k].paused = !wimpie[k].paused;
+		}
+    }
+    
     //keyboard listener
     protected class ModelViewerEventListener
 	{
@@ -366,15 +409,20 @@ public class SessionManager
 			{
 				if(e.getAction() == KeyEvent.PRESS)
 				{
-					for (int k = 0; k < wimpie.length; k++)
-					{
-						wimpie[k].paused = !wimpie[k].paused;
-					}
+					pauseInput();
 				}
-			
 			}
-			
-			viewerFeedKeyboard(e);
+			else if(e.getKey() == 'r')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+				{
+					resetSystem();
+				}
+			}
+			else
+			{
+				viewerFeedKeyboard(e);
+			}
 		}
 	}
 }
