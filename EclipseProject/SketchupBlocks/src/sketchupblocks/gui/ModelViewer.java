@@ -17,6 +17,13 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
+/**
+ * @author Jacques Coetzee
+ * 
+ * The model viewer class displays the current
+ * model being built by the user in a real-time
+ * 3D OpenGL window.
+ */
 public class ModelViewer
 {
 	private DebugViewer debugViewer;
@@ -63,6 +70,11 @@ public class ModelViewer
 	
 	private PImage tilesTexture;
 	 
+	/**
+	 * Constructor for the ModelViewer class.
+	 * The constructor sets up the current view camera
+	 * and initializes some other member variables.
+	 */
 	public ModelViewer()
 	{
 		Vec3 up = new Vec3(0, 1, 0);
@@ -85,6 +97,12 @@ public class ModelViewer
 		currentCamera = userCamera;
 	}
 	
+	/**
+	 * This method sets the parent PApplet object.
+	 * This PApplet is referenced to send all the draw
+	 * commands for the graphics.
+	 * @param _window Parent PApplet object.
+	 */
 	public void setWindow(PApplet _window)
 	{
 		window = _window;
@@ -94,11 +112,23 @@ public class ModelViewer
 		fog = window.loadShader("./shaders/constructionFloor/fogFrag.glsl", "./shaders/constructionFloor/fogVert.glsl");
 	}
 	
+	/**
+	 * This function provides the ModelViewer with a reference to the
+	 * lobby to get the latest model being built.
+	 * @param _lobby Lobby Class.
+	 */
 	public void setLobby(Lobby _lobby)
 	{
 	    lobby = _lobby;
 	}
 	
+	/**
+	 * This method passes the keyboard input to
+	 * the ModelViewer. The method then checks if
+	 * any relevant keys have been pressed and makes the
+	 * appropriate changes in the class.
+	 * @param e Keyboard event.
+	 */
 	public void setKeyboardInput(KeyEvent e)
 	{
 		if(e.getKeyCode() == 192 || (e.getKeyCode() >= 49 && e.getKeyCode() < (49 + Settings.numCameras)))
@@ -186,6 +216,12 @@ public class ModelViewer
 		}
 	}
 	
+	/**
+	 * This function creates a debug viewer for the model viewer.
+	 * The debug viewer has the ability to display additional
+	 * debug information along with the model in the OpenGL view.
+	 * @throws Exception Exception for if lobby or parent PApplet are not set.
+	 */
 	public void createDebugViewer() throws Exception
 	{
 		if(lobby == null || window == null)
@@ -194,6 +230,11 @@ public class ModelViewer
 		debugViewer = new DebugViewer(lobby, window);
 	}
 	
+	/**
+	 * This function is the draw call to draw the model.
+	 * This function calls all other relevant sub functions
+	 * to fully display all graphical components.
+	 */
 	public void drawModel()
 	{
 		updateCamera();
@@ -225,6 +266,10 @@ public class ModelViewer
 		drawConstructionFloor();
 	}
 	
+	/**
+	 * This function draws the actual model blocks graphical
+	 * component.
+	 */
 	private void drawBlocks()
 	{
 		if(showModel)
@@ -306,6 +351,10 @@ public class ModelViewer
 		}
 	}
 	
+	/**
+	 * This function draws the sky dome graphical
+	 * component.
+	 */
 	private void drawSkyBox()
 	{
 		window.pushMatrix();
@@ -318,6 +367,10 @@ public class ModelViewer
 		window.popMatrix();	
 	}
 	
+	/**
+	 * This function draws the construction floor
+	 * graphical component.
+	 */
 	private void drawConstructionFloor()
 	{
 		window.pushMatrix();
@@ -361,6 +414,11 @@ public class ModelViewer
 		window.popMatrix();
 	}
 	
+	/**
+	 * This function rotates the camera view when the
+	 * rotate command block is presented.
+	 * @param event Camera event from ReacTIVision
+	 */
 	public void rotateView(CameraEvent event)
 	{
 		if(event.type == CameraEvent.EVENT_TYPE.ADD || event.type == CameraEvent.EVENT_TYPE.UPDATE)
@@ -372,6 +430,10 @@ public class ModelViewer
 		}
 	}
 	
+	/**
+	 * This function switches between the available cameras
+	 * when the appropriate keyboard input is provided.
+	 */
 	private void switchCamera()
 	{
 		if(selectCamera == 0)
@@ -387,6 +449,10 @@ public class ModelViewer
 		}
 	}
 	
+	/**
+	 * This function updates the target rotation to
+	 * realize by matching the target and current rotations.
+	 */
 	private void changeTarget()
 	{
 		if(selectCamera != 0)
@@ -403,6 +469,11 @@ public class ModelViewer
 			leftVel = maxVel;
 	}
 	
+	/**
+	 * This function matches up the current
+	 * rotation when it differs from the target
+	 * rotation.
+	 */
 	private void updateCamera()
 	{
 		changeTarget();
