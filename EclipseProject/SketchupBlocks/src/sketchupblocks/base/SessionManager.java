@@ -277,7 +277,7 @@ public class SessionManager
     		}
     		server.start();
     		
-    		menu.forceStopConnectPopup();
+    		//menu.forceStopConnectPopup();
     		menu.checkCalibrated();
     		
     		spectating = !spectating;
@@ -304,7 +304,7 @@ public class SessionManager
     					NetworkedLobby temp;
     					if(uBlock == null)
     						//debug: manual address here
-    						temp = new NetworkedLobby("192.168.137.221", Settings.connectPort, menu, sessionManager);
+    						temp = new NetworkedLobby("192.168.137.1", Settings.connectPort, menu, sessionManager);
     					else
     						temp = new NetworkedLobby(uBlock.address, Settings.connectPort, menu, sessionManager); 
     	    			lobby = temp;
