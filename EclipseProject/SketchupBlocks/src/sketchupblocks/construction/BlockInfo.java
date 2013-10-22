@@ -18,7 +18,7 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.SingularMatrixException;
 import sketchupblocks.math.Vec3;
 /**
- * Storing information on blocks
+ * Used for storing information on blocks
  * @author Neoin
  * @author Elre
  * @author Jacques

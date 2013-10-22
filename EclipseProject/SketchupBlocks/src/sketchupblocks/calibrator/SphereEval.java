@@ -3,7 +3,7 @@ package sketchupblocks.calibrator;
 import sketchupblocks.math.Vec3;
 
 /**
- * The intersection of the Spheres
+ * Evaluation of particles for the intersection of spheres
  * @author Hein
  *
  */

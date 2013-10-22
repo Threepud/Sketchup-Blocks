@@ -6,7 +6,7 @@ import sketchupblocks.math.Vec3;
 /**
  *
  * Evaluates the fiducial positions proposed by PSO 
- * @author Neoin
+ * @author Hein
  */
 public class BlockPosition implements Evaluator
 {

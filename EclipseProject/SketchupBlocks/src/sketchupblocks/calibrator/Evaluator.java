@@ -2,7 +2,7 @@ package sketchupblocks.calibrator;
 
 /**
  * An interface for evaluating a particle
- * @author Neoin
+ * @author Hein
  */
 public interface Evaluator
 {

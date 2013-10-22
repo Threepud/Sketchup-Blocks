@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * The particle used in the PSO algorithm
- * @author Neoin
+ * @author Hein
  */
 public class Particle implements Serializable 
 {
