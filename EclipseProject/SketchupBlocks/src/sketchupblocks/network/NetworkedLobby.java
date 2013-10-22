@@ -139,4 +139,9 @@ public class NetworkedLobby extends Thread implements Lobby
 			e.printStackTrace();
 		}
 	}
+	
+	public boolean isOnline()
+	{
+		return online;
+	}
 }
