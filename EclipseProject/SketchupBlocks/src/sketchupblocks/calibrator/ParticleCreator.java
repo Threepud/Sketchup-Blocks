@@ -2,6 +2,10 @@ package sketchupblocks.calibrator;
 import java.util.Random;
 import java.io.*;
 
+/**
+ * Creates particles for PSO
+ * @author Hein *
+ */
 public class ParticleCreator
 {
 	private double  lower;

@@ -7,6 +7,11 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.Vec3;
 
+/**
+ * A class form the adjustment of blocks according to their environment.
+ *	@author Elre 
+ */
+
 public class PseudoPhysicsApplicator 
 {
 	private static double maxErrorMargin = 0.99999;

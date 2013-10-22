@@ -13,6 +13,11 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
+/**
+ * A utility class for analyzing the model
+ * @author Hein
+ * @author Elre
+ */
 public class EnvironmentAnalyzer 
 {
 	private static Lobby eddy;

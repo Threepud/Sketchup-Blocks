@@ -2,11 +2,13 @@ package sketchupblocks.calibrator;
 import java.util.Random;
 import java.io.Serializable;
 
+/**
+ * The particle used in the PSO algorithm
+ * @author Neoin
+ */
 public class Particle implements Serializable 
 {
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 1L;
 
 	public double [] attributes;

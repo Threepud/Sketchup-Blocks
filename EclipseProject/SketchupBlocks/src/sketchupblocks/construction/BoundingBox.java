@@ -6,6 +6,11 @@ import sketchupblocks.math.Face;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 
+/**
+ * The bounding box for geometry And functions to generate them
+ * @author Elre
+ *
+ */
 public class BoundingBox 
 {
 	public Vec3 min;

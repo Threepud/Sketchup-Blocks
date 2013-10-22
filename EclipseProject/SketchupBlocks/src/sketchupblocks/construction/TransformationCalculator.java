@@ -4,7 +4,11 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.SVDecomposer;
 import sketchupblocks.math.Vec3;
 
-
+/**
+ * Applies rigid body transformation
+ * @author Elre
+ *
+ */
 public class TransformationCalculator 
 {
 	public static Matrix[] calculateTransformationMatrices(Vec3[] pointsA, Vec3[] pointsB)

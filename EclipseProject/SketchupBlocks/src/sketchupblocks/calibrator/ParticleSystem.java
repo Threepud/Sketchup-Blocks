@@ -1,5 +1,10 @@
 package sketchupblocks.calibrator;
 
+/**
+ * Implements the PSO algorithm
+ * @author Hein
+ *
+ */
 public class ParticleSystem
 {
 	private ParticleSystemSettings settings;

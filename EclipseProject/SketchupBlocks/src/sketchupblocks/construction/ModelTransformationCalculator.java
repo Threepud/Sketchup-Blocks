@@ -12,6 +12,11 @@ import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.SingularMatrixException;
 import sketchupblocks.math.Vec3;
 
+/**
+ * Calculates the transformation from Model space to World space
+ * @author Neoin
+ * @author Elre
+ */
 public class ModelTransformationCalculator 
 {
 	public static Matrix[] getModelTransformationMatrix(BlockInfo.Fiducial[] fids, Vec3[] positions, Vec3[] fidCoordsM, Vec3[] fidUpM)

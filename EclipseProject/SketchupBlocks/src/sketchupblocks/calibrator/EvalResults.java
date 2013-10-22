@@ -1,5 +1,9 @@
 package sketchupblocks.calibrator;
 
+/**
+ * Results of an Particle evaluation
+ * @author Neoin
+ */
 public class EvalResults
 {
 	public double score;

@@ -12,7 +12,10 @@ import sketchupblocks.math.nonlinearmethods.ErrorFunction;
 import sketchupblocks.math.nonlinearmethods.Newton;
 import sketchupblocks.math.nonlinearmethods.SIS;
 
-
+/**
+ * Calculates the camera positions.
+ * Uses Mathematical methods without PSO failover
+ */
 public class Calibrator 
 {
 	//public boolean[][] haveBlockDetails;

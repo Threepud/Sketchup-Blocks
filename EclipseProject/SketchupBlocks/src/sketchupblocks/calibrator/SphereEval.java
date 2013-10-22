@@ -2,6 +2,11 @@ package sketchupblocks.calibrator;
 
 import sketchupblocks.math.Vec3;
 
+/**
+ * The intersection of the Spheres
+ * @author Hein
+ *
+ */
 public class SphereEval implements Evaluator
 {
 

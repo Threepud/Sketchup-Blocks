@@ -1,5 +1,10 @@
 package sketchupblocks.calibrator;
 
+/**
+ * The length of the lines to the camera
+ * @author Hein
+ *
+ */
 public class TriangleEval implements Evaluator
 {
 	double [] lengths;
