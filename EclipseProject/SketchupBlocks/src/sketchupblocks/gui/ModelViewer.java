@@ -19,7 +19,6 @@ import sketchupblocks.network.Lobby;
 
 /**
  * @author Jacques Coetzee
- * 
  * The model viewer class displays the current
  * model being built by the user in a real-time
  * 3D OpenGL window.

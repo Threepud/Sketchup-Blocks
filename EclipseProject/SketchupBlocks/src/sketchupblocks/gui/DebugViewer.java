@@ -18,6 +18,12 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
+/**
+ * @author Jacques Coetzee
+ * This class provides additional debug information
+ * and displays it in the OpenGL window alongside the
+ * model.
+ */
 public class DebugViewer extends ModelViewer 
 {
 	//fiducial debug lines
@@ -42,12 +48,22 @@ public class DebugViewer extends ModelViewer
 	//debug additional ghost blocks - pre 2 point wiggling
 	private boolean showMediumRare = false;
 	
+	/**
+	 * This constructor sets the lobby and window
+	 * handler needed to send the draw calls to
+	 * and the the current model.
+	 * @param _lobby Current working lobby.
+	 * @param _window PApplet window handler.
+	 */
 	public DebugViewer(Lobby _lobby, PApplet _window)
 	{
 		super.lobby = _lobby;
 		super.window = _window;
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.ModelViewer#setKeyboardInput(processing.event.KeyEvent)
+	 */
 	public void setKeyboardInput(KeyEvent e)
 	{
 		if(e.getKey() == 'l')
@@ -104,6 +120,12 @@ public class DebugViewer extends ModelViewer
 		}
 	}
 	
+	/**
+	 * This is the Debug Viewer's main 
+	 * draw call. This function calls all relevant
+	 * sub functions to draw the rest of the debug
+	 * graphical components.
+	 */
 	public void drawDebugInformation()
 	{
 		drawDebugLines();
@@ -114,6 +136,10 @@ public class DebugViewer extends ModelViewer
 		drawMediumRareBlocks();
 	}
 	
+	/**
+	 * This function draw the lines from all the system
+	 * cameras to a fiducial center.
+	 */
 	private void drawDebugLines()
 	{
 		if(lineShorter)
@@ -155,6 +181,11 @@ public class DebugViewer extends ModelViewer
 		window.popMatrix();
 	}
 	
+	/**
+	 * This function enable easy debugging by displaying 
+	 * arbitrary lines given by the programming. These lines 
+	 * are fetched from the RuntimeData class.
+	 */
 	private void drawOutputLines()
 	{
 		final float olLength = 10.0f;
@@ -183,6 +214,10 @@ public class DebugViewer extends ModelViewer
 		window.popMatrix();
 	}
 	
+	/**
+	 * This function draws all the fiducial 
+	 * center points.
+	 */
 	private void drawDebugPoints()
 	{
 		if(showDebugPoints)
@@ -221,6 +256,11 @@ public class DebugViewer extends ModelViewer
 		}
 	}
 	
+	/**
+	 * This function draws faces given in the
+	 * RuntimeData class for debugging the Pseudo
+	 * Physics class.
+	 */
 	private void drawDebugFaces()
 	{
 		if(showDebugFaces)
@@ -273,6 +313,11 @@ public class DebugViewer extends ModelViewer
 		}
 	}*/
 	
+	/**
+	 * This function draws the model blocks
+	 * before they have been modified by the 
+	 * pseudo physics engine.
+	 */
 	private void drawGhostBlocks()
 	{
 		if(showGhostBlocks)
@@ -332,6 +377,11 @@ public class DebugViewer extends ModelViewer
 		}
 	}
 	
+	/**
+	 * This function draws the model blocks fresh
+	 * from the SVD Decomposition. This is before any
+	 * correction to the orientation has been applied.
+	 */
 	private void drawMediumRareBlocks()
 	{
 		if(showMediumRare)
