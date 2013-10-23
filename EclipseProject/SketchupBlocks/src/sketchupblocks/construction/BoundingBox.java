@@ -38,7 +38,7 @@ public class BoundingBox
 				data[i][k] = vecData[i];
 			data[3][k] = 1;
 		}
-		
+		//Matrix hybridTransform = getHybridMatrix(mb);
 		Vec3[] vertices = Matrix.multiply(mb.transformationMatrix, new Matrix(data)).toVec3Array();
 		for (int k = 0; k < vertices.length; k++)
 		{
@@ -90,5 +90,14 @@ public class BoundingBox
 					normals.add(normal);
 			}
 			return normals;
+		}
+		
+
+		public static Matrix getHybridMatrix(ModelBlock mb)
+		{
+			Matrix hybridTransform = mb.transformationMatrix;
+			for (int k = 0; k < 4; k++)
+				hybridTransform.data[k][3] = mb.rawMatrix.data[k][3];
+			return hybridTransform;
 		}
 }
