@@ -158,7 +158,7 @@ public class BlockInfo
 		for(BlockInfo.CamFidIdentifier keys : fiducialMap.keySet())
 		{
 			BlockInfo.Fiducial fid = fiducialMap.get(keys);
-			if(fid.isSeen() && !fid.processed)
+			if(fid.isSeen())
 			{
 				cleanFids.add(fid);//Remove the ones that aren't currently visible
 			}
@@ -203,33 +203,15 @@ public class BlockInfo
 			{
 				if (new Date().getTime() - data[k].lastSeen.getTime() < LIFETIME)
 				{
-					if(data[k].seen && !data[k].processed)
+					if(data[k].seen)
 					{
 						count ++;
 						if( !fiducialList.contains(new Integer(data[k].fiducialsID)))
 							fiducialList.add(data[k].fiducialsID);
 					}
-					else
-					{
-						//numNotSeen++;
-					}
-				}
-				else
-				{
-					/*int camID = data[k].camID;
-					int fidID = data[k].fiducialsID;
-					data[k] = null;
-					numExpired++;*/
 				}
 			}
 		}
-		/*if (blockID == 2)
-		{
-			System.out.println(fiducialList.size()+" many fiducials observed");
-			System.out.println("Number of events seen & alive: "+count);
-			System.out.println("Number of events expired: "+numExpired);
-			System.out.println("Number of events alive, but not seen: "+numNotSeen);
-		}*/
 		if (fiducialList.size() >= minFidVis && count >= minEvents)
 			return true;
 		else 
@@ -277,7 +259,6 @@ public class BlockInfo
 		public double camViewY;
 		private boolean seen;
 		private Date lastSeen;
-		private boolean processed;
 		
 		public Vec3 worldPosition = null;
 		
@@ -285,7 +266,6 @@ public class BlockInfo
 		{
 			this(camE.fiducialID, camE.rotation, camE.x, camE.y, camE.cameraID);
 			seen = true;
-			processed = false;
 		}
 		
 		public Fiducial clone()
@@ -309,7 +289,6 @@ public class BlockInfo
 			camID = _camID;
 			seen = true;
 			lastSeen = new Date();
-			processed = false;
 		}
 		
 		
@@ -352,11 +331,6 @@ public class BlockInfo
 		{
 			return seen;
 		
-		}
-		
-		public void setProcessed()
-		{
-			processed = true;
 		}
 		
 		public void setSeen(boolean s)
