@@ -71,6 +71,28 @@ public class EnvironmentAnalyzer
 		return null;
 	}
 	
+	public static void sortBottomUp(ArrayList<ModelBlock> blocks)
+	{
+		BoundingBox[] bb = new BoundingBox[blocks.size()];
+		for (int k = 0; k < bb.length; k++)
+		{
+			bb[k] = BoundingBox.generateBoundingBox(blocks.get(k));
+		}
+		
+		for (int i = 1; i < blocks.size(); i++)
+		{
+			for (int k = i; k > 0 && higherThan(bb[k-1], bb[k]); k--)
+			{
+				BoundingBox tempbb = bb[k];
+				bb[k] = bb[k-1];
+				bb[k-1] = tempbb;
+				ModelBlock tempmb = blocks.get(k);
+				blocks.set(k, blocks.get(k-1));
+				blocks.set(k-1, tempmb);
+			}
+		}
+	}
+	
 	public static Face[] getFacingFaces(Matrix transform, SmartBlock s, Vec3 surfaceNormal)
 	{
 		double largestDot = -Double.MAX_VALUE;
@@ -150,7 +172,7 @@ public class EnvironmentAnalyzer
 	
 	private static boolean checkSAT(BoundingBox one, BoundingBox two)
 	{
-		double thresh = 2;
+		double thresh = 1.5;
 		ArrayList<Vec3> sepAxes = new ArrayList<Vec3>();
 		sepAxes = one.generate2DSeparationAxes(sepAxes);
 		sepAxes = two.generate2DSeparationAxes(sepAxes);
@@ -218,7 +240,7 @@ public class EnvironmentAnalyzer
 	{
 		int count = 0;
 		
-		Vec3 fidPos = sm.fiducialCoordinates[fidID];
+		Vec3 fidPos = sm.fiducialCoordinates[fidID%6];
 		double distToEdge = 3.0;
 		
 		int nonzeroDim = -1;
@@ -243,10 +265,10 @@ public class EnvironmentAnalyzer
 			indexTwo = 2;
 			nonzeroDim = 0;
 		}
-		
 		int numCorners = 4;
+		int numPoints = numCorners+1;
 		double[][] fidCornerData = new double[numCorners][3];
-		Vec3[] fidCorners = new Vec3[numCorners];
+		Vec3[] fidPoints = new Vec3[5];
 		int k = 0;
 		fidCornerData[k][indexOne] = distToEdge;
 		fidCornerData[k][indexTwo] = distToEdge;
@@ -263,14 +285,16 @@ public class EnvironmentAnalyzer
 		fidCornerData[k][indexOne] = distToEdge;
 		fidCornerData[k][indexTwo] = -distToEdge;
 		fidCornerData[k][nonzeroDim] = fidPosData[nonzeroDim];
-		for (k = 0; k < numCorners; k++)
-		{
-			fidCorners[k] = new Vec3(fidCornerData[k]);
-		}
 		
 		for (k = 0; k < numCorners; k++)
 		{
-			Vec3 fidWorld = Matrix.multiply(transform, fidCorners[k]);
+			fidPoints[k] = new Vec3(fidCornerData[k]);
+		}
+		fidPoints[numCorners] = fidPos;
+		
+		for (k = 0; k < numPoints; k++)
+		{
+			Vec3 fidWorld = Matrix.multiply(transform, fidPoints[k].padVec3()).toVec3();
 			ModelBlock[] mb = getIntersectingModels(RuntimeData.getCameraPosition(camID), fidWorld);
 			if ((mb.length == 1 && mb[0].smartBlock.blockId == sm.blockId) || mb.length == 0)
 			{
@@ -281,6 +305,9 @@ public class EnvironmentAnalyzer
 				count++;
 			}
 		}
+		
+		
+		
 		return count;
 	}
 	
