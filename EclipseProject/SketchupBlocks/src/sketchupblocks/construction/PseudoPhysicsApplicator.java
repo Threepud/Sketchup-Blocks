@@ -44,12 +44,12 @@ public class PseudoPhysicsApplicator
 			}
 			else 
 			{
-				topFace = EnvironmentAnalyzer.getFacingFace(mBelow, new Vec3(0, 0, 1)); //This face has already been rotated.
+				topFace = EnvironmentAnalyzer.getFacingFaces(mBelow.transformationMatrix, mBelow.smartBlock, new Vec3(0, 0, 1))[0]; //This face has already been rotated.
 			}
 			
 			Vec3 surfaceNormal = topFace.normal();
 			Vec3 invertedSurfaceNormal = Vec3.scalar(-1, surfaceNormal);
-			Face bottomFace = EnvironmentAnalyzer.getFacingFace(m, invertedSurfaceNormal); //Get the face of m that is towards the block below it.
+			Face bottomFace = EnvironmentAnalyzer.getFacingFaces(m.transformationMatrix, m.smartBlock, invertedSurfaceNormal)[0]; //Get the face of m that is towards the block below it.
 			
 			Matrix calculatedRotationMatrix = EnvironmentAnalyzer.extractRotationMatrix(m.transformationMatrix); //Get rotation already applied to bottomFace.
 			double largest = Vec3.dot(invertedSurfaceNormal, bottomFace.normal());

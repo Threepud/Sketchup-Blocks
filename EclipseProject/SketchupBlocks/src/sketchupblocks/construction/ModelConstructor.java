@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import sketchupblocks.database.*;
+import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.InputBlock;
 import sketchupblocks.base.Logger;
@@ -202,19 +203,28 @@ public class ModelConstructor implements Runnable
 	{
 		for(BlockInfo.Fiducial fid : block.getAllFiducials())
 		{
-			Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
-			Vec3 fidPos = fid.worldPosition;
-			if(camPos == null || fidPos == null)
+			try
+			{
+				Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
+				Vec3 fidPos = fid.worldPosition;
+				ModelBlock mb1 = eddy.getModel().getBlockById(block.blockID);
+				if(camPos == null || fidPos == null || mb1 == null)
+				{
+					continue;
+				}
+				//ModelBlock [] mb = EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos);
+				int numObscured = EnvironmentAnalyzer.getNumObscuredPoints((SmartBlock)block.smartBlock, mb1.transformationMatrix, fid.camID, fid.fiducialsID);	
+				if (numObscured == 0)
+					return true;
+				//The fiducial is not obscured.
+				//if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) 
+				//{
+				//	return true;
+				//}
+			}
+			catch(ModelNotSetException e)
 			{
 				continue;
-			}
-		
-			ModelBlock [] mb = EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos);
-					
-			//The fiducial is not obscured.
-			if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) 
-			{
-				return true;
 			}
 		}
 
