@@ -294,23 +294,11 @@ public class ModelViewer
 			}
 			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
 			{
-				//TODO: Please remove this...
-				//###
-				if(block.smartBlock.blockId == RuntimeData.blockID)
-				{
-					if(transparentModel)
-						window.fill(0, 0, 255, 100);
-					else
-						window.fill(0, 0, 255);
-					
-				}
+
+				if(transparentModel)
+					window.fill(255, 255, 255, 100);
 				else
-				{
-					if(transparentModel)
-						window.fill(255, 255, 255, 100);
-					else
-						window.fill(255);
-				}
+					window.fill(255);
 				//###
 				
 				/*if(showDebugLineIntersection)
