@@ -3,6 +3,7 @@ package sketchupblocks.network;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -32,7 +33,8 @@ public class NetworkedLobby extends Thread implements Lobby
 		server = _server;
 		port = _port;
 		
-		connection = new Socket(server,port);
+		connection = new Socket();
+		connection.connect(new InetSocketAddress(server, port), 5000);
 		menu = _menu;
 		sessMan = _sessMan;
 	}
@@ -104,7 +106,8 @@ public class NetworkedLobby extends Thread implements Lobby
 						
 						try 
 						{
-							connection = new Socket(server,port);
+							connection = new Socket();
+							connection.connect(new InetSocketAddress(server, port), 5000);
 							menu.updateNetworkStatus(true);
 							sessMan.clearState();
 							online = true;
