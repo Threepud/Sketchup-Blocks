@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import sketchupblocks.base.Logger;
 import sketchupblocks.base.Model;
+import sketchupblocks.base.RuntimeData;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.math.Face;
@@ -57,6 +58,7 @@ public class EnvironmentAnalyzer
 					}
 				}
 			}
+			
 			if (belowBB == null)
 				return null;
 			return belowBB.modelBlock;
@@ -69,26 +71,32 @@ public class EnvironmentAnalyzer
 		return null;
 	}
 	
-	public static Face getFacingFace(ModelBlock m, Vec3 surfaceNormal)
+	public static Face[] getFacingFaces(Matrix transform, SmartBlock s, Vec3 surfaceNormal)
 	{
 		double largestDot = -Double.MAX_VALUE;
+		double secondDot = -Double.MAX_VALUE;
 		int largestDotIndex = -1; 
-		Matrix rotationMatrix = extractRotationMatrix(m.transformationMatrix);
+		int secondDotIndex = -1;
+		Matrix rotationMatrix = extractRotationMatrix(transform);
 
-		Face[] worldFaces = getFaces(m.smartBlock);
+		Face[] worldFaces = getFaces(s);
 		
 		for (int k = 0; k < worldFaces.length; k++)
 		{
-			//Convert the corners of every face into a matrix (of column vectors).
-			//Then multiply these matrices with the current rotation matrix.
-			//These will be the corners for the new, transformed faces
-			//Check if it is the bottom one by finding the one that is the closest to parallel.
 			worldFaces[k] = new Face(Matrix.multiply(rotationMatrix, new Matrix(worldFaces[k].corners, true)).toVec3Array());
 			double dotWithSurfNorm = (Vec3.dot(worldFaces[k].normal(), surfaceNormal));
+			
 			if (dotWithSurfNorm >= largestDot)
 			{
+				secondDot = largestDot;
+				secondDotIndex = largestDotIndex;
 				largestDot = dotWithSurfNorm;
 				largestDotIndex = k;
+			}
+			else if (dotWithSurfNorm >= secondDot)
+			{
+				secondDot = dotWithSurfNorm;
+				secondDotIndex = k;
 			}
 		}
 		
@@ -98,7 +106,7 @@ public class EnvironmentAnalyzer
 			System.exit(-1);
 		}
 		
-		return worldFaces[largestDotIndex];
+		return new Face[]{worldFaces[largestDotIndex], worldFaces[secondDotIndex]};
 	}
 
 	
@@ -134,7 +142,6 @@ public class EnvironmentAnalyzer
 	{
 		if (checkBroad(one, two))
 		{
-			//System.out.println("Broad check between "+one.modelBlock.smartBlock.blockId+" and "+two.modelBlock.smartBlock.blockId);
 			if (checkSAT(one, two))
 				return true;
 		}
@@ -207,6 +214,76 @@ public class EnvironmentAnalyzer
 		return false;
 	}
 	
+	public static int getNumObscuredPoints(SmartBlock sm, Matrix transform, int camID, int fidID)
+	{
+		int count = 0;
+		
+		Vec3 fidPos = sm.fiducialCoordinates[fidID];
+		double distToEdge = 3.0;
+		
+		int nonzeroDim = -1;
+		int indexOne = -1;
+		int indexTwo = -1;
+		double[] fidPosData = fidPos.toArray();
+		if (fidPos.x == 0 && fidPos.y == 0)
+		{
+			indexOne = 0;
+			indexTwo = 1;
+			nonzeroDim = 2;
+		}
+		else if (fidPos.x == 0 && fidPos.z == 0)
+		{
+			indexOne = 0;
+			indexTwo = 2;
+			nonzeroDim = 1;
+		}
+		else
+		{
+			indexOne = 1;
+			indexTwo = 2;
+			nonzeroDim = 0;
+		}
+		
+		int numCorners = 4;
+		double[][] fidCornerData = new double[numCorners][3];
+		Vec3[] fidCorners = new Vec3[numCorners];
+		int k = 0;
+		fidCornerData[k][indexOne] = distToEdge;
+		fidCornerData[k][indexTwo] = distToEdge;
+		fidCornerData[k][nonzeroDim] = fidPosData[nonzeroDim];
+		k++;
+		fidCornerData[k][indexOne] = -distToEdge;
+		fidCornerData[k][indexTwo] = distToEdge;
+		fidCornerData[k][nonzeroDim] = fidPosData[nonzeroDim];
+		k++;
+		fidCornerData[k][indexOne] = -distToEdge;
+		fidCornerData[k][indexTwo] = -distToEdge;
+		fidCornerData[k][nonzeroDim] = fidPosData[nonzeroDim];
+		k++;
+		fidCornerData[k][indexOne] = distToEdge;
+		fidCornerData[k][indexTwo] = -distToEdge;
+		fidCornerData[k][nonzeroDim] = fidPosData[nonzeroDim];
+		for (k = 0; k < numCorners; k++)
+		{
+			fidCorners[k] = new Vec3(fidCornerData[k]);
+		}
+		
+		for (k = 0; k < numCorners; k++)
+		{
+			Vec3 fidWorld = Matrix.multiply(transform, fidCorners[k]);
+			ModelBlock[] mb = getIntersectingModels(RuntimeData.getCameraPosition(camID), fidWorld);
+			if ((mb.length == 1 && mb[0].smartBlock.blockId == sm.blockId) || mb.length == 0)
+			{
+				count = count + 0;
+			}
+			else
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+	
 	/*
 	 * Return an array of blocks a line passes through.
 	 * 
@@ -239,7 +316,7 @@ public class EnvironmentAnalyzer
 		
 		
 		 ModelBlock [] res = new  ModelBlock [0];
-	return result.toArray(res);	
+		 return result.toArray(res);	
 	}
 	
 	public static boolean isIntersecting(Line line , ModelBlock mb)
