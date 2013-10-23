@@ -15,7 +15,7 @@ import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
 /**
- * A utility class for analyzing the model
+ * A utility class for analyzing the model.
  * @author Hein
  * @author Elre
  */
@@ -311,9 +311,9 @@ public class EnvironmentAnalyzer
 		return count;
 	}
 	
-	/*
+	/**
 	 * Return an array of blocks a line passes through.
-	 * 
+	 * @return An array of blocks
 	 */
 	public static ModelBlock [] getIntersectingModels(Vec3 start, Vec3 end)
 	{

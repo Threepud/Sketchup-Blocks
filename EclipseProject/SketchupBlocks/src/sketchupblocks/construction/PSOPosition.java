@@ -10,7 +10,7 @@ import sketchupblocks.math.RotationMatrix4D;
 
 /**
  * A backup for the numerical methods for calculating the Model to World transformation
- * @author Neoin
+ * @author Hein
  *
  */
 public class PSOPosition {

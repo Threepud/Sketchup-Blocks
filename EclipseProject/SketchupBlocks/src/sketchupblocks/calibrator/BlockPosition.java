@@ -81,7 +81,7 @@ public class BlockPosition implements Evaluator
 		return result;
 	}
 	
-	/*
+	/**
 	 * Calculates the error between suggested positions (lin and s) and actual positions ( position)
 	 * @return The error between the actual distance and guessed distance
 	 */

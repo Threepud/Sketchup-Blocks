@@ -30,7 +30,11 @@ public class Calibrator
 		}
 	}
 	
-	
+	/**
+	 * Stores information about blocks until it can be processed and then calss calculateCameraPositions.
+	 * @param iBlock
+	 * @return If calibrated
+	 */
 	public boolean processBlock(InputBlock iBlock)
 	{
 		if(Settings.numCameras == 0)
@@ -61,6 +65,10 @@ public class Calibrator
 		return false;	
 	}
 	
+	/**
+	 * Uses mathematical methods for finding the position of a camera.
+	 * @param cameraID The camera ID
+	 */
 	private void calculateCameraPosition(int cameraID)
 	{
 		Logger.log("Camera busy calibrating", 98);

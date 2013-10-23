@@ -19,7 +19,7 @@ import sketchupblocks.math.SingularMatrixException;
 import sketchupblocks.math.Vec3;
 /**
  * Used for storing information on blocks
- * @author Neoin
+ * @author Hein
  * @author Elre
  * @author Jacques
  */
@@ -80,6 +80,11 @@ public class BlockInfo
 		return fiducialMap.values();
 	}
 	
+	/**
+	 * Updates the fiducial if it exists else creates the fiducial.
+	 * This changes the last seen time/
+	 * @param cam The camera event used for updating.
+	 */
 	public synchronized void updateFiducial(CameraEvent cam)
 	{
 		Fiducial fid = fiducialMap.get(new CamFidIdentifier(cam.cameraID, cam.fiducialID));
@@ -149,6 +154,10 @@ public class BlockInfo
 		numFiducialsUsed = _numFiducialsUsed;
 	}
 	
+	/**
+	 * Creates a list of fiducials that are seen. 
+	 * @return The list of seen fiducials
+	 */
 	public synchronized Fiducial[] getCleanFiducials()
 	{
 		BlockInfo.Fiducial [] fids = new BlockInfo.Fiducial[0];
@@ -166,6 +175,10 @@ public class BlockInfo
 		return cleanFids.toArray(fids);	
 	}
 	
+	/**
+	 * The last time a fiducial was seen from this block
+	 * @return The date
+	 */
 	public synchronized Date getLastSeen()
 	{
 		Date result = new Date();
@@ -177,6 +190,10 @@ public class BlockInfo
 		return result;
 	}
 	
+	/**
+	 * Tests whether there is enough information to attempt processing
+	 * @return Whether processing should be attempted
+	 */
 	public synchronized boolean ready()
 	{
 		Fiducial[] data = new Fiducial[0];

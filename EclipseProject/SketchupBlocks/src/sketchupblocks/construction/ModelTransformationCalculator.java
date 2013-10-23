@@ -14,7 +14,7 @@ import sketchupblocks.math.Vec3;
 
 /**
  * Calculates the transformation from Model space to World space
- * @author Neoin
+ * @author Hein
  * @author Elre
  */
 public class ModelTransformationCalculator 
