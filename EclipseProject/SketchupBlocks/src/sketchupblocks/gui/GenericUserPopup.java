@@ -8,6 +8,12 @@ import processing.core.PFont;
 import sketchupblocks.base.Settings;
 import sketchupblocks.database.Block;
 
+/**
+ * @author Jacques Coetzee
+ * This class implements the Popup interface.
+ * This popup indicates to the user that the system
+ * is going to spectate or disconnect from some host.
+ */
 public class GenericUserPopup implements Popup 
 {
 	public boolean active;
@@ -43,6 +49,11 @@ public class GenericUserPopup implements Popup
 			{255, 134, 0}
 		};
 	
+	/**
+	 * This constructor initializes all necessary member
+	 * variables.
+	 * @param _window PApplet window.
+	 */
 	public GenericUserPopup(PApplet _window)
 	{
 		window = _window;
@@ -65,18 +76,27 @@ public class GenericUserPopup implements Popup
 			randomIndex[2] = genny.nextInt(randomColours.length);
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#activate()
+	 */
 	@Override
 	public void activate() 
 	{
 		active = true;
 	}
 
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#feedPoison()
+	 */
 	@Override
 	public void feedPoison() 
 	{
 		poisonStamp = System.currentTimeMillis();
 	}
 
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#draw()
+	 */
 	@Override
 	public void draw() 
 	{
@@ -95,6 +115,10 @@ public class GenericUserPopup implements Popup
 		}
 	}
 	
+	/**
+	 * This function draws the base graphical component of 
+	 * the popup.
+	 */
 	private void drawPopupBase()
 	{
 		window.fill(0, 0, 0, 200);
@@ -103,6 +127,11 @@ public class GenericUserPopup implements Popup
 		window.rect(window.width / 2, window.height / 2, popupBaseWidth, popupBaseHeight);
 	}
 	
+	/**
+	 * This function draws a popup heading with the given string
+	 * message.
+	 * @param message String message.
+	 */
 	private void drawPopupHeader(String message)
 	{
 		window.fill(255);
@@ -111,6 +140,11 @@ public class GenericUserPopup implements Popup
 		window.text(message, window.width / 2, (window.height / 2) - 80);
 	}
 	
+	/**
+	 * This function draws a popup sub-heading with the given string
+	 * message.
+	 * @param message String message.
+	 */
 	private void drawPopupSubHeader(String message)
 	{
 		window.fill(255);
@@ -119,6 +153,10 @@ public class GenericUserPopup implements Popup
 		window.text(message, window.width / 2, (window.height / 2) - 20);
 	}
 	
+	/**
+	 * This function draws the progress bar graphical
+	 * component of the popup.
+	 */
 	private void drawProgressBar()
 	{
 		//draw progress bar

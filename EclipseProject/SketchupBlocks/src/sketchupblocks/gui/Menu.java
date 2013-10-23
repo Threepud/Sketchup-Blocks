@@ -14,7 +14,6 @@ import sketchupblocks.database.UserBlock;
 
 /**
  * @author Jacques Coetzee
- * 
  * The menu class provides system feedback to the user
  * by displaying a 2D graphic overlay. This overlay is
  * drawn onto the 3D model viewer.
@@ -40,6 +39,13 @@ public class Menu
 	
 	private ArrayList<Popup> displayList;
 	
+	/**
+	 * This constructor initializes member variables and adds a
+	 * calibration popup in the display list to be shown to the user.
+	 * @param _sessMan Session Manager.
+	 * @param _window PApplet window.
+	 * @param startupStatus Boolean startup status.
+	 */
 	public Menu(SessionManager _sessMan, PApplet _window, boolean startupStatus)
 	{
 		sessMan = _sessMan;
@@ -63,6 +69,9 @@ public class Menu
 			displayList.add(new CalibratePopup(window));
 	}
 	
+	/**
+	 * This function updates the calibrated system cameras.
+	 */
 	private void updateCalibratedCameras()
 	{
 		for(int x = 0; x < calibratedCams.length; ++x)
@@ -79,6 +88,12 @@ public class Menu
 		calibrated = true;
 	}
 	
+	/**
+	 * This function handles any user or command blocks and the appropriate
+	 * actions are then taken.
+	 * @param block Block object.
+	 * @param cEvent Camera event.
+	 */
 	public void handleInput(Block block, CameraEvent cEvent)
 	{
 		if(calibrated)
@@ -179,6 +194,11 @@ public class Menu
 		}
 	}
 	
+	/**
+	 * This function checks the calibration status of the system. 
+	 * If the system is not calibrated then the menu will display another
+	 * calibration popup.
+	 */
 	public void checkCalibrated()
 	{
 		if(Settings.numCameras < 1)
@@ -189,6 +209,11 @@ public class Menu
 		}
 	}
 	
+	/**
+	 * This function forces the removal of a connection
+	 * popup given that there exists one at the front of
+	 * the display list.
+	 */
 	public void forceStopConnectPopup()
 	{
 		if(!displayList.isEmpty())
@@ -200,6 +225,10 @@ public class Menu
 		}
 	}
 	
+	/**
+	 * This function creates a connection popup and adds it to
+	 * the display list.
+	 */
 	public void createConnectPopup()
 	{
 		if(!displayList.isEmpty())
@@ -213,17 +242,30 @@ public class Menu
 		displayList.add(new ConnectingPopup(window));
 	}
 	
+	/**
+	 * This function creates a reconnection popup and adds it to
+	 * the display list.
+	 */
 	public void createReconnectPopup()
 	{
 		displayList.add(new ReconnectPopup(window));
 	}
 	
+	/**
+	 * This function updates the current network connection
+	 * status.
+	 * @param status Boolean status.
+	 */
 	public void updateNetworkStatus(boolean status)
 	{
 		networkUpdate = true;
 		networkStatus = status;
 	}
 	
+	/**
+	 * This function draws all the 2D graphical 
+	 * components.
+	 */
 	public void drawMenuOverlay()
 	{
 		window.camera();

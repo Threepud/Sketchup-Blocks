@@ -8,6 +8,12 @@ import processing.core.PFont;
 import processing.core.PVector;
 import sketchupblocks.base.Settings;
 
+/**
+ * @author Jacques Coetzee
+ * This class implements the Popup interface.
+ * This popup is displayed to show the calibration
+ * status of the system cameras.
+ */
 public class CalibratePopup implements Popup
 {
 	public boolean active;
@@ -43,6 +49,11 @@ public class CalibratePopup implements Popup
 	int particleCount = 75 * Settings.numCameras;
 	private int[] colourIndex;
 	
+	/**
+	 * This constructor initializes all necessary member
+	 * variables like the particle swarm positions.
+	 * @param _window PApplet window.
+	 */
 	public CalibratePopup(PApplet _window)
 	{
 		active = false;
@@ -81,12 +92,18 @@ public class CalibratePopup implements Popup
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#activate()
+	 */
 	@Override
 	public void activate()
 	{
 		active = true;
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#feedPoison()
+	 */
 	@Override
 	public void feedPoison() 
 	{
@@ -97,11 +114,18 @@ public class CalibratePopup implements Popup
 		}
 	}
 	
+	/**
+	 * This function sets the calibration status of all the system cameras.
+	 * @param _calibratedCameras Array of calibration status of all system cameras.
+	 */
 	public void updateCalibratedCameras(boolean[] _calibratedCameras)
 	{
 		calibratedCameras = _calibratedCameras;
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#draw()
+	 */
 	@Override
 	public void draw()
 	{
@@ -122,6 +146,10 @@ public class CalibratePopup implements Popup
 		}
 	}
 	
+	/**
+	 * This function draws the base graphical component of 
+	 * the popup.
+	 */
 	private void drawPopupBase()
 	{
 		window.fill(0, 0, 0, 200);
@@ -130,6 +158,11 @@ public class CalibratePopup implements Popup
 		window.rect(window.width / 2, window.height / 2, popupBaseWidth, popupBaseHeight);
 	}
 	
+	/**
+	 * This function draws a popup heading with the given string
+	 * message.
+	 * @param message String message.
+	 */
 	private void drawPopupHeader(String message)
 	{
 		window.fill(255);
@@ -138,6 +171,9 @@ public class CalibratePopup implements Popup
 		window.text(message, window.width / 2, (window.height / 2) - 80);
 	}
 	
+	/**
+	 * This function draws the particle swarm graphical component.
+	 */
 	private void drawParticles()
 	{
 		window.noStroke();
