@@ -21,16 +21,17 @@ import sketchupblocks.math.Vec3;
 
 /**
  * ColladaLoader manages the importing and exporting of Collada files.
- * 
- * @author Jacques
- *
+ * @author Jacques Coetzee
  */
 public class ColladaLoader 
 {
 	
 	/**
-	 * @param fileName
-	 * @return
+	 * This function loads 3D model information from a
+	 * given file name and return a SmartBlock containing the
+	 * 3D information.
+	 * @param fileName Collada file name.
+	 * @return SmartBlock containing 3D information.
 	 */
 	public static SmartBlock getSmartBlock(String fileName)
 	{
@@ -151,6 +152,11 @@ public class ColladaLoader
 		return result;
 	}
 	
+	/**
+	 * This file sets up the export for the given SmartBlock to Collada file with
+	 * a custom name under "models".
+	 * @param block SmartBlock to be written to file.
+	 */
 	public static void saveSmartBlock(SmartBlock block)
 	{
 		ArrayList<ModelBlock> blocks = new ArrayList<>();
@@ -161,6 +167,11 @@ public class ColladaLoader
 		makeCollada(block.name, blocks);
 	}
 	
+	/**
+	 * This function sets up the export for the array list of model blocks to 
+	 * a Collada file with a generated file name under "exports".
+	 * @param blocks Array list of ModelBlocks to be written to file.
+	 */
 	public static void export(ArrayList<ModelBlock> blocks)
 	{
 		String fileName = "SketchupBlocks" + new Timestamp(new Date().getTime()) + ".dae";
@@ -169,6 +180,12 @@ public class ColladaLoader
 		makeCollada(path + fileName, blocks);
 	}
 	
+	/**
+	 * This function exports the given array list of model blocks to a 
+	 * Collada file labeled with the file name provided.
+	 * @param fileName Collada file name.
+	 * @param blocks Array list of model blocks to export.
+	 */
 	private static void makeCollada(String fileName, ArrayList<ModelBlock> blocks)
 	{
 		//create file structure
