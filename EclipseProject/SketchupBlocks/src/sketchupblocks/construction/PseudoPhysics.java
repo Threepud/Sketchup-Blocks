@@ -12,7 +12,7 @@ import sketchupblocks.math.Vec3;
  *	@author Elre 
  */
 
-public class PseudoPhysicsApplicator 
+public class PseudoPhysics
 {
 	private static double maxErrorMargin = 0.99999;
 	private static double minErrorMargin = 0.5;
@@ -22,6 +22,7 @@ public class PseudoPhysicsApplicator
 	private static double minDot = 0;
 	private static double totalThetaX = 0;
 	private static double totalThetaY = 0;
+	
 	
 	public static ModelBlock applyPseudoPhysics(ModelBlock m)
 	{
@@ -101,6 +102,7 @@ public class PseudoPhysicsApplicator
 				//Final z co-ordinate is:
 				double z = (-surfaceNormal.x*pointOnBottomFace.x - surfaceNormal.y*pointOnBottomFace.y+Vec3.dot(surfaceNormal, pointOnSurface))/surfaceNormal.z;
 				double diffZ = -(pointOnBottomFace.z - z);
+				System.out.println(diffZ);
 				//The difference in z co-ordinates is then the additional translation to apply.*/
 				
 				double[][] data = new double[4][4];
@@ -219,4 +221,5 @@ public class PseudoPhysicsApplicator
 	{
 		return minErrorMargin;
 	}
+	
 }
