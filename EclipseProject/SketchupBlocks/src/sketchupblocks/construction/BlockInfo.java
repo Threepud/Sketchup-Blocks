@@ -192,7 +192,6 @@ public class BlockInfo
 		{
 			//Do nothing
 		}
-		
 		ArrayList<Integer> fiducialList = new ArrayList<Integer>();
 		int count = 0;
 		//int numExpired = 0;
