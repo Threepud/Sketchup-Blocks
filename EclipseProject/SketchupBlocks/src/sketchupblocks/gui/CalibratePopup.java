@@ -28,9 +28,10 @@ public class CalibratePopup implements Popup
 	private int popupBaseHeight = 270;
 	private int[][] randomColours = 
 		{
-			{255, 32, 0},
-			{162, 237, 0},
-			{0, 217, 255}
+			{255, 32, 0},		//red
+			{0, 255, 18},		//green
+			{0, 217, 255},		//blue
+			{252, 255, 0}		//yellow
 		};
 	
 	//particles
@@ -38,8 +39,8 @@ public class CalibratePopup implements Popup
 	private PVector targetLocation;
 	private PVector[] currentDirection;
 	private PVector[] targetDirection;
-	private int[] velocity;
-	int particleCount = 100 * Settings.numCameras;
+	private double[] velocity;
+	int particleCount = 75 * Settings.numCameras;
 	private int[] colourIndex;
 	
 	public CalibratePopup(PApplet _window)
@@ -71,12 +72,12 @@ public class CalibratePopup implements Popup
 		}
 		targetLocation = new PVector(window.width / 2, window.height / 2);
 		
-		velocity = new int[Settings.numCameras];
-		int vel = 2;
+		velocity = new double[Settings.numCameras];
+		double vel = 2;
 		for(int x = 0; x < velocity.length; ++x)
 		{
 			velocity[x] = vel;
-			vel += 1;
+			vel += 0.5;
 		}
 	}
 	
@@ -165,7 +166,7 @@ public class CalibratePopup implements Popup
 			currentDirection[x].normalize();
 			
 			if(calibratedCameras[x % Settings.numCameras])
-				currentDirection[x].mult(velocity[x % Settings.numCameras]);
+				currentDirection[x].mult((float)velocity[x % Settings.numCameras]);
 			else
 				currentDirection[x].mult(3);
 			

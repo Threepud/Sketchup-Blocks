@@ -341,6 +341,11 @@ public class SessionManager
     	}
     }
     
+    public boolean isSpectating()
+    {
+    	return spectating;
+    }
+    
     public void drawGUI()
     {
     	sarah.drawModel();

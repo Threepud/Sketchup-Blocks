@@ -136,34 +136,42 @@ public class Menu
 					}
 				}
 			}
-			else if(block instanceof UserBlock)
+		}
+		if(block instanceof UserBlock)
+		{
+			UserBlock uBlock = (UserBlock)block;
+			if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
 			{
-				UserBlock uBlock = (UserBlock)block;
-				if(cEvent.type == CameraEvent.EVENT_TYPE.ADD)
+				if(!displayList.isEmpty())
 				{
-					if(!displayList.isEmpty())
+					if(displayList.get(displayList.size() - 1) instanceof UserPopup)
 					{
-						if(displayList.get(displayList.size() - 1) instanceof UserPopup)
+						if(((UserPopup)displayList.get(displayList.size() - 1)).userType == UserTypes.SPECTATE)
 						{
-							if(((UserPopup)displayList.get(displayList.size() - 1)).userType == UserTypes.SPECTATE)
-							{
-								return;
-							}
+							return;
 						}
 					}
-					
-					displayList.add(new UserPopup(window, "Spectate", uBlock.name, UserTypes.SPECTATE, uBlock));
-				}
-				else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
-				{
-					if(!displayList.isEmpty())
+					else if(displayList.get(displayList.size() - 1) instanceof CalibratePopup)
 					{
-						if(displayList.get(displayList.size() - 1) instanceof UserPopup)
+						displayList.remove(displayList.size() - 1);
+					}
+				}
+				
+				if(sessMan.isSpectating())
+					displayList.add(new UserPopup(window, "Disconnect", uBlock.name, UserTypes.SPECTATE, uBlock));
+				else
+					displayList.add(new UserPopup(window, "Spectate", uBlock.name, UserTypes.SPECTATE, uBlock));
+			}
+			else if(cEvent.type == CameraEvent.EVENT_TYPE.REMOVE)
+			{
+				if(!displayList.isEmpty())
+				{
+					if(displayList.get(displayList.size() - 1) instanceof UserPopup)
+					{
+						if(((UserPopup)displayList.get(displayList.size() - 1)).userType == UserTypes.SPECTATE)
 						{
-							if(((UserPopup)displayList.get(displayList.size() - 1)).userType == UserTypes.SPECTATE)
-							{
-								displayList.remove(displayList.size() - 1);
-							}
+							displayList.remove(displayList.size() - 1);
+							checkCalibrated();
 						}
 					}
 				}
