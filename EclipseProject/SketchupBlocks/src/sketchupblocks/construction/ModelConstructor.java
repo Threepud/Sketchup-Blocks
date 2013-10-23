@@ -195,7 +195,7 @@ public class ModelConstructor implements Runnable
 		
 		mb.debugLines = dbLines.toArray(new Line[0]);
 		mb.debugPoints = dbPoints.toArray(new Vec3[0]);
-		eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mb));	
+		eddy.updateModel(PseudoPhysics.applyPseudoPhysics(mb));	
 	
 	}
 	
@@ -212,15 +212,17 @@ public class ModelConstructor implements Runnable
 				{
 					continue;
 				}
-				//ModelBlock [] mb = EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos);
 				int numObscured = EnvironmentAnalyzer.getNumObscuredPoints((SmartBlock)block.smartBlock, mb1.transformationMatrix, fid.camID, fid.fiducialsID);	
 				if (numObscured == 0)
 					return true;
+				/*ModelBlock [] mb = EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos);
 				//The fiducial is not obscured.
-				//if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) 
-				//{
-				//	return true;
-				//}
+				if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) 
+				{
+					System.out.println("Returning true where otherwise would return: "+(numObscured == 0));
+					return true;
+				}
+				System.out.println("Continuing search with numObscured: "+numObscured);*/
 			}
 			catch(ModelNotSetException e)
 			{
@@ -384,17 +386,32 @@ public class ModelConstructor implements Runnable
 		if(samePosition(bin, fidCoordsM, fiducialWorld))
 			return;
 		
-		for(int k = 0 ; k < numFiducials ; k++)
+		Matrix[] transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM);
+
+		Matrix transform;
+		double MTCScore;
+		
+		if (transforms.length > 1)
 		{
-			fids[k].setProcessed();
+			double transformScore0 = getTransformationScore(transforms[0], fiducialWorld, fidCoordsM);
+			double transformScore1 = getTransformationScore(transforms[1], fiducialWorld, fidCoordsM);
+			if (transformScore0 > transformScore1)
+			{
+				transform = transforms[1];
+				MTCScore = transformScore1;
+			}
+			else 
+			{
+				transform = transforms[0];
+				MTCScore = transformScore0;
+			}
+		}
+		else
+		{
+			transform = transforms[0];
+			MTCScore = getTransformationScore(transform, fiducialWorld, fidCoordsM);
 		}
 		
-		//Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM, bin.getNumUniqueFiducials());
-		/**/
-		Matrix[] transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM);
-			
-		Matrix transform = transforms[0];
-		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
 		
 		if(MTCScore > errorThreshold)
 		{
@@ -419,13 +436,17 @@ public class ModelConstructor implements Runnable
 		if (binReference.getRemoved() == bin.getRemoved())
 		{
 			ModelBlock mbToAdd = new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE);
-			mbToAdd.mooingMatrix = transforms[1]; /**/
+			if (transforms.length > 1)
+				mbToAdd.mooingMatrix = transforms[1]; 
+			else
+				mbToAdd.mooingMatrix = transform;
+			
 			mbToAdd.debugLines = lines;
 			mbToAdd.debugPoints = fiducialWorld;
 			
 			binReference.setTransform(transform, numFiducials);
 			binReference.setRemoved(false);	
-			eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
+			eddy.updateModel(PseudoPhysics.applyPseudoPhysics(mbToAdd));
 		}
 		doReadditions(bis);
 	}
