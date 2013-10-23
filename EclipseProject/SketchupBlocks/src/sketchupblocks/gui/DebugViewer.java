@@ -24,8 +24,12 @@ import sketchupblocks.network.Lobby;
  * and displays it in the OpenGL window alongside the
  * model.
  */
-public class DebugViewer extends ModelViewer 
+public class DebugViewer
 {
+	//core member variables
+	private PApplet window;
+	private Lobby lobby;
+	
 	//fiducial debug lines
 	private boolean showDebugLines = false;
 	private int lineLength = 80;
@@ -57,8 +61,8 @@ public class DebugViewer extends ModelViewer
 	 */
 	public DebugViewer(Lobby _lobby, PApplet _window)
 	{
-		super.lobby = _lobby;
-		super.window = _window;
+		lobby = _lobby;
+		window = _window;
 	}
 	
 	/* (non-Javadoc)
@@ -147,7 +151,7 @@ public class DebugViewer extends ModelViewer
 		if(lineLonger)
 			lineLength += lineRate;
 		
-		super.window.pushMatrix();
+		window.pushMatrix();
 		window.scale(1f);
 		if(showDebugLines)
 		{
