@@ -39,6 +39,7 @@ public class BoundingBox
 			data[3][k] = 1;
 		}
 		//Matrix hybridTransform = getHybridMatrix(mb);
+		//Vec3[] vertices = Matrix.multiply(hybridTransform, new Matrix(data)).toVec3Array();
 		Vec3[] vertices = Matrix.multiply(mb.transformationMatrix, new Matrix(data)).toVec3Array();
 		for (int k = 0; k < vertices.length; k++)
 		{
