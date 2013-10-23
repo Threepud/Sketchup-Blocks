@@ -137,6 +137,8 @@ public class LobbyTest
 		networkedLobby.stopLobby();
 		server.stopServer();
 		
+		while(networkedLobby.isOnline()){}
+		
 		networkedLobby = null;
 		server = null;
 		lobby = null;
@@ -150,7 +152,9 @@ public class LobbyTest
 	@Test
 	public void lobbyNetworkIntegrationTest() 
 	{
-		lobby.updateModel(testBlock);
+		ArrayList<ModelBlock> list = new ArrayList<>();
+		list.add(testBlock);
+		((LocalLobby)lobby).updateModel(list);
 		Model model = null;
 		try 
 		{
@@ -168,7 +172,7 @@ public class LobbyTest
 		
 		//Wait for networked lobby to receive block
 		long startTime = System.currentTimeMillis();
-		while(System.currentTimeMillis() - startTime < 100){}
+		while(System.currentTimeMillis() - startTime < 500){}
 		
 		try 
 		{
