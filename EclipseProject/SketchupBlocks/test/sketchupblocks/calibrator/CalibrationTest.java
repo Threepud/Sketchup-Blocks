@@ -36,8 +36,8 @@ public class CalibrationTest
 	private static Calibrator cally;
 	private static String prevNumCams;
 	
-	@Before
-	public void setupBeforeClass()
+	@BeforeClass
+	public static void setupBeforeClass()
 	{
 		//Edit settings to one camera
 		
@@ -66,8 +66,8 @@ public class CalibrationTest
 		cally = new Calibrator();
 	}
 	
-	@After
-	public void afterClass()
+	@AfterClass
+	public static void afterClass()
 	{
 		//Undo edit
 		XML settings = null;
@@ -199,9 +199,10 @@ public class CalibrationTest
 		}
 		assertTrue("Is not calibrated", RuntimeData.isSystemCalibrated());
 	    Vec3 camPosition = RuntimeData.getCameraPosition(0);
-	    assertTrue("X component differs by "+Math.abs(camPosition.x - 20) ,Math.abs(camPosition.x - 20) < 5);
-	    assertTrue("Y component differs by "+Math.abs(camPosition.y - 20)   ,Math.abs(camPosition.y - 20) < 5);
-	    assertTrue("Z component differs by "+Math.abs(camPosition.z - 18)   ,Math.abs(camPosition.z - 18) < 5);
+	    System.out.println("POS: " + camPosition);
+	    assertTrue("X component differs by "+Math.abs(camPosition.x - 0.5) ,Math.abs(camPosition.x - 0.5) < 5);
+	    assertTrue("Y component differs by "+Math.abs(camPosition.y - 52)   ,Math.abs(camPosition.y - 52) < 5);
+	    assertTrue("Z component differs by "+Math.abs(camPosition.z - -4)   ,Math.abs(camPosition.z - -4) < 5);
 	}
 
 }
