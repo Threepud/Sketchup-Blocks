@@ -63,6 +63,8 @@ public class SessionManager
 		}
 		server.start();
 		
+		PseudoPhysicsApplicator physicsApp = new PseudoPhysicsApplicator((LocalLobby)lobby);
+		
 		sarah = new ModelViewer();
 		
 		try 
