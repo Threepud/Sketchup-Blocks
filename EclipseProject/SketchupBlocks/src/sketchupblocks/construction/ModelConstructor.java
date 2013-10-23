@@ -169,15 +169,18 @@ public class ModelConstructor implements Runnable
 		return !seen;
 	}
 	
-	private void reAddBlockToModel(BlockInfo bi)
+	private void reAddBlockToModel(BlockInfo bin, BlockInfo binRef)
 	{
-		bi.setRemoved(false);
-		ModelBlock mb = new ModelBlock((SmartBlock)bi.smartBlock, bi.getTransform(), ModelBlock.ChangeType.UPDATE);
+		binRef.setRemoved(false);
+		//System.out.println("Bin clone == null "+(bin.getTransform() == null));
+		//System.out.println("Bin Ref == null "+(binRef.getTransform() == null));
+		
+		ModelBlock mb = new ModelBlock((SmartBlock)bin.smartBlock, bin.getTransform(), ModelBlock.ChangeType.UPDATE);
 		
 		ArrayList<Line> dbLines = new ArrayList<Line>();
 		ArrayList<Vec3>  dbPoints = new ArrayList<Vec3>();
 		
-		for (BlockInfo.Fiducial fid : bi.getAllFiducials())
+		for (BlockInfo.Fiducial fid : bin.getAllFiducials())
 		{
 			if (RuntimeData.getCameraPosition(fid.camID) == null)
 			{
@@ -195,6 +198,7 @@ public class ModelConstructor implements Runnable
 		
 		mb.debugLines = dbLines.toArray(new Line[0]);
 		mb.debugPoints = dbPoints.toArray(new Vec3[0]);
+		//System.out.println("Readding "+bin.blockID);
 		eddy.updateModel(PseudoPhysics.applyPseudoPhysics(mb));	
 	
 	}
@@ -215,14 +219,6 @@ public class ModelConstructor implements Runnable
 				int numObscured = EnvironmentAnalyzer.getNumObscuredPoints((SmartBlock)block.smartBlock, mb1.transformationMatrix, fid.camID, fid.fiducialsID);	
 				if (numObscured == 0)
 					return true;
-				/*ModelBlock [] mb = EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos);
-				//The fiducial is not obscured.
-				if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) 
-				{
-					System.out.println("Returning true where otherwise would return: "+(numObscured == 0));
-					return true;
-				}
-				System.out.println("Continuing search with numObscured: "+numObscured);*/
 			}
 			catch(ModelNotSetException e)
 			{
@@ -241,20 +237,28 @@ public class ModelConstructor implements Runnable
 		ArrayList<BlockInfo> result = new ArrayList<BlockInfo>();
 		for(BlockInfo bi : blockMap.values())
 		{
-			if(bi.getRemoved() && expectedToSeeBlock(bi) && bi.getLastSeen().getTime() < 2*changeWindow)
+			boolean removed = bi.getRemoved();
+			boolean expected = expectedToSeeBlock(bi);
+			long time = bi.getLastSeen().getTime();
+			long now = System.currentTimeMillis();
+			boolean timeFine = now - time < 150*changeWindow; /**TODO: This may break stuff*/
+			boolean hasBeenSpotted = bi.getTransform() != null;
+			if(removed && !expected && timeFine && hasBeenSpotted)
 				result.add(bi);
 		}
 		BlockInfo [] res = new BlockInfo [0];
 		return result.toArray(res);
 	}
 	
-	private void doReadditions(BlockInfo [] bis)
+	private void doReadditions(BlockInfo [] bins)
 	{
-		for(BlockInfo bi : bis)
+		
+		for(BlockInfo bi : bins)
 		{
-			if(bi.getRemoved() && !expectedToSeeBlock(bi))
+			BlockInfo temp = bi.clone();
+			if(temp.getRemoved() && !expectedToSeeBlock(temp))
 			{
-				reAddBlockToModel(bi);
+				reAddBlockToModel(temp, bi);
 			}
 		}
 	}
@@ -272,7 +276,7 @@ public class ModelConstructor implements Runnable
 				fid.setSeen(true);
 				if(block.getRemoved() && block.getTransform() != null) // if all the fiducials are seen we add
 				{
-					reAddBlockToModel(block);							
+					reAddBlockToModel(block.clone(), block);							
 				}
 				return true;
 			}
