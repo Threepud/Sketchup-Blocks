@@ -358,7 +358,7 @@ public class SessionManager
     			  "#################################\n"
     			+ "#             RESET             #\n"
     			+ "#################################\n";
-    	Logger.log(resetString, 1);
+    	Logger.log(resetString, 2);
     	
     	pauseInput();
     	
