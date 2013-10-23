@@ -45,8 +45,8 @@
 		<ProgressBarRotationSpeed>500</ProgressBarRotationSpeed>
 	</GUI>
 	<DebugRecording>
-		<LiveData>true</LiveData>
-		<RecordingInputFilename>dbo/CustomBlocks(withRemoval)</RecordingInputFilename>
+		<LiveData>false</LiveData>
+		<RecordingInputFilename>dbo/Jumping2</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
 	<Network>
