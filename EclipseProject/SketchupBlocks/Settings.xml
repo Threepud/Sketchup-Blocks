@@ -5,7 +5,7 @@
 		<DebugVerbose>5</DebugVerbose>
 	</System>
 	<Cameras>
-		<NumberOfCameras>3</NumberOfCameras>
+		<NumberOfCameras>4</NumberOfCameras>
 		<CameraSettings id="0">
 			<FOV>68.5</FOV>
 			<Width>1280.0</Width>
@@ -24,6 +24,12 @@
 			<Height>720.0</Height>
 			<Port>3335</Port>
 		</CameraSettings>
+		<CameraSettings id="3">
+			<FOV>68.5</FOV>
+			<Width>1280.0</Width>
+			<Height>720.0</Height>
+			<Port>3336</Port>
+		</CameraSettings>
 	</Cameras>
 	<Calibration>
 		<Landmark id="0">-5.0,-5.0,0</Landmark>
@@ -32,14 +38,14 @@
 		<Landmark id="3">5.0,5.0,0</Landmark>
 	</Calibration>
 	<GUI>
-		<FancyShaders>false</FancyShaders>
-		<ShowSplash>false</ShowSplash>
+		<FancyShaders>true</FancyShaders>
+		<ShowSplash>true</ShowSplash>
 		<SplashTTL>3000</SplashTTL>
 		<CommandWaitTime>3000</CommandWaitTime>
 		<ProgressBarRotationSpeed>500</ProgressBarRotationSpeed>
 	</GUI>
 	<DebugRecording>
-		<LiveData>false</LiveData>
+		<LiveData>true</LiveData>
 		<RecordingInputFilename>dbo/CustomBlocks(withRemoval)</RecordingInputFilename>
 		<TimeDelay>true</TimeDelay>
 	</DebugRecording>
