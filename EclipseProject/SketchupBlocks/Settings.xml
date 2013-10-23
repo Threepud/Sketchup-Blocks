@@ -39,7 +39,7 @@
 	</Calibration>
 	<GUI>
 		<FancyShaders>true</FancyShaders>
-		<ShowSplash>true</ShowSplash>
+		<ShowSplash>false</ShowSplash>
 		<SplashTTL>3000</SplashTTL>
 		<CommandWaitTime>3000</CommandWaitTime>
 		<ProgressBarRotationSpeed>500</ProgressBarRotationSpeed>
