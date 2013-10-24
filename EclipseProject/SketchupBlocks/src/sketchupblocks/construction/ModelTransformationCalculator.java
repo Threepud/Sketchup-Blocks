@@ -79,11 +79,14 @@ public class ModelTransformationCalculator
 					double newPosAngle = GetError(transformMatrices[0],rot,fidUpM[k],fidCoordsM[k],positions[k],axis,up,fids[k].rotation);
 					double newNegAngle = GetError(transformMatrices[0],rotNeg,fidUpM[k],fidCoordsM[k],positions[k],axis,up,fids[k].rotation);
 	
+					double TheFinalError = newPosAngle; 
 					if (newNegAngle < newPosAngle)
 					{
 						rot = rotNeg;
+						TheFinalError = newNegAngle;
 					}
 					
+					if(TheFinalError < angle)
 					transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(rot, transformMatrices[0]).padMatrix());
 					
 				}
