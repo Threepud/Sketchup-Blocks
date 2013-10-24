@@ -64,9 +64,6 @@ public class ModelViewer
 	//transparent construction floor
 	private boolean transparentConstructionFloor = false;
 	
-	//debug line intersections
-	//private boolean showDebugLineIntersection = false;
-	
 	private PImage tilesTexture;
 	 
 	/**
@@ -275,10 +272,6 @@ public class ModelViewer
 		{
 			window.pushMatrix();
 			window.noStroke();
-			if(transparentModel)
-				window.fill(255, 255, 255, 100);
-			else
-				window.fill(255);
 			window.scale(10, 10, 10);
 			
 			//draw block list
@@ -294,28 +287,10 @@ public class ModelViewer
 			}
 			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
 			{
-
 				if(transparentModel)
 					window.fill(255, 255, 255, 100);
 				else
 					window.fill(255);
-				//###
-				
-				/*if(showDebugLineIntersection)
-				{
-					Line line = RuntimeData.debugLine;
-					if(line != null)
-					{
-						if(EnvironmentAnalyzer.isIntersecting(line, block))
-						{
-							window.fill(0, 255, 0);
-						}
-						else
-						{
-							window.fill(255);
-						}
-					}
-				}*/
 				if (block.type == ModelBlock.ChangeType.REMOVE)
 				{
 					Logger.log("Drawing removed block!", 1);
