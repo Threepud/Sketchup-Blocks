@@ -124,7 +124,7 @@ public class Server extends Thread implements ModelChangeListener
 						{
 							for(ModelBlock block: blockMap.values())
 							{
-								System.out.println("Flush: " + block.smartBlock.blockId);
+								//System.out.println("Flush: " + block.smartBlock.blockId);
 								try 
 								{
 									sendData(clients.get(clients.size() - 1), block);
