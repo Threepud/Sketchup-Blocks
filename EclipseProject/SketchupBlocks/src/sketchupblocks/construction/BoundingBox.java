@@ -18,6 +18,10 @@ public class BoundingBox
 	public Vec3[] worldVertices;
 	public ModelBlock modelBlock;
 	
+	protected BoundingBox()
+	{
+	}
+	
 	private BoundingBox(Vec3 _max, Vec3 _min, Vec3[] _worldVertices, ModelBlock _modelBlock)
 	{
 		min = _min;

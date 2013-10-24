@@ -1,56 +1,56 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Settings>
-	<System>
-		<VersionNumber>0.85</VersionNumber>
-		<DebugVerbose>5</DebugVerbose>
-	</System>
-	<Cameras>
-		<NumberOfCameras>4</NumberOfCameras>
-		<CameraSettings id="0">
-			<FOV>68.5</FOV>
-			<Width>1280.0</Width>
-			<Height>720.0</Height>
-			<Port>3333</Port>
-		</CameraSettings>
-		<CameraSettings id="1">
-			<FOV>68.5</FOV>
-			<Width>1280.0</Width>
-			<Height>720.0</Height>
-			<Port>3334</Port>
-		</CameraSettings>
-		<CameraSettings id="2">
-			<FOV>68.5</FOV>
-			<Width>1280.0</Width>
-			<Height>720.0</Height>
-			<Port>3335</Port>
-		</CameraSettings>
-		<CameraSettings id="3">
-			<FOV>68.5</FOV>
-			<Width>1280.0</Width>
-			<Height>720.0</Height>
-			<Port>3336</Port>
-		</CameraSettings>
-	</Cameras>
-	<Calibration>
-		<Landmark id="0">-5.0,-5.0,0</Landmark>
-		<Landmark id="1">-5.0,5.0,0</Landmark>
-		<Landmark id="2">5.0,-5.0,0</Landmark>
-		<Landmark id="3">5.0,5.0,0</Landmark>
-	</Calibration>
-	<GUI>
-		<FancyShaders>true</FancyShaders>
-		<ShowSplash>false</ShowSplash>
-		<SplashTTL>3000</SplashTTL>
-		<CommandWaitTime>3000</CommandWaitTime>
-		<ProgressBarRotationSpeed>500</ProgressBarRotationSpeed>
-	</GUI>
-	<DebugRecording>
-		<LiveData>false</LiveData>
-		<RecordingInputFilename>dbo/Jumping2</RecordingInputFilename>
-		<TimeDelay>true</TimeDelay>
-	</DebugRecording>
-	<Network>
-		<HostPort>5555</HostPort>
-		<ConnectPort>5555</ConnectPort>
-	</Network>
+  <System>
+    <VersionNumber>0.85</VersionNumber>
+    <DebugVerbose>5</DebugVerbose>
+  </System>
+  <Cameras>
+    <NumberOfCameras>4</NumberOfCameras>
+    <CameraSettings id="0">
+      <FOV>68.5</FOV>
+      <Width>1280.0</Width>
+      <Height>720.0</Height>
+      <Port>3333</Port>
+    </CameraSettings>
+    <CameraSettings id="1">
+      <FOV>68.5</FOV>
+      <Width>1280.0</Width>
+      <Height>720.0</Height>
+      <Port>3334</Port>
+    </CameraSettings>
+    <CameraSettings id="2">
+      <FOV>68.5</FOV>
+      <Width>1280.0</Width>
+      <Height>720.0</Height>
+      <Port>3335</Port>
+    </CameraSettings>
+    <CameraSettings id="3">
+      <FOV>68.5</FOV>
+      <Width>1280.0</Width>
+      <Height>720.0</Height>
+      <Port>3336</Port>
+    </CameraSettings>
+  </Cameras>
+  <Calibration>
+    <Landmark id="0">-5.0,-5.0,0</Landmark>
+    <Landmark id="1">-5.0,5.0,0</Landmark>
+    <Landmark id="2">5.0,-5.0,0</Landmark>
+    <Landmark id="3">5.0,5.0,0</Landmark>
+  </Calibration>
+  <GUI>
+    <FancyShaders>true</FancyShaders>
+    <ShowSplash>false</ShowSplash>
+    <SplashTTL>3000</SplashTTL>
+    <CommandWaitTime>3000</CommandWaitTime>
+    <ProgressBarRotationSpeed>500</ProgressBarRotationSpeed>
+  </GUI>
+  <DebugRecording>
+    <LiveData>false</LiveData>
+    <RecordingInputFilename>dbo/Jumping2</RecordingInputFilename>
+    <TimeDelay>true</TimeDelay>
+  </DebugRecording>
+  <Network>
+    <HostPort>5555</HostPort>
+    <ConnectPort>5555</ConnectPort>
+  </Network>
 </Settings>

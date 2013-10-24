@@ -88,7 +88,6 @@ public class Calibrator
 	    angles[4] = RuntimeData.getAngle(cameraID, 0, 2);
 	    angles[5] = RuntimeData.getAngle(cameraID, 1, 3);
 
-	    
 	    SIS radiiFunction = new SIS(lengths, angles);
 	    ErrorFunction radiiErrorFunction = new ErrorFunction(radiiFunction);
 	    double[] radiiX0 = new double[]{60, 60, 60, 60};

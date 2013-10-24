@@ -160,7 +160,7 @@ public class EnvironmentAnalyzer
 		return new Matrix(data);
 	}
 	
-	private static boolean checkOverlap(BoundingBox one, BoundingBox two)
+	protected static boolean checkOverlap(BoundingBox one, BoundingBox two)
 	{
 		if (checkBroad(one, two))
 		{
@@ -170,7 +170,7 @@ public class EnvironmentAnalyzer
 		return false;
 	}
 	
-	private static boolean checkSAT(BoundingBox one, BoundingBox two)
+	protected static boolean checkSAT(BoundingBox one, BoundingBox two)
 	{
 		double thresh = 1.5;
 		ArrayList<Vec3> sepAxes = new ArrayList<Vec3>();
@@ -218,7 +218,7 @@ public class EnvironmentAnalyzer
 		
 	}
 	
-	private static boolean checkBroad(BoundingBox one, BoundingBox two)
+	protected static boolean checkBroad(BoundingBox one, BoundingBox two)
 	{
 		double error = 3;
 		if (error < two.min.x - one.max.x)
@@ -232,7 +232,7 @@ public class EnvironmentAnalyzer
 		return true;
 	}
 
-	private static boolean higherThan(BoundingBox one, BoundingBox two)
+	protected static boolean higherThan(BoundingBox one, BoundingBox two)
 	{
 		if (one.max.z > two.max.z)
 			return true;

@@ -191,7 +191,11 @@ public class CalibrationTest
 		input = new InputBlock(block,event);
 		try
 		{
+			long before = System.currentTimeMillis();
 			cally.processBlock(input);
+			long after = System.currentTimeMillis();
+			assertTrue(after - before < 20);
+			System.out.println("Time for calibration: "+(after - before));
 		}
 		catch(Exception e)
 		{
