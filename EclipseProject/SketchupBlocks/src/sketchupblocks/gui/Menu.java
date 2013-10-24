@@ -173,7 +173,7 @@ public class Menu
 				}
 				
 				if(sessMan.isSpectating())
-					displayList.add(new UserPopup(window, "Disconnect", uBlock.name, UserTypes.SPECTATE, uBlock));
+					displayList.add(new UserPopup(window, "Disconnect", "", UserTypes.SPECTATE, uBlock));
 				else
 					displayList.add(new UserPopup(window, "Spectate", uBlock.name, UserTypes.SPECTATE, uBlock));
 			}
