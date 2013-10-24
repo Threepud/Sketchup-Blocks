@@ -65,7 +65,10 @@ public class Feeder extends Interpreter
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			if (Settings.verbose >= 1)
+				e.printStackTrace();
+			Logger.log("Could not find input file for camera "+cameraID, 0);
+			
 		}
 	}
 
