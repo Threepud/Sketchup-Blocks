@@ -36,13 +36,11 @@ public class EnvironmentAnalyzer
 			Collection<ModelBlock> blocks = eddy.getModel().getBlocks();
 			
 			BoundingBox belowBB = null;
-			
 			for (ModelBlock modelBlock : blocks)
 			{
 				if (modelBlock.smartBlock.blockId != newBlock.smartBlock.blockId)
 				{
 					BoundingBox modelBB = BoundingBox.generateBoundingBox(modelBlock);
-	
 					boolean overlap = checkOverlap(newBB, modelBB);
 					
 					if (overlap)
@@ -60,7 +58,9 @@ public class EnvironmentAnalyzer
 			}
 			
 			if (belowBB == null)
+			{
 				return null;
+			}
 			return belowBB.modelBlock;
 		}
 		catch(Exception e)
@@ -200,11 +200,16 @@ public class EnvironmentAnalyzer
 				min2 = proj < min2 ? proj : min2;
 				max2 = proj > max2 ? proj : max2;
 			}
+			
 			if (min1 > max2 || min2 > max1)
 			{
 				return false;
 			}
-			else if ((max2 - min1 < thresh  && (max2 - min1  > 0)) || (max1 - min2 < thresh && max1 - min2 > 0))
+			else if ((max2 - min1 < thresh  && (max2 - min1  > 0)))
+			{
+				return false;
+			}
+			else if (max1 - min2 < thresh && max1 - min2 > 0)
 			{
 				return false;
 			}
@@ -215,7 +220,7 @@ public class EnvironmentAnalyzer
 	
 	private static boolean checkBroad(BoundingBox one, BoundingBox two)
 	{
-		double error = -3;
+		double error = 3;
 		if (error < two.min.x - one.max.x)
 			return false;
 		if (one.min.x - two.max.x > error)
