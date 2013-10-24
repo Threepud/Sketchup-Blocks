@@ -152,6 +152,16 @@ public class ColladaLoader
 		return result;
 	}
 	
+	private SmartBlock getCubeData()
+	{
+		return null;
+	}
+	
+	private SmartBlock getDisplayData()
+	{
+		return null;
+	}
+	
 	/**
 	 * This file sets up the export for the given SmartBlock to Collada file with
 	 * a custom name under "models".
