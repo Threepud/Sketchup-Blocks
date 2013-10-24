@@ -186,6 +186,8 @@ public class Menu
 						if(((UserPopup)displayList.get(displayList.size() - 1)).userType == UserTypes.SPECTATE)
 						{
 							displayList.remove(displayList.size() - 1);
+							if(sessMan.isSpectating())
+								return;
 							checkCalibrated();
 						}
 					}

@@ -159,7 +159,12 @@ public class ConnectingPopup implements Popup
 			if(poisonFed && success)
 				drawPopupHeader("Connected");
 			else if(poisonFed && !success)
+			{
+				System.out.println(headingFont.getSize());
+				if(headingFont.getSize() == 40)
+					headingFont = window.createFont("Arial", 30, true);
 				drawPopupHeader("Connection Failed");
+			}
 			else if(!poisonFed)
 				drawPopupHeader(baseString);
 			
