@@ -67,7 +67,6 @@ public class BoundingBox
 		return result;
 	}
 	
-	//TODO: Check that checking for doubles works.
 	public ArrayList<Vec3> generate2DSeparationAxes(ArrayList<Vec3> normals)
 	{
 		for (int k = 0; k < worldVertices.length; k += 3)
@@ -81,7 +80,6 @@ public class BoundingBox
 		return normals;
 	}
 	
-	//TODO: Check that checking for doubles works.
 		public ArrayList<Vec3> generate3DSeparationAxes(ArrayList<Vec3> normals)
 		{
 			for (int k = 0; k < worldVertices.length; k += 3)

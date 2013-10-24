@@ -227,8 +227,6 @@ public class EnvironmentAnalyzer
 		return true;
 	}
 
-	/**TODO: There was some argument here that I have forgotten.
-	 */
 	private static boolean higherThan(BoundingBox one, BoundingBox two)
 	{
 		if (one.max.z > two.max.z)

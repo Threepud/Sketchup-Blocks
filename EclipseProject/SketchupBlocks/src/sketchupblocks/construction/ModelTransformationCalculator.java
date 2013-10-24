@@ -182,10 +182,12 @@ public class ModelTransformationCalculator
             }
             // Do calculation 
             Vec3 lineDirection;
-			try {
+			try 
+			{
 				lineDirection = LineDirectionSolver.solve(landmarkToCamera, angles);
-			} catch (SingularMatrixException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch (SingularMatrixException e) 
+			{
 				e.printStackTrace();
 				return new Vec3(0,0,1);
 			}

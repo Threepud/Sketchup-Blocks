@@ -153,7 +153,7 @@ public class ModelConstructor implements Runnable
 	}
 	
 	/**
-	 * TODO: fix negative...
+	 * 
 	 * @param block The block being assessed.
 	 * @return true is the block has any visible fiducials
 	 */
@@ -242,7 +242,7 @@ public class ModelConstructor implements Runnable
 			boolean expected = expectedToSeeBlock(bi);
 			long time = bi.getLastSeen().getTime();
 			long now = System.currentTimeMillis();
-			boolean timeFine = now - time < 150*changeWindow; /**TODO: This may break stuff*/
+			boolean timeFine = now - time < 150*changeWindow; /**TODO: This may break stuff? Discuss with Hein*/
 			boolean hasBeenSpotted = bi.getTransform() != null;
 			if(removed && !expected && timeFine && hasBeenSpotted)
 				result.add(bi);

@@ -1,7 +1,6 @@
 package sketchupblocks.construction;
 
 import sketchupblocks.base.Logger;
-import sketchupblocks.base.RuntimeData;
 import sketchupblocks.math.Face;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.RotationMatrix3D;
