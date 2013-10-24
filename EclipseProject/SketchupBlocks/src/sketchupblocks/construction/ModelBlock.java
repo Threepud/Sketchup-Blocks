@@ -1,7 +1,6 @@
 package sketchupblocks.construction;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.math.Line;
@@ -25,7 +24,6 @@ public class ModelBlock implements Serializable
 	public ChangeType type;
 	public Line [] debugLines = new Line[0];
 	public Vec3 [] debugPoints = new Vec3[0];
-	public ArrayList<ModelBlock> blocksAbove = new ArrayList<ModelBlock>();
 	
 	public ModelBlock()
 	{

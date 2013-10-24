@@ -1,18 +1,15 @@
 package sketchupblocks.gui;
 
 import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.event.KeyEvent;
 import sketchupblocks.base.Logger;
 import sketchupblocks.base.Model;
-import sketchupblocks.base.RuntimeData;
 import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.ModelNotSetException;
-import sketchupblocks.math.Face;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
@@ -133,9 +130,7 @@ public class DebugViewer
 	public void drawDebugInformation()
 	{
 		drawDebugLines();
-		drawOutputLines();
 		drawDebugPoints();
-		drawDebugFaces();
 		drawGhostBlocks();
 		drawMediumRareBlocks();
 	}
@@ -177,39 +172,6 @@ public class DebugViewer
 					
 					start = Vec3.scalar(10, start);
 					end = Vec3.scalar(lineLength * 10, end);
-					end = Vec3.add(start, end);
-					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
-				}
-			}
-		}
-		window.popMatrix();
-	}
-	
-	/**
-	 * This function enable easy debugging by displaying 
-	 * arbitrary lines given by the programming. These lines 
-	 * are fetched from the RuntimeData class.
-	 */
-	private void drawOutputLines()
-	{
-		final float olLength = 10.0f;
-		
-		window.pushMatrix();
-		window.scale(1f);
-		
-		if(showOutputLines)
-		{
-			window.stroke(222, 3, 255);
-			LinkedBlockingQueue<Line> outputLines = RuntimeData.outputLines;
-			if(outputLines != null)
-			{
-				for(Line line: outputLines)
-				{
-					Vec3 start = new Vec3(line.point.y, -line.point.z, line.point.x);
-					Vec3 end = new Vec3(line.direction.y, -line.direction.z, line.direction.x);
-					
-					start = Vec3.scalar(10, start);
-					end = Vec3.scalar(olLength * 10, end);
 					end = Vec3.add(start, end);
 					window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
 				}
@@ -261,63 +223,6 @@ public class DebugViewer
 	}
 	
 	/**
-	 * This function draws faces given in the
-	 * RuntimeData class for debugging the Pseudo
-	 * Physics class.
-	 */
-	private void drawDebugFaces()
-	{
-		if(showDebugFaces)
-		{
-			window.pushMatrix();
-			window.fill(0, 162, 237);
-			
-			Face f = RuntimeData.topFace;
-			if(f != null)
-			{
-				window.beginShape();
-				for(int x = 0; x < f.corners.length; ++x)
-				{
-					window.vertex(10 * (float)f.corners[x].y, 10 * -(float)f.corners[x].z, 10 * (float)f.corners[x].x);
-				}
-				window.endShape(PConstants.CLOSE);
-			}
-			
-			window.fill(206, 27, 167);
-			f = RuntimeData.bottomFace;
-			if(f != null)
-			{
-				window.beginShape();
-				for(int x = 0; x < f.corners.length; ++x)
-				{
-					window.vertex(10 * (float)f.corners[x].y, 10 * -(float)f.corners[x].z, 10 * (float)f.corners[x].x);
-				}
-				window.endShape(PConstants.CLOSE);
-			}
-			window.popMatrix();
-		}
-	}
-	
-	/*private void drawDebugLinesIntersections()
-	{
-		if(showDebugLineIntersection)
-		{
-			window.pushMatrix();
-			window.fill(255);
-			
-			Line debugLine = RuntimeData.debugLine;
-			if(debugLine != null)
-			{
-				Vec3 start = new Vec3(10 * debugLine.point.y, 10 * -debugLine.point.z, 10 * debugLine.point.x);
-				Vec3 end = new Vec3(10 * debugLine.direction.y, 10 * -debugLine.direction.z, 10 * debugLine.direction.x);
-				window.line((float)start.x, (float)start.y, (float)start.z, (float)end.x, (float)end.y, (float)end.z);
-			}
-			
-			window.popMatrix();
-		}
-	}*/
-	
-	/**
 	 * This function draws the model blocks
 	 * before they have been modified by the 
 	 * pseudo physics engine.
@@ -344,21 +249,6 @@ public class DebugViewer
 			}
 			for(ModelBlock block: new ArrayList<ModelBlock>(model.getBlocks()))
 			{
-				/*if(showDebugLineIntersection)
-				{
-					Line line = RuntimeData.debugLine;
-					if(line != null)
-					{
-						if(EnvironmentAnalyzer.isIntersecting(line, block))
-						{
-							window.fill(0, 255, 0);
-						}
-						else
-						{
-							window.fill(255);
-						}
-					}
-				}*/
 				if (block.type == ModelBlock.ChangeType.REMOVE)
 				{
 					Logger.log("Drawing removed block!", 1);

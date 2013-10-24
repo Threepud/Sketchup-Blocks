@@ -91,9 +91,6 @@ public class PseudoPhysics
 					topFace.corners[k] = Vec3.add(topFace.corners[k], surfaceTrans);
 				}
 				
-				RuntimeData.bottomFace = bottomFace;
-				RuntimeData.topFace = topFace;
-				
 				//We find a point on the bottom face of the modelblock to be placed. 
 				Vec3 pointOnBottomFace = Vec3.scalar(1.0/3.0, Vec3.add(Vec3.add(bottomFace.corners[0], bottomFace.corners[1]), bottomFace.corners[2]));
 				Vec3 pointOnSurface = Vec3.scalar(1.0/3.0, Vec3.add(Vec3.add(topFace.corners[0], topFace.corners[1]), topFace.corners[2]));

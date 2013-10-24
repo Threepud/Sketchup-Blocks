@@ -65,28 +65,23 @@ public class ModelTransformationCalculator
 				axis.normalize();
 				
 				Matrix rot = Matrix.identity(3);
-				Matrix rotTest = Matrix.identity(3);
+				Matrix rotNeg = Matrix.identity(3);
 				
 				for (int k = 0; k < positions.length; k++)
 				{ 
 					
 					Vec3 up = getUpVector(fids[k].camID);
 					
-					//double angle = Math.acos(Vec3.dot(ra, fidUpAxis));
 					double angle = GetError(transformMatrices[0],rot,fidUpM[k],fidCoordsM[k],positions[k],axis,up,fids[k].rotation);
 					rot = Matrix.multiply(new RotationMatrix3D(axis, angle), rot);
+					rotNeg = Matrix.multiply(new RotationMatrix3D(axis, -angle), rotNeg);
 					
-					double newAngle = GetError(transformMatrices[0],rot,fidUpM[k],fidCoordsM[k],positions[k],axis,up,fids[k].rotation);
-					rotTest = Matrix.multiply(new RotationMatrix3D(axis, -angle), rotTest);
-					
-					double newTestAngle = GetError(transformMatrices[0],rotTest,fidUpM[k],fidCoordsM[k],positions[k],axis,up,fids[k].rotation);
-					
-					Vec3 fidNormal = Matrix.multiply(rot, Matrix.multiply(transformMatrices[0], Vec3.normalize(fidCoordsM[k])));
-					RuntimeData.outputLines.add(new Line(positions[k], Vec3.normalize(Matrix.multiply(new RotationMatrix3D(fidNormal, fids[k].rotation), new Vec3(0,0,1)))));
+					double newPosAngle = GetError(transformMatrices[0],rot,fidUpM[k],fidCoordsM[k],positions[k],axis,up,fids[k].rotation);
+					double newNegAngle = GetError(transformMatrices[0],rotNeg,fidUpM[k],fidCoordsM[k],positions[k],axis,up,fids[k].rotation);
 	
-					if (newTestAngle < newAngle)
+					if (newNegAngle < newPosAngle)
 					{
-						rot = rotTest;
+						rot = rotNeg;
 					}
 					
 					transform = Matrix.multiply(transformMatrices[1], Matrix.multiply(rot, transformMatrices[0]).padMatrix());
@@ -100,9 +95,29 @@ public class ModelTransformationCalculator
 		throw new RuntimeException("Invalid number of fiducials observed to calculate position "+(fidCoordsM.length == positions.length));
 	}
 	
+	/**
+	 * 1. Find the fiducial up in world space by rotating fiducial up in model space.
+	 * 2. Find the fiducial normal in world space by rotating fiducial normal in model space.
+	 * 3. A plane that goes through the fiducial's world position with normal = fiducial world normal is found (by calculating its basis).
+	 * 4. The camera's up vector is projected onto that plane.
+	 * 5. The projected camera up is rotated the observed amount around the fiducial normal.
+	 * 6. A plane that goes through the fiducial's world position with normal = axis between 2 observed fiducials is found (by calculating its basis).
+	 * 7. The rotated, projected up is projected onto this plane.
+	 * 8. The fiducial's world up vector is also projected onto this plane.
+	 * 9. The angle between the fiducial's observed up and the calculated up is calculated using the dot product and returned.
+	 * @param transform
+	 * @param rot
+	 * @param fidMUp
+	 * @param fidM
+	 * @param fidW
+	 * @param axis
+	 * @param cameraUp
+	 * @param rotation
+	 * @return
+	 */
 	static private double GetError(Matrix transform, Matrix rot ,Vec3 fidMUp,Vec3 fidM , Vec3 fidW, Vec3 axis,Vec3 cameraUp, double rotation)
 	{
-		Vec3 fidUpW = Matrix.multiply(rot, Matrix.multiply(transform, fidMUp));
+		Vec3 fidUpW = Matrix.multiply(rot, Matrix.multiply(transform, fidMUp)); 
 		Vec3 fidNormal = Matrix.multiply(rot, Matrix.multiply(transform, Vec3.normalize(fidM)));
 		fidNormal.normalize();
 		

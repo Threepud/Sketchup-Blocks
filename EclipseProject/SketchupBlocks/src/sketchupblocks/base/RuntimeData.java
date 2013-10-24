@@ -14,15 +14,8 @@ public class RuntimeData
 	private static Map<Integer, Vec3> cameraViewVectors = new ConcurrentHashMap<Integer, Vec3>();
 	private static Map<Integer, Boolean> cameraCalibrated = new ConcurrentHashMap<Integer, Boolean>();
 	
-	public static Line debugLine; 
-	public static LinkedBlockingQueue<Line> outputLines = new LinkedBlockingQueue<Line>();
-	
 	public static double[][][] cameraCalibrationDetails;
 	public static boolean[][] haveCalibrationDetails;
-	
-	public static Face topFace;
-	public static Face bottomFace;
-	public static int blockID = -1;
 	
 	public static void init()
 	{
@@ -35,7 +28,6 @@ public class RuntimeData
 				haveCalibrationDetails[l][k] = false;
 			}
 		}
-		debugLine = new Line(new Vec3(-10,-10,10),new Vec3(10,10,10));
 	}
 	
 	public static void clearCalibrationDetails(int camID)
