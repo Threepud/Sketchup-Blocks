@@ -109,7 +109,7 @@ public class Feeder extends Interpreter
 				}
 				
 			}
-			Logger.log(cameraID+" is done", 2);
+			Logger.log(cameraID+" is done feeding recorded data.", 2);
 		}
 	}
 }

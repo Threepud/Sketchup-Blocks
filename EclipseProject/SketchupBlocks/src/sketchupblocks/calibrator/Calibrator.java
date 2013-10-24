@@ -22,8 +22,6 @@ public class Calibrator
 	
 	public Calibrator()
 	{
-		//Unit tests need this check
-		//TODO: Examine this closely
 		if(Settings.numCameras == 0)
 		{
 			Settings.readSettings("Settings.xml");
