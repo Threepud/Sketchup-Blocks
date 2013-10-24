@@ -38,6 +38,7 @@ public class BlockInfoTest {
 		ce.cameraID = 0;
 		ce.fiducialID = 1;
 		ce.type = CameraEvent.EVENT_TYPE.UPDATE;
+		try {Thread.sleep(100);} catch (InterruptedException e) {}
 		Date n = new Date();
 		bin.updateFiducial(ce);
 		assert(bin.getLastSeen().getTime() - n.getTime() < 30);		
@@ -46,6 +47,8 @@ public class BlockInfoTest {
 	@Test
 	public void changeTest()
 	{	
+		try {Thread.sleep(100);} catch (InterruptedException e) {}
+		
 		Date n = new Date();
 		bin.setTransform(Matrix.identity(4), 1);
 		assert(bin.getLastSeen().getTime() - n.getTime() < 30);		
@@ -60,5 +63,26 @@ public class BlockInfoTest {
 		ce.type = CameraEvent.EVENT_TYPE.UPDATE;
 		bin.updateFiducial(ce);
 		assert(bin.mapContainsKey(0, 1));
+	}
+	
+	
+	@Test
+	public void correctFiducialGet()
+	{
+		CameraEvent ce = new CameraEvent();
+		ce.cameraID = 0;
+		ce.fiducialID = 1;
+		ce.x = 0.5f;
+		ce.y = 0.55f;
+		ce.type = CameraEvent.EVENT_TYPE.UPDATE;
+		bin.updateFiducial(ce);
+		BlockInfo.Fiducial fid = bin.getFiducial(ce.cameraID,ce.fiducialID);
+		assert(fid.camID == ce.cameraID);
+		assert(fid.fiducialsID == ce.fiducialID);
+		assert(fid.fiducialsID == ce.fiducialID);
+		assert(fid.camViewX == ce.x);
+		assert(fid.camViewY == ce.y);
+		
+	
 	}
 }
