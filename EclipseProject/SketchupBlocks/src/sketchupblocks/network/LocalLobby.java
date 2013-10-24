@@ -24,7 +24,7 @@ public class LocalLobby implements Lobby
 		modelChangeListeners.trimToSize();
 		for (int k = 0; k < modelChangeListeners.size(); k++)
 		{
-			if (modelChangeListeners.get(k) instanceof PseudoPhysicsApplicator)
+			if (modelChangeListeners.get(k) instanceof PseudoPhysicsApplicator || ModelBlock.ChangeType.REMOVE == modelBlock.type)
 				modelChangeListeners.get(k).fireModelChangeEvent(modelBlock);
 		}
 	}
