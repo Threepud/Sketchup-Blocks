@@ -96,7 +96,7 @@ public class Menu
 	 */
 	public void handleInput(Block block, CameraEvent cEvent)
 	{
-		if(calibrated)
+		if(calibrated || sessMan.isSpectating())
 		{
 			if(block instanceof CommandBlock)
 			{
