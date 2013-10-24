@@ -31,6 +31,7 @@ public class SessionManager
 	private Menu menu;
 	private String[] dbPaths;
 	private Interpreter[] wimpie;
+	private PseudoPhysicsApplicator physicsApp;
 	
 	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
 	
@@ -63,7 +64,7 @@ public class SessionManager
 		}
 		server.start();
 		
-		PseudoPhysicsApplicator physicsApp = new PseudoPhysicsApplicator((LocalLobby)lobby);
+		physicsApp = new PseudoPhysicsApplicator((LocalLobby)lobby);
 		
 		sarah = new ModelViewer();
 		
@@ -255,18 +256,6 @@ public class SessionManager
     		lobby = null;
     		lobby = new LocalLobby();
     		lobby.setModel(new Model());
-    		try 
-    		{
-				sarah.setLobby(lobby);
-				sarah.createDebugViewer();
-				EnvironmentAnalyzer.setLobby(lobby);
-				jimmy.setLobby(lobby);
-			} 
-    		catch (Exception e1) 
-    		{
-				e1.printStackTrace();
-				System.exit(-1);
-			}
     		
     		try
     		{
@@ -278,6 +267,22 @@ public class SessionManager
     			System.exit(-1);
     		}
     		server.start();
+    		
+    		try 
+    		{
+    			physicsApp = new PseudoPhysicsApplicator((LocalLobby)lobby);
+    			EnvironmentAnalyzer.setLobby(lobby);
+    			sarah = new ModelViewer();
+    			sarah.setWindow(parent);
+				sarah.setLobby(lobby);
+				sarah.createDebugViewer();
+				jimmy.setLobby(lobby);
+			} 
+    		catch (Exception e1) 
+    		{
+				e1.printStackTrace();
+				System.exit(-1);
+			}
     		
     		//menu.forceStopConnectPopup();
     		menu.checkCalibrated();
@@ -359,7 +364,7 @@ public class SessionManager
     	sarah.setKeyboardInput(event);
     }
     
-    private void resetSystem()
+    /*private void resetSystem()
     {
     	String resetString = 
     			  "#################################\n"
@@ -392,7 +397,7 @@ public class SessionManager
 		jimmy.setLobby(lobby);
 		
 		createInterpreters();
-    }
+    }*/
     
     private void pauseInput()
     {
@@ -423,7 +428,7 @@ public class SessionManager
 			{
 				if(e.getAction() == KeyEvent.RELEASE)
 				{
-					resetSystem();
+					//resetSystem();
 				}
 			}
 			else

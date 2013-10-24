@@ -55,7 +55,7 @@ public class NetworkedLobby extends Thread implements Lobby
 	public Model getModel() throws ModelNotSetException
 	{
 		if(model == null)
-			throw new ModelNotSetException("Local Lobby: Model not set.");
+			throw new ModelNotSetException("Networked Lobby: Model not set.");
 		return model;
 	}
 
