@@ -37,7 +37,7 @@ public class ModelViewer
 	private PShader fog;
 	
 	//fiducial
-	private double velocityScalar = 5.0;
+	private double velocityScalar = 4.0;
 	
 	//camera
 	private double currentRotation = 0;
