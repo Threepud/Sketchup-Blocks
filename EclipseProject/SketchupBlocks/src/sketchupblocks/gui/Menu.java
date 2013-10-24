@@ -207,6 +207,9 @@ public class Menu
 			displayList.add(new WarningPopup(window, "No Cameras Set"));
 		else if(!RuntimeData.isSystemCalibrated())
 		{
+			if(!displayList.isEmpty())
+				if(displayList.get(displayList.size() - 1) instanceof CalibratePopup)
+					return;
 			displayList.add(new CalibratePopup(window));
 		}
 	}
