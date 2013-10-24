@@ -272,8 +272,6 @@ public class SessionManager
     		{
     			physicsApp = new PseudoPhysicsApplicator((LocalLobby)lobby);
     			EnvironmentAnalyzer.setLobby(lobby);
-    			sarah = new ModelViewer();
-    			sarah.setWindow(parent);
 				sarah.setLobby(lobby);
 				sarah.createDebugViewer();
 				jimmy.setLobby(lobby);
