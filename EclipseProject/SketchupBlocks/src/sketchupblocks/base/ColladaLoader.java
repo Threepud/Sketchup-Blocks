@@ -21,16 +21,17 @@ import sketchupblocks.math.Vec3;
 
 /**
  * ColladaLoader manages the importing and exporting of Collada files.
- * 
- * @author Jacques
- *
+ * @author Jacques Coetzee
  */
 public class ColladaLoader 
 {
 	
 	/**
-	 * @param fileName
-	 * @return
+	 * This function loads 3D model information from a
+	 * given file name and return a SmartBlock containing the
+	 * 3D information.
+	 * @param fileName Collada file name.
+	 * @return SmartBlock containing 3D information.
 	 */
 	public static SmartBlock getSmartBlock(String fileName)
 	{
@@ -58,6 +59,48 @@ public class ColladaLoader
 		
 		SmartBlock result = new SmartBlock();
 		
+		//get transformation matrix
+		Matrix transM = Matrix.identity(4);
+		XML libraryVisualScenesNode = xml.getChild("library_visual_scenes");
+		XML visualSceneNode = libraryVisualScenesNode.getChild("visual_scene"); 
+		XML nodeNode = visualSceneNode.getChild("node");
+		XML node2Node = nodeNode.getChild("node");
+		if(node2Node != null)
+		{
+			XML matrixNode = node2Node.getChild("matrix");
+			String matrixString = matrixNode.getContent();
+			String[] matrixBits = matrixString.split(" ");
+			int index = 0;
+			double[][] dMatrix = 
+				{
+					{
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+					},
+					{
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+					},
+					{
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+					},
+					{
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+						Double.parseDouble(matrixBits[index++]),
+					}
+				};
+			transM = new Matrix(dMatrix);
+		}
+		
 		//get model vertices
 		String[] stringVertices = sources[0].getChild("float_array").getContent().split(" ");
 		Vec3[] vertices = new Vec3[stringVertices.length / 3];
@@ -75,6 +118,8 @@ public class ColladaLoader
 				vertices[x].x = Double.parseDouble(stringVertices[index]) * unitMeter;
 				vertices[x].y = -Double.parseDouble(stringVertices[index + 1]) * unitMeter;
 				vertices[x].z = Double.parseDouble(stringVertices[index + 2]) * unitMeter;
+				
+				vertices[x] = Matrix.multiply(transM, vertices[x].padVec3()).toVec3();
 			}
 			catch(NumberFormatException e)
 			{
@@ -107,16 +152,26 @@ public class ColladaLoader
 		return result;
 	}
 	
+	/**
+	 * This file sets up the export for the given SmartBlock to Collada file with
+	 * a custom name under "models".
+	 * @param block SmartBlock to be written to file.
+	 */
 	public static void saveSmartBlock(SmartBlock block)
 	{
 		ArrayList<ModelBlock> blocks = new ArrayList<>();
 		ModelBlock mBlock = new ModelBlock();
 		mBlock.smartBlock = block;
+		mBlock.transformationMatrix = Matrix.identity(4);
 		blocks.add(mBlock);
-		String path = "./models/";
-		makeCollada(path + block.name, blocks);
+		makeCollada(block.name, blocks);
 	}
 	
+	/**
+	 * This function sets up the export for the array list of model blocks to 
+	 * a Collada file with a generated file name under "exports".
+	 * @param blocks Array list of ModelBlocks to be written to file.
+	 */
 	public static void export(ArrayList<ModelBlock> blocks)
 	{
 		String fileName = "SketchupBlocks" + new Timestamp(new Date().getTime()) + ".dae";
@@ -125,6 +180,12 @@ public class ColladaLoader
 		makeCollada(path + fileName, blocks);
 	}
 	
+	/**
+	 * This function exports the given array list of model blocks to a 
+	 * Collada file labeled with the file name provided.
+	 * @param fileName Collada file name.
+	 * @param blocks Array list of model blocks to export.
+	 */
 	private static void makeCollada(String fileName, ArrayList<ModelBlock> blocks)
 	{
 		//create file structure
@@ -261,7 +322,7 @@ public class ColladaLoader
 			{
 				vector = Matrix.multiply(blocks.get(x).transformationMatrix, vector.padVec3()).toVec3();
 				vectorString += vector.x / 0.02539999969303608 + " ";
-				vectorString += vector.y / 0.02539999969303608 + " ";
+				vectorString += -(vector.y / 0.02539999969303608) + " ";
 				vectorString += vector.z / 0.02539999969303608 + " ";
 			}
 			floatArray.setContent(vectorString.substring(0, vectorString.length() - 1));

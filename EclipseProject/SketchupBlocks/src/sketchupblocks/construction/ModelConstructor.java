@@ -8,18 +8,15 @@ import java.util.Iterator;
 import java.util.Map;
 
 import sketchupblocks.database.*;
+import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.base.CameraEvent;
 import sketchupblocks.base.InputBlock;
 import sketchupblocks.base.Logger;
 import sketchupblocks.base.RuntimeData;
 import sketchupblocks.base.SessionManager;
-import sketchupblocks.base.Settings;
 import sketchupblocks.calibrator.*;
 import sketchupblocks.math.Line;
-import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Matrix;
-import sketchupblocks.math.NoConvergenceException;
-import sketchupblocks.math.RotationMatrix3D;
 import sketchupblocks.math.SingularMatrixException;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.math.nonlinearmethods.BPos;
@@ -30,6 +27,7 @@ import sketchupblocks.network.Lobby;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 
  * @author Hein,Jacques,Elre
  */
 
@@ -89,7 +87,7 @@ public class ModelConstructor implements Runnable
 	 * The thread will only process the data once there is enough.
 	 * @param iBlock
 	 */
-	private void store(InputBlock iBlock)
+	private synchronized void store(InputBlock iBlock)
 	{
 		if (iBlock.cameraEvent.type != CameraEvent.EVENT_TYPE.REMOVE)
 		{
@@ -103,47 +101,47 @@ public class ModelConstructor implements Runnable
 			
 			if(!checkReAdd(block,iBlock))
 			{
-				BlockInfo.Fiducial fiducial =  block.new Fiducial(iBlock.cameraEvent);
-				block.fiducialMap.put(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID),fiducial);
-				block.lastChange = new Date();
+				block.updateFiducial(iBlock.cameraEvent);
+				block.setLastChange(new Date());
 			}
 		}
 		else //When a remove call is received
 		{
 			BlockInfo block = blockMap.get(iBlock.block.blockId);
 			if(block == null) return;
-			BlockInfo.Fiducial fid = block.fiducialMap.get(block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID));
+			BlockInfo.Fiducial fid = block.getFiducial(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID);
 			if(fid == null) return;
-			
+
 			boolean blockWasRemoved = false;
 			fid.setSeen(false);
-			block.lastChange = new Date();
+			block.setLastChange(new Date());
 						
-			if(!block.removed)
+			if(!block.getRemoved())
 			{
 				if(blockNotSeen(block))
 				{
 					if(expectedToSeeBlock(block))
 					{
-						block.removed = true;						
+						block.setRemoved(true);						
 						eddy.updateModel(new ModelBlock((SmartBlock)block.smartBlock, null, ModelBlock.ChangeType.REMOVE));		
 						blockWasRemoved = true;
 					}
 				}
 			}
 			
+			//As toe-geboude blokkie remove is.
 			if (blockWasRemoved)
 			{
 				//Check ALLLLLL the blocks
 				for(BlockInfo blokkie : blockMap.values())
 				{
-					if(!blokkie.removed)
+					if(!blokkie.getRemoved())
 					{
 						if(blockNotSeen(blokkie))
 						{
 							if(expectedToSeeBlock(blokkie))
 							{
-								blokkie.removed = true;						
+								blokkie.setRemoved(true);					
 								eddy.updateModel(new ModelBlock((SmartBlock)blokkie.smartBlock, null, ModelBlock.ChangeType.REMOVE));			
 							}
 						}
@@ -155,39 +153,45 @@ public class ModelConstructor implements Runnable
 	}
 	
 	/**
+	 * 
 	 * @param block The block being assessed.
 	 * @return true is the block has any visible fiducials
 	 */
 	private boolean blockNotSeen(BlockInfo block)
 	{
-		for(BlockInfo.Fiducial fid : block.fiducialMap.values())
+		boolean seen = false;
+		for(BlockInfo.Fiducial fid : block.getAllFiducials())
 		{
 			if(fid.isSeen())
 			{
-				return false;
+				seen = true;
 			}
 		}
-		return true;
+		return !seen;
 	}
 	
-	private void reAddBlockToModel(BlockInfo bi)
+	private void reAddBlockToModel(BlockInfo bin, BlockInfo binRef)
 	{
-		bi.removed = false;
-		ModelBlock mb = new ModelBlock((SmartBlock)bi.smartBlock, bi.getTransform(), ModelBlock.ChangeType.UPDATE);
+		binRef.setRemoved(false);
+		//System.out.println("Bin clone == null "+(bin.getTransform() == null));
+		//System.out.println("Bin Ref == null "+(binRef.getTransform() == null));
+		
+		ModelBlock mb = new ModelBlock((SmartBlock)bin.smartBlock, bin.getTransform(), ModelBlock.ChangeType.UPDATE);
 		
 		ArrayList<Line> dbLines = new ArrayList<Line>();
 		ArrayList<Vec3>  dbPoints = new ArrayList<Vec3>();
 		
-		for(BlockInfo.Fiducial fid : bi.fiducialMap.values())
+		for (BlockInfo.Fiducial fid : bin.getAllFiducials())
 		{
-			if(RuntimeData.getCameraPosition(fid.camID) == null)
+			if (RuntimeData.getCameraPosition(fid.camID) == null)
 			{
 				continue;
 			}
-			if(fid.worldPosition == null)
+			if (fid.worldPosition == null)
 			{
 				continue;
 			}
+			
 			Vec3 direction = Vec3.subtract(fid.worldPosition,RuntimeData.getCameraPosition(fid.camID));
 			dbLines.add(new Line(RuntimeData.getCameraPosition(fid.camID),direction));
 			dbPoints.add(fid.worldPosition);
@@ -195,30 +199,34 @@ public class ModelConstructor implements Runnable
 		
 		mb.debugLines = dbLines.toArray(new Line[0]);
 		mb.debugPoints = dbPoints.toArray(new Vec3[0]);
-		//mb.debugPoints;
-		eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mb));	
+		//System.out.println("Readding "+bin.blockID);
+		eddy.updateModel(PseudoPhysics.applyPseudoPhysics(mb));	
 	
 	}
 	
 	private boolean expectedToSeeBlock(BlockInfo block)
 	{
-		for(BlockInfo.Fiducial fid : block.fiducialMap.values())
+		for(BlockInfo.Fiducial fid : block.getAllFiducials())
 		{
-			Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
-			Vec3 fidPos = fid.worldPosition;
-			if(camPos == null || fidPos == null)
+			try
+			{
+				Vec3 camPos = RuntimeData.getCameraPosition(fid.camID);
+				Vec3 fidPos = fid.worldPosition;
+				ModelBlock mb1 = eddy.getModel().getBlockById(block.blockID);
+				if(camPos == null || fidPos == null || mb1 == null)
+				{
+					continue;
+				}
+				int numObscured = EnvironmentAnalyzer.getNumObscuredPoints((SmartBlock)block.smartBlock, mb1.transformationMatrix, fid.camID, fid.fiducialsID);	
+				if (numObscured == 0)
+					return true;
+			}
+			catch(ModelNotSetException e)
 			{
 				continue;
 			}
-		
-			ModelBlock [] mb = EnvironmentAnalyzer.getIntersectingModels(camPos,fidPos);
-					
-			//The fiducial is not obscured.
-			if((mb.length == 1 && mb[0].smartBlock.blockId == block.blockID) || mb.length == 0) 
-			{
-				return true;
-			}
 		}
+
 		return false;
 	}
 	
@@ -230,39 +238,46 @@ public class ModelConstructor implements Runnable
 		ArrayList<BlockInfo> result = new ArrayList<BlockInfo>();
 		for(BlockInfo bi : blockMap.values())
 		{
-			if(bi.removed && expectedToSeeBlock(bi) && bi.getLastSeen().getTime() < 2*changeWindow)
+			boolean removed = bi.getRemoved();
+			boolean expected = expectedToSeeBlock(bi);
+			long time = bi.getLastSeen().getTime();
+			long now = System.currentTimeMillis();
+			boolean timeFine = now - time < 150*changeWindow; /**TODO: This may break stuff? Discuss with Hein*/
+			boolean hasBeenSpotted = bi.getTransform() != null;
+			if(removed && !expected && timeFine && hasBeenSpotted)
 				result.add(bi);
 		}
 		BlockInfo [] res = new BlockInfo [0];
 		return result.toArray(res);
 	}
 	
-	private void doReadditions(BlockInfo [] bis)
+	private void doReadditions(BlockInfo [] bins)
 	{
-		for(BlockInfo bi : bis)
+		
+		for(BlockInfo bi : bins)
 		{
-			if(bi.removed && !expectedToSeeBlock(bi))
+			BlockInfo temp = bi.clone();
+			if(temp.getRemoved() && !expectedToSeeBlock(temp))
 			{
-				reAddBlockToModel(bi);
+				reAddBlockToModel(temp, bi);
 			}
 		}
 	}
 	
 	private boolean checkReAdd(BlockInfo block , InputBlock iBlock)
 	{
-		BlockInfo.CamFidIdentifier key = block.new CamFidIdentifier(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID);
-		if(!block.fiducialMap.containsKey(key))
+		if(!block.mapContainsKey(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID))
 			return false; //There is no information to build on
 		
-		BlockInfo.Fiducial fid =  block.fiducialMap.get(key);
+		BlockInfo.Fiducial fid =  block.getFiducial(iBlock.cameraEvent.cameraID,iBlock.cameraEvent.fiducialID);
 		if(!fid.isSeen()) //The block was removed and we are seeing it again.
 		{
 			if(fid.camID == iBlock.cameraEvent.cameraID && Math.abs(fid.camViewX - iBlock.cameraEvent.x) < 0.1 && Math.abs(fid.camViewY - iBlock.cameraEvent.y) < 0.1) // Seen at the same place
 			{
 				fid.setSeen(true);
-				if(block.removed && block.getTransform() != null) // if all the fiducials are seen we add
+				if(block.getRemoved() && block.getTransform() != null) // if all the fiducials are seen we add
 				{
-					reAddBlockToModel(block);							
+					reAddBlockToModel(block.clone(), block);							
 				}
 				return true;
 			}
@@ -299,11 +314,11 @@ public class ModelConstructor implements Runnable
 					if (b == null) 
 						continue;
 					
-					double timePassed = Math.abs(b.lastChange.getTime() - new Date().getTime());
+					double timePassed = Math.abs(b.getLastChange().getTime() - new Date().getTime());
 					if(b.ready() && RuntimeData.isSystemCalibrated() && (timePassed > changeWindow) )
 					{
-						Logger.log("Processing "+b.fiducialMap.size()+" number of lines after "+timePassed, 50);
-						processBin(b);
+						Logger.log("Processing "+b.getMapSize()+" number of lines after "+timePassed, 50);
+						processBin(b.clone(), b);
 					}
 				}
 				Thread.sleep(1);
@@ -326,20 +341,19 @@ public class ModelConstructor implements Runnable
 	 * This calculates the block position and adds it to the model.
 	 * @param bin
 	 */
-	private void processBin(BlockInfo bin)
+	private void processBin(BlockInfo bin, BlockInfo binReference)
 	{
 		BlockInfo.Fiducial [] fids = bin.getCleanFiducials();
 		int numFiducials = fids.length;
-		
 		Line[] lines = new Line[numFiducials];
 		for(int k = 0 ; k < fids.length ; k++)
 		{
 			lines[k] = fids[k].getLine(); 
 			lines[k].direction.normalize();
 		}
-		
 		Vec3[] fidCoordsM = new Vec3[numFiducials]; //Get from DB
 		int [] cameraIds = new int[numFiducials];
+		Vec3[] fidUpM = new Vec3[numFiducials];
 		//Generate list of the indices (into the smartblock's associatedFiducials list) of the observed fiducials.
 		SmartBlock sBlock = (SmartBlock)(bin.smartBlock);
 		
@@ -362,21 +376,47 @@ public class ModelConstructor implements Runnable
 			}
 			
 			fidCoordsM[k] = sBlock.fiducialCoordinates[fiducialIndex];
+			fidUpM[k] = sBlock.fiducialOrient[fiducialIndex];
 		}
-		
 		Matrix lambdas = calculateLambdas(bin.getTransform(),cameraIds,fidCoordsM, lines);
 		
 		Vec3 [] fiducialWorld = new Vec3[numFiducials];
 		for(int k = 0 ; k < numFiducials ; k++)
 		{
-			fids[k].worldPosition = fiducialWorld[k] = Vec3.add(lines[k].point,  Vec3.scalar(lambdas.data[k][0], lines[k].direction));
+			fiducialWorld[k] = Vec3.add(lines[k].point,  Vec3.scalar(lambdas.data[k][0], lines[k].direction));
+			updateFidPos(fids[k].fiducialsID, fids[k].camID, binReference, fiducialWorld[k]);
+			fids[k].worldPosition = fiducialWorld[k];
 		}
 		
-		if(samePosition(bin,fidCoordsM,fiducialWorld))
+		if(samePosition(bin, fidCoordsM, fiducialWorld))
 			return;
 		
-		Matrix transform = ModelTransformationCalculator.getModelTransformationMatrix(sBlock, fiducialWorld, fidCoordsM);
-		double MTCScore =  getTransformationScore(transform, fiducialWorld, fidCoordsM);
+		Matrix[] transforms = ModelTransformationCalculator.getModelTransformationMatrix(fids, fiducialWorld, fidCoordsM, fidUpM);
+
+		Matrix transform;
+		double MTCScore;
+		
+		if (transforms.length > 1)
+		{
+			double transformScore0 = getTransformationScore(transforms[0], fiducialWorld, fidCoordsM);
+			double transformScore1 = getTransformationScore(transforms[1], fiducialWorld, fidCoordsM);
+			if (transformScore0 > transformScore1)
+			{
+				transform = transforms[1];
+				MTCScore = transformScore1;
+			}
+			else 
+			{
+				transform = transforms[0];
+				MTCScore = transformScore0;
+			}
+		}
+		else
+		{
+			transform = transforms[0];
+			MTCScore = getTransformationScore(transform, fiducialWorld, fidCoordsM);
+		}
+		
 		
 		if(MTCScore > errorThreshold)
 		{
@@ -388,48 +428,76 @@ public class ModelConstructor implements Runnable
 				transform = PSOtransform;
 			}
 			
+			
 			Logger.log("Transformation score(MTC):"+MTCScore, 10);
 			Logger.log("Transformation score(PSO):"+PSOScore, 10);
 		}
 		
 		Logger.log("Transform: "+transform, 50);
 		
-		bin.setTransform(transform, numFiducials);
-		bin.removed = false;
-		
-		ModelBlock mbToAdd = new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE);
-		
-		mbToAdd.debugLines = lines;
-		mbToAdd.debugPoints = fiducialWorld;
-		
 		BlockInfo [] bis = allPossibleReadditions();
 		
-		eddy.updateModel(PseudoPhysicsApplicator.applyPseudoPhysics(mbToAdd));
-		//eddy.updateModel(mbToAdd);
+		
+		if (binReference.getRemoved() == bin.getRemoved())
+		{
+			ModelBlock mbToAdd = new ModelBlock(sBlock, transform, ModelBlock.ChangeType.UPDATE);
+			if (transforms.length > 1)
+				mbToAdd.mooingMatrix = transforms[1]; 
+			else
+				mbToAdd.mooingMatrix = transform;
+			
+			mbToAdd.debugLines = lines;
+			mbToAdd.debugPoints = fiducialWorld;
+			
+			binReference.setTransform(transform, numFiducials);
+			binReference.setRemoved(false);	
+			eddy.updateModel(PseudoPhysics.applyPseudoPhysics(mbToAdd));
+		}
 		doReadditions(bis);
 	}
 	
-	private boolean samePosition(BlockInfo bin,Vec3 [] model,Vec3 [] fids)
+	private void updateFidPos(int fidID, int camID, BlockInfo binReference, Vec3 fidPos)
+	{
+		BlockInfo.Fiducial fid = binReference.getFiducial(camID, fidID);
+		if (fid != null) 
+			fid.worldPosition = fidPos;
+	}
+	
+	private boolean samePosition(BlockInfo bin, Vec3 [] model,Vec3 [] fids)
 	{
 		if(bin.getTransform() == null)
 			return false;
-		double error =0;
+		double ERROR_THRESH = 1;
+		double error = 0;
+		Matrix transform = bin.getTransform();
+		
+		int numMatchingPoints = 0;
+		int numDistinctMatchingFiducials = 0;
+		ArrayList<Vec3> considered = new ArrayList<Vec3>();
 		for(int k = 0 ;  k < fids.length ; k++ )
 		{
-			double temp = fids[k].distance(Matrix.multiply(bin.getTransform(), model[k].padVec3()).toVec3());
-			error +=temp*temp;
+			double temp = fids[k].distance(Matrix.multiply(transform, model[k].padVec3()).toVec3());
+			error += temp*temp;
+			if (temp*temp < ERROR_THRESH*0.5)
+			{
+				numMatchingPoints++;
+				if (!considered.contains(model[k]))
+				{
+					considered.add(model[k]);
+					numDistinctMatchingFiducials++;
+				}
+			}
 		}
 		
 		error /= fids.length;
-		
-		
-		
-		if(error < 1 && fids.length < bin.getNumFiducialsUsed())
+		if(error < ERROR_THRESH && fids.length <= bin.getNumFiducialsUsed())
 		{
-			//System.err.println("Same error:"+error+" num:"+fids.length);
 			return true;
 		}
-		
+		if (error< 1.5*ERROR_THRESH && fids.length >= bin.getNumFiducialsUsed() && fids.length - numMatchingPoints  <= fids.length/4 && numDistinctMatchingFiducials > 1)
+		{
+			return true;
+		}
 		return false;
 	}
 	
@@ -456,9 +524,9 @@ public class ModelConstructor implements Runnable
 			}
 			else
 			{
-				x0[k] = 20;
+				x0[k] = 5;
 			}
-			xt[k] = 20;
+			xt[k] = 5;
 		}
 		
 		Matrix lambdasNewton = null;

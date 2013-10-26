@@ -6,12 +6,21 @@ import sketchupblocks.math.Face;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 
+/**
+ * The bounding box for geometry And functions to generate them
+ * @author Elre
+ *
+ */
 public class BoundingBox 
 {
 	public Vec3 min;
 	public Vec3 max;
 	public Vec3[] worldVertices;
 	public ModelBlock modelBlock;
+	
+	protected BoundingBox()
+	{
+	}
 	
 	private BoundingBox(Vec3 _max, Vec3 _min, Vec3[] _worldVertices, ModelBlock _modelBlock)
 	{
@@ -33,7 +42,8 @@ public class BoundingBox
 				data[i][k] = vecData[i];
 			data[3][k] = 1;
 		}
-		
+		//Matrix hybridTransform = getHybridMatrix(mb);
+		//Vec3[] vertices = Matrix.multiply(hybridTransform, new Matrix(data)).toVec3Array();
 		Vec3[] vertices = Matrix.multiply(mb.transformationMatrix, new Matrix(data)).toVec3Array();
 		for (int k = 0; k < vertices.length; k++)
 		{
@@ -61,7 +71,6 @@ public class BoundingBox
 		return result;
 	}
 	
-	//TODO: Check that checking for doubles works.
 	public ArrayList<Vec3> generate2DSeparationAxes(ArrayList<Vec3> normals)
 	{
 		for (int k = 0; k < worldVertices.length; k += 3)
@@ -75,7 +84,6 @@ public class BoundingBox
 		return normals;
 	}
 	
-	//TODO: Check that checking for doubles works.
 		public ArrayList<Vec3> generate3DSeparationAxes(ArrayList<Vec3> normals)
 		{
 			for (int k = 0; k < worldVertices.length; k += 3)
@@ -85,5 +93,14 @@ public class BoundingBox
 					normals.add(normal);
 			}
 			return normals;
+		}
+		
+
+		public static Matrix getHybridMatrix(ModelBlock mb)
+		{
+			Matrix hybridTransform = mb.transformationMatrix;
+			for (int k = 0; k < 4; k++)
+				hybridTransform.data[k][3] = mb.rawMatrix.data[k][3];
+			return hybridTransform;
 		}
 }

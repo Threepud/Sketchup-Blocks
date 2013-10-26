@@ -8,6 +8,12 @@ import processing.core.PFont;
 import processing.core.PVector;
 import sketchupblocks.base.Settings;
 
+/**
+ * @author Jacques Coetzee
+ * This class implements the Popup interface.
+ * This popup is displayed to show the calibration
+ * status of the system cameras.
+ */
 public class CalibratePopup implements Popup
 {
 	public boolean active;
@@ -28,9 +34,10 @@ public class CalibratePopup implements Popup
 	private int popupBaseHeight = 270;
 	private int[][] randomColours = 
 		{
-			{255, 32, 0},
-			{162, 237, 0},
-			{0, 217, 255}
+			{255, 32, 0},		//red
+			{0, 255, 18},		//green
+			{0, 217, 255},		//blue
+			{252, 255, 0}		//yellow
 		};
 	
 	//particles
@@ -38,10 +45,15 @@ public class CalibratePopup implements Popup
 	private PVector targetLocation;
 	private PVector[] currentDirection;
 	private PVector[] targetDirection;
-	private int[] velocity;
-	int particleCount = 100 * Settings.numCameras;
+	private double[] velocity;
+	int particleCount = 75 * Settings.numCameras;
 	private int[] colourIndex;
 	
+	/**
+	 * This constructor initializes all necessary member
+	 * variables like the particle swarm positions.
+	 * @param _window PApplet window.
+	 */
 	public CalibratePopup(PApplet _window)
 	{
 		active = false;
@@ -71,21 +83,27 @@ public class CalibratePopup implements Popup
 		}
 		targetLocation = new PVector(window.width / 2, window.height / 2);
 		
-		velocity = new int[Settings.numCameras];
-		int vel = 2;
+		velocity = new double[Settings.numCameras];
+		double vel = 2;
 		for(int x = 0; x < velocity.length; ++x)
 		{
 			velocity[x] = vel;
-			vel += 1;
+			vel += 0.5;
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#activate()
+	 */
 	@Override
 	public void activate()
 	{
 		active = true;
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#feedPoison()
+	 */
 	@Override
 	public void feedPoison() 
 	{
@@ -96,11 +114,18 @@ public class CalibratePopup implements Popup
 		}
 	}
 	
+	/**
+	 * This function sets the calibration status of all the system cameras.
+	 * @param _calibratedCameras Array of calibration status of all system cameras.
+	 */
 	public void updateCalibratedCameras(boolean[] _calibratedCameras)
 	{
 		calibratedCameras = _calibratedCameras;
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#draw()
+	 */
 	@Override
 	public void draw()
 	{
@@ -121,6 +146,10 @@ public class CalibratePopup implements Popup
 		}
 	}
 	
+	/**
+	 * This function draws the base graphical component of 
+	 * the popup.
+	 */
 	private void drawPopupBase()
 	{
 		window.fill(0, 0, 0, 200);
@@ -129,6 +158,11 @@ public class CalibratePopup implements Popup
 		window.rect(window.width / 2, window.height / 2, popupBaseWidth, popupBaseHeight);
 	}
 	
+	/**
+	 * This function draws a popup heading with the given string
+	 * message.
+	 * @param message String message.
+	 */
 	private void drawPopupHeader(String message)
 	{
 		window.fill(255);
@@ -137,6 +171,9 @@ public class CalibratePopup implements Popup
 		window.text(message, window.width / 2, (window.height / 2) - 80);
 	}
 	
+	/**
+	 * This function draws the particle swarm graphical component.
+	 */
 	private void drawParticles()
 	{
 		window.noStroke();
@@ -165,7 +202,7 @@ public class CalibratePopup implements Popup
 			currentDirection[x].normalize();
 			
 			if(calibratedCameras[x % Settings.numCameras])
-				currentDirection[x].mult(velocity[x % Settings.numCameras]);
+				currentDirection[x].mult((float)velocity[x % Settings.numCameras]);
 			else
 				currentDirection[x].mult(3);
 			

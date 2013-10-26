@@ -36,7 +36,7 @@ public class Feeder extends Interpreter
 	{
 		try
 		{
-			BufferedReader reader = new BufferedReader(new FileReader(new File(Settings.recordingInputFileName + cameraID)));
+			BufferedReader reader = new BufferedReader(new FileReader(new File(Settings.recordingInputFileName + "/output"+cameraID)));
 			
 			String line = "";
 			
@@ -65,7 +65,10 @@ public class Feeder extends Interpreter
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			if (Settings.verbose >= 1)
+				e.printStackTrace();
+			Logger.log("Could not find input file for camera "+cameraID, 0);
+			
 		}
 	}
 
@@ -106,7 +109,7 @@ public class Feeder extends Interpreter
 				}
 				
 			}
-			Logger.log(cameraID+" is done", 10);
+			Logger.log(cameraID+" is done feeding recorded data.", 2);
 		}
 	}
 }

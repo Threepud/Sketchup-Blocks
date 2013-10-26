@@ -31,6 +31,7 @@ public class SessionManager
 	private Menu menu;
 	private String[] dbPaths;
 	private Interpreter[] wimpie;
+	private PseudoPhysicsApplicator physicsApp;
 	
 	private final ModelViewerEventListener modelViewerEventListener = new ModelViewerEventListener();
 	
@@ -38,6 +39,10 @@ public class SessionManager
 	private boolean connecting = false;
 	
 	private boolean startupStatus = false;
+	
+	protected SessionManager()
+	{
+	}
 	
 	public SessionManager(PApplet _parent, boolean status)
 	{
@@ -59,6 +64,8 @@ public class SessionManager
 		}
 		server.start();
 		
+		physicsApp = new PseudoPhysicsApplicator((LocalLobby)lobby);
+		
 		sarah = new ModelViewer();
 		
 		try 
@@ -67,6 +74,7 @@ public class SessionManager
 			
 			sarah.setLobby(lobby);
 			sarah.setWindow(parent);
+			sarah.createDebugViewer();
 			menu = new Menu(this, parent, startupStatus);
 			
 			jimmy = new ModelConstructor(this);
@@ -87,7 +95,6 @@ public class SessionManager
 	
     public void onCameraEvent(CameraEvent cameraEvent)
     {
-    	//We still require some sort of menu traversal scheme...
     	Block block = blockDB.findBlock(cameraEvent.fiducialID);
     	
     	if(block instanceof UserBlock)
@@ -159,10 +166,20 @@ public class SessionManager
     	jimmy.setLobby(lobby);
     }
     
+    public ModelConstructor getModelConstructor()
+    {
+    	return jimmy;
+    }
+    
     public void setExporter(Exporter _kreshnik)
     {
     	kreshnik = _kreshnik;
     	kreshnik.setLobby(lobby);
+    }
+    
+    public Exporter getExporter()
+    {
+    	return kreshnik;
     }
     
     public void setModelViewer(ModelViewer _sarah)
@@ -179,10 +196,20 @@ public class SessionManager
 		}
     }
     
+    public ModelViewer getModelViewer()
+    {
+    	return sarah;
+    }
+    
     public void setModelLoader(ModelLoader _modelLoader)
     {
     	modelLoader = _modelLoader;
     	modelLoader.setLobby(lobby);
+    }
+    
+    public ModelLoader getModelLoader()
+    {
+    	return modelLoader;
     }
     
     public boolean checkModelExists()
@@ -229,17 +256,6 @@ public class SessionManager
     		lobby = null;
     		lobby = new LocalLobby();
     		lobby.setModel(new Model());
-    		try 
-    		{
-				sarah.setLobby(lobby);
-				EnvironmentAnalyzer.setLobby(lobby);
-				jimmy.setLobby(lobby);
-			} 
-    		catch (Exception e1) 
-    		{
-				e1.printStackTrace();
-				System.exit(-1);
-			}
     		
     		try
     		{
@@ -252,7 +268,21 @@ public class SessionManager
     		}
     		server.start();
     		
-    		menu.forceStopConnectPopup();
+    		try 
+    		{
+    			physicsApp = new PseudoPhysicsApplicator((LocalLobby)lobby);
+    			EnvironmentAnalyzer.setLobby(lobby);
+				sarah.setLobby(lobby);
+				sarah.createDebugViewer();
+				jimmy.setLobby(lobby);
+			} 
+    		catch (Exception e1) 
+    		{
+				e1.printStackTrace();
+				System.exit(-1);
+			}
+    		
+    		//menu.forceStopConnectPopup();
     		menu.checkCalibrated();
     		
     		spectating = !spectating;
@@ -279,7 +309,7 @@ public class SessionManager
     					NetworkedLobby temp;
     					if(uBlock == null)
     						//debug: manual address here
-    						temp = new NetworkedLobby("192.168.137.221", Settings.connectPort, menu, sessionManager);
+    						temp = new NetworkedLobby("192.168.137.1", Settings.connectPort, menu, sessionManager);
     					else
     						temp = new NetworkedLobby(uBlock.address, Settings.connectPort, menu, sessionManager); 
     	    			lobby = temp;
@@ -289,6 +319,7 @@ public class SessionManager
     	        		
     	            	lobby.setModel(new Model());
     	            	sarah.setLobby(lobby);
+    	            	sarah.createDebugViewer();
     	            	((NetworkedLobby)lobby).start();
     	            	
     	            	spectating = !spectating;
@@ -315,6 +346,11 @@ public class SessionManager
     	}
     }
     
+    public boolean isSpectating()
+    {
+    	return spectating;
+    }
+    
     public void drawGUI()
     {
     	sarah.drawModel();
@@ -324,6 +360,49 @@ public class SessionManager
     private void viewerFeedKeyboard(KeyEvent event)
     {
     	sarah.setKeyboardInput(event);
+    }
+    
+    /*private void resetSystem()
+    {
+    	String resetString = 
+    			  "#################################\n"
+    			+ "#             RESET             #\n"
+    			+ "#################################\n";
+    	Logger.log(resetString, 2);
+    	
+    	pauseInput();
+    	
+    	lobby = new LocalLobby();
+		lobby.setModel(new Model());
+		
+		server.replaceLobby(lobby);
+		
+		EnvironmentAnalyzer.setLobby(lobby);
+		
+		sarah.setLobby(lobby);
+		sarah.setWindow(parent);
+		try 
+		{
+			sarah.createDebugViewer();
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		
+		jimmy = null;
+		jimmy = new ModelConstructor(this);
+		jimmy.setLobby(lobby);
+		
+		createInterpreters();
+    }*/
+    
+    private void pauseInput()
+    {
+    	for (int k = 0; k < wimpie.length; k++)
+		{
+			wimpie[k].paused = !wimpie[k].paused;
+		}
     }
     
     //keyboard listener
@@ -340,15 +419,20 @@ public class SessionManager
 			{
 				if(e.getAction() == KeyEvent.PRESS)
 				{
-					for (int k = 0; k < wimpie.length; k++)
-					{
-						wimpie[k].paused = !wimpie[k].paused;
-					}
+					pauseInput();
 				}
-			
 			}
-			
-			viewerFeedKeyboard(e);
+			else if(e.getKey() == 'r')
+			{
+				if(e.getAction() == KeyEvent.RELEASE)
+				{
+					//resetSystem();
+				}
+			}
+			else
+			{
+				viewerFeedKeyboard(e);
+			}
 		}
 	}
 }

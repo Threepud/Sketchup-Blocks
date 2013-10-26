@@ -4,6 +4,12 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
 
+/**
+ * @author Jacques Coetzee
+ * This class implements the Popup interface.
+ * This popup allows for the creation of custom 
+ * warning popups to be shown to the user.
+ */
 public class GenericWarningPopup implements Popup 
 {
 	public boolean active;
@@ -32,6 +38,11 @@ public class GenericWarningPopup implements Popup
 	private float[] topPositions;
 	private float[] botPositions;
 	
+	/**
+	 * This constructor initializes all necessary member
+	 * variables.
+	 * @param _window PApplet window.
+	 */
 	public GenericWarningPopup(PApplet _window)
 	{
 		window = _window;
@@ -50,18 +61,27 @@ public class GenericWarningPopup implements Popup
 			botPositions[x] = max - (30 * x);
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#activate()
+	 */
 	@Override
 	public void activate() 
 	{
 		active = true;
 	}
 
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#feedPoison()
+	 */
 	@Override
 	public void feedPoison() 
 	{
 		poisonStamp = System.currentTimeMillis();
 	}
 
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#draw()
+	 */
 	@Override
 	public void draw() 
 	{
@@ -80,6 +100,10 @@ public class GenericWarningPopup implements Popup
 		}
 	}
 	
+	/**
+	 * This function draws the base graphical component of 
+	 * the popup.
+	 */
 	private void drawPopupBase()
 	{
 		window.fill(0, 0, 0, 200);
@@ -88,6 +112,11 @@ public class GenericWarningPopup implements Popup
 		window.rect(window.width / 2, window.height / 2, popupBaseWidth, popupBaseHeight);
 	}
 	
+	/**
+	 * This function draws a popup heading with the given string
+	 * message.
+	 * @param message String message.
+	 */
 	private void drawPopupHeader(String message)
 	{
 		window.fill(255);
@@ -96,6 +125,11 @@ public class GenericWarningPopup implements Popup
 		window.text(message, window.width / 2, (window.height / 2) - 20);
 	}
 	
+	/**
+	 * This function draws a popup sub-heading with the given string
+	 * message.
+	 * @param message String message.
+	 */
 	private void drawPopupSubHeader(String message)
 	{
 		window.fill(255);
@@ -104,12 +138,20 @@ public class GenericWarningPopup implements Popup
 		window.text(message, window.width / 2, (window.height / 2) + 40);
 	}
 	
+	/**
+	 * This function calls all relative sub functions to
+	 * draw the given warning bar components in the popup.
+	 */
 	private void drawWarningBars()
 	{
 		drawBar1();
 		drawBar2();
 	}
 	
+	/**
+	 * This function draws the first warning bar graphical
+	 * component.
+	 */
 	private void drawBar1()
 	{
 		window.fill(247, 254, 0);
@@ -123,10 +165,14 @@ public class GenericWarningPopup implements Popup
 			if(topPositions[x] > min + 425)
 				topPositions[x] = min - 25;
 				
-			drawThingy((int)topPositions[x], (window.height / 2) - (popupBaseHeight / 2));
+			drawParallelogram((int)topPositions[x], (window.height / 2) - (popupBaseHeight / 2));
 		}
 	}
 	
+	/**
+	 * This function draws the second warning bar graphical
+	 * component.
+	 */
 	private void drawBar2()
 	{
 		window.fill(247, 254, 0);
@@ -140,11 +186,17 @@ public class GenericWarningPopup implements Popup
 			if(botPositions[x] < max - 425)
 				botPositions[x] = max + 25;
 				
-			drawThingy((int)botPositions[x], (window.height / 2) + (popupBaseHeight / 2) - 20);
+			drawParallelogram((int)botPositions[x], (window.height / 2) + (popupBaseHeight / 2) - 20);
 		}
 	}
 	
-	private void drawThingy(int x, int y)
+	/**
+	 * This function draws the parallelogram shapes which 
+	 * make up the warning bar graphical components.
+	 * @param x X-Coordinate of target.
+	 * @param y Y-Coordinate of target.
+	 */
+	private void drawParallelogram(int x, int y)
 	{
 		//check transparency
 		int ratio = 0;

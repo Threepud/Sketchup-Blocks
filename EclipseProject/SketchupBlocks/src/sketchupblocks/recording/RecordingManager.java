@@ -35,7 +35,8 @@ public class RecordingManager extends PApplet
 		{
 			recorders[k].startRecording();
 		}
-		Logger.log("Started recording", 1);
+		Logger.log("--Recording has started--", 1);
+		Logger.log("Press enter to stop recording", 1);
 		timeStarted = new Date();
 	}
 	
@@ -53,7 +54,7 @@ public class RecordingManager extends PApplet
 			{
 				recorders[k].stopRecording();
 			}
-			Logger.log("Stopped recording", 1);
+			Logger.log("--Recording has stopped--", 1);
 			in.close();
 		}
 		else
@@ -66,8 +67,8 @@ public class RecordingManager extends PApplet
 			{
 				recorders[k].stopRecording();
 			}
-			Logger.log("Stopped recording", 1);
-			
+			Logger.log("--Recording has stopped--", 1);
+			System.exit(0);
 		}
 	}
 	

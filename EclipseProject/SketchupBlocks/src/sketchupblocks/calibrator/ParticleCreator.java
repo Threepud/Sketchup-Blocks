@@ -2,24 +2,29 @@ package sketchupblocks.calibrator;
 import java.util.Random;
 import java.io.*;
 
+/**
+ * Creates particles for PSO
+ * @author Hein *
+ */
 public class ParticleCreator
 {
 	private double  lower;
 	private double  upper;
 	private int dimension;
 	private Random rand;
+	private int counter = 0;
 	
 	public ParticleCreator(int dim,double low, double  up)
 		{
 			dimension= dim;
 			lower = low;
 			upper = up;
-			rand = new Random();
+			rand = new Random(42);
 		}
 
 	public Particle getParticle(double sC,double cC,double mC,double Cmax)
 	{
-		Particle result = new Particle(sC,cC,mC,Cmax,dimension);
+		Particle result = new Particle(sC,cC,mC,Cmax,dimension,counter++);
 		for(int k = 0 ; k < dimension ; k++)
 			result.attributes[k] = rand.nextDouble()*(upper-lower)+lower;
 			

@@ -1,5 +1,10 @@
 package sketchupblocks.calibrator;
 
+/**
+ * The settings for the PSO System
+ * @author Hein
+ *
+ */
 public class ParticleSystemSettings
 {
 	public Evaluator eval;

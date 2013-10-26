@@ -2,11 +2,13 @@ package sketchupblocks.calibrator;
 import java.util.Random;
 import java.io.Serializable;
 
+/**
+ * The particle used in the PSO algorithm
+ * @author Hein
+ */
 public class Particle implements Serializable 
 {
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 1L;
 
 	public double [] attributes;
@@ -26,13 +28,15 @@ public class Particle implements Serializable
 	
 	Random rand;
 	
-	public Particle(double sC,double cC,double mC,double Cmax,int pDim)
+	public Particle(double sC,double cC,double mC,double Cmax,int pDim, int id)
 	{
+		
 		socialComponent = sC;
 		cognitiveComponent = cC;
 		momentumComponent = mC;
 		ComponentMax = Cmax;
-		rand = new Random();
+		//Id is olny osed for seed
+		rand = new Random(42+id);
 		bestScore = -Double.MAX_VALUE;
 		
 		lastDirection = new double[pDim];
@@ -95,7 +99,7 @@ public class Particle implements Serializable
 		return result;	
 	}
 
-	public static double [] addDA(double [] left, double [] middel, double [] right)
+	private double [] addDA(double [] left, double [] middel, double [] right)
 	{
 		if(left.length != right.length) throw new RuntimeException("Cannot subtract arrays of unequal length");
 		double  [] result = new double[left.length];
@@ -112,22 +116,21 @@ public class Particle implements Serializable
 		return result;	
 	}
 	
-	public static double [] scaleDA(double scalar,double [] array)
+	private double [] scaleDA(double scalar,double [] array)
 	{
 		for(int k = 0 ; k < array.length ; k++)
 			array[k]*= scalar;		
 		return array;
 	}
 	
-	public static double [] scaleRandomDA(double scalar,double lower,double upper,double [] array)
+	private double [] scaleRandomDA(double scalar,double lower,double upper,double [] array)
 	{
-		Random rand = new Random();
 			for(int k = 0 ; k < array.length ; k++)
 				array[k]*= (scalar * (rand.nextDouble()*(upper-lower)+lower));		
 		return array;
 	}
 	
-	static double sizeofDA(double [] array)
+	private double sizeofDA(double [] array)
 	{
 		double result= 0;
 		for(int k = 0 ; k < array.length ; k++)
@@ -135,7 +138,7 @@ public class Particle implements Serializable
 		return Math.sqrt(result);
 	}
 	
-	public static void clipDA(double max,double [] array)
+	private  void clipDA(double max,double [] array)
 		{			
 			double size = sizeofDA(array);
 			if(size == 0 ) return;

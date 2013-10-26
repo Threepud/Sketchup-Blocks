@@ -2,9 +2,6 @@ package sketchupblocks.base;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import sketchupblocks.math.Face;
-import sketchupblocks.math.Line;
 import sketchupblocks.math.Vec3;
 
 public class RuntimeData 
@@ -13,14 +10,8 @@ public class RuntimeData
 	private static Map<Integer, Vec3> cameraViewVectors = new ConcurrentHashMap<Integer, Vec3>();
 	private static Map<Integer, Boolean> cameraCalibrated = new ConcurrentHashMap<Integer, Boolean>();
 	
-	public static Line debugLine; 
-	
 	public static double[][][] cameraCalibrationDetails;
 	public static boolean[][] haveCalibrationDetails;
-	
-	public static Face topFace;
-	public static Face bottomFace;
-	public static int blockID;
 	
 	public static void init()
 	{
@@ -33,7 +24,6 @@ public class RuntimeData
 				haveCalibrationDetails[l][k] = false;
 			}
 		}
-		debugLine = new Line(new Vec3(-10,-10,10),new Vec3(10,10,10));
 	}
 	
 	public static void clearCalibrationDetails(int camID)

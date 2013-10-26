@@ -46,7 +46,11 @@ public class Recorder
 		recording = false;
 		try
 		{
-			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputFile+cameraID)));
+			File folder = new File((outputFile));
+			if (!folder.exists())
+				folder.mkdirs();
+			
+			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputFile+"/output"+cameraID)));
 			
 			//It would be nice to have some pre-processing here.
 			writer.write(outputString);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import sketchupblocks.base.Model;
 import sketchupblocks.base.ModelChangeListener;
+import sketchupblocks.base.PseudoPhysicsApplicator;
 import sketchupblocks.construction.ModelBlock;
 import sketchupblocks.exception.ModelNotSetException;
 
@@ -19,13 +20,29 @@ public class LocalLobby implements Lobby
 			model.addModelBlock(modelBlock);
 		else
 			model.removeModelBlock(modelBlock);
+		
 		modelChangeListeners.trimToSize();
 		for (int k = 0; k < modelChangeListeners.size(); k++)
 		{
-			modelChangeListeners.get(k).fireModelChangeEvent(modelBlock);
+			if (modelChangeListeners.get(k) instanceof PseudoPhysicsApplicator || ModelBlock.ChangeType.REMOVE == modelBlock.type)
+				modelChangeListeners.get(k).fireModelChangeEvent(modelBlock);
 		}
 	}
 	    
+	public void updateModel(ArrayList<ModelBlock> updatedBlocks)
+	{
+		for (int i = 0; i < updatedBlocks.size(); i++)
+		{
+			model.addModelBlock(updatedBlocks.get(i));
+			modelChangeListeners.trimToSize();
+			for (int k = 0; k < modelChangeListeners.size(); k++)
+			{
+				if (!(modelChangeListeners.get(k) instanceof PseudoPhysicsApplicator))
+					modelChangeListeners.get(k).fireModelChangeEvent(updatedBlocks.get(i));
+			}
+		}
+	}
+	
 	public Model getModel() throws ModelNotSetException
 	{
 		if(model == null)

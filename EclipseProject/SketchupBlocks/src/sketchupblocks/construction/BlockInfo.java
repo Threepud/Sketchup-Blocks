@@ -1,6 +1,7 @@
 package sketchupblocks.construction;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,22 +17,28 @@ import sketchupblocks.math.LineDirectionSolver;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.SingularMatrixException;
 import sketchupblocks.math.Vec3;
-
+/**
+ * Used for storing information on blocks
+ * @author Hein
+ * @author Elre
+ * @author Jacques
+ */
 public class BlockInfo 
 {
-	int minEvents = 3;
-	int minFidVis = 2;
-	int LIFETIME = 1500; //ms
 	public int blockID;
 	public Block smartBlock;
-	public Date lastChange;
+	
+	private int minEvents = 3;
+	private int minFidVis = 2;
+	private int LIFETIME = 2500; //ms
+	private Date lastChange;
 	
 	//Variables for removal logic.
-	public boolean removed = true;
+	private boolean removed = true;
 	private Matrix transform = null;
 	private int numFiducialsUsed = 0;
 	
-	protected Map<CamFidIdentifier,Fiducial> fiducialMap;
+	private Map<CamFidIdentifier,Fiducial> fiducialMap;
 
 	
 	public BlockInfo(Block _smartBlock)
@@ -42,23 +49,116 @@ public class BlockInfo
 		lastChange = new Date();
 	}
 	
-	public Matrix getTransform()
+	public synchronized BlockInfo clone()
 	{
-		return transform;
+		BlockInfo dolly = new BlockInfo(smartBlock);
+		dolly.lastChange = (Date)lastChange.clone();
+		dolly.removed = removed;
+		dolly.minEvents = minEvents;
+		dolly.minFidVis = minFidVis;
+		if (transform != null)
+			dolly.transform = transform.clone();
+		dolly.numFiducialsUsed = numFiducialsUsed;
+		dolly.fiducialMap = new HashMap<CamFidIdentifier, Fiducial>();
+		
+		for(BlockInfo.CamFidIdentifier keys : fiducialMap.keySet())
+		{
+			BlockInfo.Fiducial fid = fiducialMap.get(keys);
+			dolly.fiducialMap.put(keys, fid.clone());
+		}
+		
+		return dolly;
 	}
 	
-	public int getNumFiducialsUsed()
+	public synchronized Fiducial getFiducial(int camID, int fidID)
+	{
+		return fiducialMap.get(new CamFidIdentifier(camID, fidID));
+	}
+	
+	public synchronized Collection<Fiducial> getAllFiducials()
+	{
+		return fiducialMap.values();
+	}
+	
+	/**
+	 * Updates the fiducial if it exists else creates the fiducial.
+	 * This changes the last seen time/
+	 * @param cam The camera event used for updating.
+	 */
+	public synchronized void updateFiducial(CameraEvent cam)
+	{
+		Fiducial fid = fiducialMap.get(new CamFidIdentifier(cam.cameraID, cam.fiducialID));
+		if (fid != null)
+		{
+			fid.camViewX = cam.x;
+			fid.camViewY = cam.y;
+			fid.lastSeen = new Date();
+			fid.rotation = cam.rotation;
+			fid.seen = true;
+		}
+		else
+		{
+			fid = new Fiducial(cam);
+			fiducialMap.put(new CamFidIdentifier(cam.cameraID, cam.fiducialID), fid);
+		}
+	}
+	
+	public synchronized int getMapSize()
+	{
+		return fiducialMap.values().size();
+	}
+	
+	public synchronized boolean mapContainsKey(int camID, int fidID)
+	{
+		return fiducialMap.containsKey(new CamFidIdentifier(camID, fidID));
+	}
+	
+	public synchronized Date getLastChange()
+	{
+		return lastChange;
+	}
+	
+	public synchronized void setLastChange(Date d)
+	{
+		lastChange = d;
+	}
+	
+	public synchronized Matrix getTransform()
+	{
+		if (transform != null)
+			return transform;
+		else
+			return null;
+	}
+	
+	public synchronized void setRemoved(boolean r)
+	{
+		//System.out.println("Setting removed to:" + r + "for " + blockID);
+		removed = r;
+	}
+	
+	public synchronized boolean getRemoved()
+	{
+		return removed;
+	}
+	
+	public synchronized int getNumFiducialsUsed()
 	{
 		return numFiducialsUsed;
 	}
 	
-	public void setTransform(Matrix _transform, int _numFiducialsUsed)
+	/**/
+	public synchronized void setTransform(Matrix _transform, int _numFiducialsUsed)
 	{
 		transform = _transform;
 		numFiducialsUsed = _numFiducialsUsed;
 	}
 	
-	public Fiducial[] getCleanFiducials()
+	/**
+	 * Creates a list of fiducials that are seen. 
+	 * @return The list of seen fiducials
+	 */
+	public synchronized Fiducial[] getCleanFiducials()
 	{
 		BlockInfo.Fiducial [] fids = new BlockInfo.Fiducial[0];
 		
@@ -75,7 +175,11 @@ public class BlockInfo
 		return cleanFids.toArray(fids);	
 	}
 	
-	public Date getLastSeen()
+	/**
+	 * The last time a fiducial was seen from this block
+	 * @return The date
+	 */
+	public synchronized Date getLastSeen()
 	{
 		Date result = new Date();
 		for(Fiducial fid : fiducialMap.values())
@@ -86,7 +190,51 @@ public class BlockInfo
 		return result;
 	}
 	
-	public boolean ready()
+	/**
+	 * Tests whether there is enough information to attempt processing
+	 * @return Whether processing should be attempted
+	 */
+	public synchronized boolean ready()
+	{
+		Fiducial[] data = new Fiducial[0];
+		boolean tryToArray = true;
+		
+		while(tryToArray)
+		try
+		{
+			data = fiducialMap.values().toArray(data);
+			tryToArray = false;
+		}
+		catch(ConcurrentModificationException e)
+		{
+			//Do nothing
+		}
+		ArrayList<Integer> fiducialList = new ArrayList<Integer>();
+		int count = 0;
+		//int numExpired = 0;
+		//int numNotSeen = 0;
+		for (int k = 0; k < data.length; k++)
+		{
+			if (data[k] != null)
+			{
+				if (new Date().getTime() - data[k].lastSeen.getTime() < LIFETIME)
+				{
+					if(data[k].seen)
+					{
+						count ++;
+						if( !fiducialList.contains(new Integer(data[k].fiducialsID)))
+							fiducialList.add(data[k].fiducialsID);
+					}
+				}
+			}
+		}
+		if (fiducialList.size() >= minFidVis && count >= minEvents)
+			return true;
+		else 
+			return false;
+	}
+	
+	public synchronized int getNumUniqueFiducials()
 	{
 		Fiducial[] data = new Fiducial[0];
 		boolean tryToArray = true;
@@ -103,31 +251,19 @@ public class BlockInfo
 		}
 		
 		ArrayList<Integer> fiducialList = new ArrayList<Integer>();
-		int count = 0;
 		for (int k = 0; k < data.length; k++)
 		{
 			if (data[k] != null)
 			{
-				if (new Date().getTime() - data[k].timestamp.getTime() < LIFETIME)
+				if(data[k].seen)
 				{
-					if(data[k].seen)
-					{
-						count ++;
-						if( !fiducialList.contains(new Integer(data[k].fiducialsID)))
-							fiducialList.add(data[k].fiducialsID);
-					}
-				}
-				else
-				{
-					data[k] = null;
+					if( !fiducialList.contains(new Integer(data[k].fiducialsID)))
+						fiducialList.add(data[k].fiducialsID);
 				}
 			}
 		}
-		
-		if (fiducialList.size() >= minFidVis && count >= minEvents)
-			return true;
-		else 
-			return false;
+
+		return fiducialList.size();
 	}
 
 	protected class Fiducial
@@ -135,7 +271,6 @@ public class BlockInfo
 		public int fiducialsID;
 		public int camID;
 		public double rotation;
-		public Date timestamp;
 		public double camViewX;
 		public double camViewY;
 		private boolean seen;
@@ -149,17 +284,30 @@ public class BlockInfo
 			seen = true;
 		}
 		
+		public Fiducial clone()
+		{
+			Fiducial dolly = new Fiducial(fiducialsID, rotation, camViewX, camViewY, camID);
+			dolly.lastSeen = (Date)this.lastSeen.clone();
+			dolly.seen = seen;
+			if (worldPosition != null)
+				dolly.worldPosition = worldPosition.clone();
+			else
+				dolly.worldPosition = null;
+			return dolly;
+		}
+		
 		public Fiducial(int _fiducialsID, double rot, double _camViewX, double _camViewY, int _camID)
 		{
 			fiducialsID = _fiducialsID;
 			rotation = rot;
-			timestamp = new Date();
 			camViewX = _camViewX;
 			camViewY = _camViewY;
 			camID = _camID;
 			seen = true;
 			lastSeen = new Date();
 		}
+		
+		
 		
 		public Line getLine()
 		{
@@ -218,7 +366,7 @@ public class BlockInfo
 			}
 			else
 			{
-				return lastSeen;
+				return (Date)lastSeen.clone();
 			}			
 		}
 	
@@ -246,7 +394,7 @@ public class BlockInfo
 		@Override
 		public int hashCode()
 		{
-		return 	(cameraID*256)+fiducialID;
+			return 	(cameraID*256)+fiducialID;
 		}
 	}
 }

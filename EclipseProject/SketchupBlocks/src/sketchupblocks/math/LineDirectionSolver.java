@@ -1,5 +1,11 @@
 package sketchupblocks.math;
 
+/**
+ * @author cravingoxygen
+ *
+ *This class was written to solve the linear system produced during camera calibration.
+ *The solution represents 
+ */
 public class LineDirectionSolver
 {
 	public static Vec3 solve(Vec3[] input, double[] angles) throws SingularMatrixException

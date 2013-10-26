@@ -1,6 +1,5 @@
 package sketchupblocks.math;
 
-import sketchupblocks.math.Matrix.Axis;
 
 public class RotationMatrix4D extends Matrix 
 {

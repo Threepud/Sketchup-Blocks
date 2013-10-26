@@ -8,6 +8,11 @@ import sketchupblocks.math.*;
 import sketchupblocks.math.Matrix;
 import sketchupblocks.math.RotationMatrix4D;
 
+/**
+ * A backup for the numerical methods for calculating the Model to World transformation
+ * @author Hein
+ *
+ */
 public class PSOPosition {
 	
 	static class PSORot implements Evaluator

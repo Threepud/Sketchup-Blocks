@@ -36,6 +36,12 @@ public class Vec3 implements Serializable
     	y = oldVec.y;
     	z = oldVec.z;
     }
+    
+
+    public Vec3 clone()
+    {
+    	return new Vec3(x, y, z);
+    }
 
     public static Vec3 midpoint(Vec3 one, Vec3 two)
     {
@@ -60,11 +66,12 @@ public class Vec3 implements Serializable
     {
         double magnitude = Math.sqrt(one.x * one.x + one.y * one.y + one.z * one.z);
 
-        one.x = one.x / magnitude;
-        one.y = one.y / magnitude;
-        one.z = one.z / magnitude;
+        Vec3 two = new Vec3(one);
+        two.x = two.x / magnitude;
+        two.y = two.y / magnitude;
+        two.z = two.z / magnitude;
 
-        return one;
+        return two;
     }
     
     public double dot(Vec3 other)
@@ -114,6 +121,15 @@ public class Vec3 implements Serializable
     public double distance(Vec3 vec)
     {
     	return Math.sqrt((this.x - vec.x) * (this.x - vec.x) + (this.y - vec.y) * (this.y - vec.y) + (this.z - vec.z) * (this.z - vec.z)); 
+    }
+    
+    public Vec3 project(Vec3 b1, Vec3 b2)
+    {
+    	b1 = Vec3.normalize(b1);
+    	b2 = Vec3.normalize(b2);
+    	Vec3 one = Vec3.scalar(Vec3.dot(b1,  this), b1);
+    	Vec3 two = Vec3.scalar(Vec3.dot(b2,  this), b2);
+    	return Vec3.add(one, two);
     }
     
     public Vec4 padVec3()

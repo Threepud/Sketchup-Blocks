@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import sketchupblocks.base.Logger;
 import sketchupblocks.base.Model;
+import sketchupblocks.base.RuntimeData;
 import sketchupblocks.database.SmartBlock;
 import sketchupblocks.exception.ModelNotSetException;
 import sketchupblocks.math.Face;
@@ -13,6 +14,11 @@ import sketchupblocks.math.Matrix;
 import sketchupblocks.math.Vec3;
 import sketchupblocks.network.Lobby;
 
+/**
+ * A utility class for analyzing the model.
+ * @author Hein
+ * @author Elre
+ */
 public class EnvironmentAnalyzer 
 {
 	private static Lobby eddy;
@@ -30,13 +36,11 @@ public class EnvironmentAnalyzer
 			Collection<ModelBlock> blocks = eddy.getModel().getBlocks();
 			
 			BoundingBox belowBB = null;
-			
 			for (ModelBlock modelBlock : blocks)
 			{
 				if (modelBlock.smartBlock.blockId != newBlock.smartBlock.blockId)
 				{
 					BoundingBox modelBB = BoundingBox.generateBoundingBox(modelBlock);
-	
 					boolean overlap = checkOverlap(newBB, modelBB);
 					
 					if (overlap)
@@ -52,8 +56,11 @@ public class EnvironmentAnalyzer
 					}
 				}
 			}
+			
 			if (belowBB == null)
+			{
 				return null;
+			}
 			return belowBB.modelBlock;
 		}
 		catch(Exception e)
@@ -64,26 +71,54 @@ public class EnvironmentAnalyzer
 		return null;
 	}
 	
-	public static Face getFacingFace(ModelBlock m, Vec3 surfaceNormal)
+	public static void sortBottomUp(ArrayList<ModelBlock> blocks)
+	{
+		BoundingBox[] bb = new BoundingBox[blocks.size()];
+		for (int k = 0; k < bb.length; k++)
+		{
+			bb[k] = BoundingBox.generateBoundingBox(blocks.get(k));
+		}
+		
+		for (int i = 1; i < blocks.size(); i++)
+		{
+			for (int k = i; k > 0 && higherThan(bb[k-1], bb[k]); k--)
+			{
+				BoundingBox tempbb = bb[k];
+				bb[k] = bb[k-1];
+				bb[k-1] = tempbb;
+				ModelBlock tempmb = blocks.get(k);
+				blocks.set(k, blocks.get(k-1));
+				blocks.set(k-1, tempmb);
+			}
+		}
+	}
+	
+	public static Face[] getFacingFaces(Matrix transform, SmartBlock s, Vec3 surfaceNormal)
 	{
 		double largestDot = -Double.MAX_VALUE;
+		double secondDot = -Double.MAX_VALUE;
 		int largestDotIndex = -1; 
-		Matrix rotationMatrix = extractRotationMatrix(m.transformationMatrix);
+		int secondDotIndex = -1;
+		Matrix rotationMatrix = extractRotationMatrix(transform);
 
-		Face[] worldFaces = getFaces(m.smartBlock);
+		Face[] worldFaces = getFaces(s);
 		
 		for (int k = 0; k < worldFaces.length; k++)
 		{
-			//Convert the corners of every face into a matrix (of column vectors).
-			//Then multiply these matrices with the current rotation matrix.
-			//These will be the corners for the new, transformed faces
-			//Check if it is the bottom one by finding the one that is the closest to parallel.
 			worldFaces[k] = new Face(Matrix.multiply(rotationMatrix, new Matrix(worldFaces[k].corners, true)).toVec3Array());
 			double dotWithSurfNorm = (Vec3.dot(worldFaces[k].normal(), surfaceNormal));
+			
 			if (dotWithSurfNorm >= largestDot)
 			{
+				secondDot = largestDot;
+				secondDotIndex = largestDotIndex;
 				largestDot = dotWithSurfNorm;
 				largestDotIndex = k;
+			}
+			else if (dotWithSurfNorm >= secondDot)
+			{
+				secondDot = dotWithSurfNorm;
+				secondDotIndex = k;
 			}
 		}
 		
@@ -93,7 +128,7 @@ public class EnvironmentAnalyzer
 			System.exit(-1);
 		}
 		
-		return worldFaces[largestDotIndex];
+		return new Face[]{worldFaces[largestDotIndex], worldFaces[secondDotIndex]};
 	}
 
 	
@@ -125,20 +160,19 @@ public class EnvironmentAnalyzer
 		return new Matrix(data);
 	}
 	
-	private static boolean checkOverlap(BoundingBox one, BoundingBox two)
+	protected static boolean checkOverlap(BoundingBox one, BoundingBox two)
 	{
 		if (checkBroad(one, two))
 		{
-			//System.out.println("Broad check between "+one.modelBlock.smartBlock.blockId+" and "+two.modelBlock.smartBlock.blockId);
 			if (checkSAT(one, two))
 				return true;
 		}
 		return false;
 	}
 	
-	private static boolean checkSAT(BoundingBox one, BoundingBox two)
+	protected static boolean checkSAT(BoundingBox one, BoundingBox two)
 	{
-		double thresh = 2;
+		double thresh = 1.5;
 		ArrayList<Vec3> sepAxes = new ArrayList<Vec3>();
 		sepAxes = one.generate2DSeparationAxes(sepAxes);
 		sepAxes = two.generate2DSeparationAxes(sepAxes);
@@ -166,11 +200,16 @@ public class EnvironmentAnalyzer
 				min2 = proj < min2 ? proj : min2;
 				max2 = proj > max2 ? proj : max2;
 			}
+			
 			if (min1 > max2 || min2 > max1)
 			{
 				return false;
 			}
-			else if ((max2 - min1 < thresh  && (max2 - min1  > 0)) || (max1 - min2 < thresh && max1 - min2 > 0))
+			else if ((max2 - min1 < thresh  && (max2 - min1  > 0)))
+			{
+				return false;
+			}
+			else if (max1 - min2 < thresh && max1 - min2 > 0)
 			{
 				return false;
 			}
@@ -179,9 +218,9 @@ public class EnvironmentAnalyzer
 		
 	}
 	
-	private static boolean checkBroad(BoundingBox one, BoundingBox two)
+	protected static boolean checkBroad(BoundingBox one, BoundingBox two)
 	{
-		double error = -3;
+		double error = 3;
 		if (error < two.min.x - one.max.x)
 			return false;
 		if (one.min.x - two.max.x > error)
@@ -193,18 +232,91 @@ public class EnvironmentAnalyzer
 		return true;
 	}
 
-	/**TODO: There was some argument here that I have forgotten.
-	 */
-	private static boolean higherThan(BoundingBox one, BoundingBox two)
+	protected static boolean higherThan(BoundingBox one, BoundingBox two)
 	{
 		if (one.max.z > two.max.z)
 			return true;
 		return false;
 	}
 	
-	/*
+	public static int getNumObscuredPoints(SmartBlock sm, Matrix transform, int camID, int fidID)
+	{
+		int count = 0;
+		
+		Vec3 fidPos = sm.fiducialCoordinates[fidID%6];
+		double distToEdge = 3.0;
+		
+		int nonzeroDim = -1;
+		int indexOne = -1;
+		int indexTwo = -1;
+		double[] fidPosData = fidPos.toArray();
+		if (fidPos.x == 0 && fidPos.y == 0)
+		{
+			indexOne = 0;
+			indexTwo = 1;
+			nonzeroDim = 2;
+		}
+		else if (fidPos.x == 0 && fidPos.z == 0)
+		{
+			indexOne = 0;
+			indexTwo = 2;
+			nonzeroDim = 1;
+		}
+		else
+		{
+			indexOne = 1;
+			indexTwo = 2;
+			nonzeroDim = 0;
+		}
+		int numCorners = 4;
+		int numPoints = numCorners+1;
+		double[][] fidCornerData = new double[numCorners][3];
+		Vec3[] fidPoints = new Vec3[5];
+		int k = 0;
+		fidCornerData[k][indexOne] = distToEdge;
+		fidCornerData[k][indexTwo] = distToEdge;
+		fidCornerData[k][nonzeroDim] = fidPosData[nonzeroDim];
+		k++;
+		fidCornerData[k][indexOne] = -distToEdge;
+		fidCornerData[k][indexTwo] = distToEdge;
+		fidCornerData[k][nonzeroDim] = fidPosData[nonzeroDim];
+		k++;
+		fidCornerData[k][indexOne] = -distToEdge;
+		fidCornerData[k][indexTwo] = -distToEdge;
+		fidCornerData[k][nonzeroDim] = fidPosData[nonzeroDim];
+		k++;
+		fidCornerData[k][indexOne] = distToEdge;
+		fidCornerData[k][indexTwo] = -distToEdge;
+		fidCornerData[k][nonzeroDim] = fidPosData[nonzeroDim];
+		
+		for (k = 0; k < numCorners; k++)
+		{
+			fidPoints[k] = new Vec3(fidCornerData[k]);
+		}
+		fidPoints[numCorners] = fidPos;
+		
+		for (k = 0; k < numPoints; k++)
+		{
+			Vec3 fidWorld = Matrix.multiply(transform, fidPoints[k].padVec3()).toVec3();
+			ModelBlock[] mb = getIntersectingModels(RuntimeData.getCameraPosition(camID), fidWorld);
+			if ((mb.length == 1 && mb[0].smartBlock.blockId == sm.blockId) || mb.length == 0)
+			{
+				count = count + 0;
+			}
+			else
+			{
+				count++;
+			}
+		}
+		
+		
+		
+		return count;
+	}
+	
+	/**
 	 * Return an array of blocks a line passes through.
-	 * 
+	 * @return An array of blocks
 	 */
 	public static ModelBlock [] getIntersectingModels(Vec3 start, Vec3 end)
 	{
@@ -234,7 +346,7 @@ public class EnvironmentAnalyzer
 		
 		
 		 ModelBlock [] res = new  ModelBlock [0];
-	return result.toArray(res);	
+		 return result.toArray(res);	
 	}
 	
 	public static boolean isIntersecting(Line line , ModelBlock mb)

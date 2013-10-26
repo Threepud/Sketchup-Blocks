@@ -3,6 +3,7 @@ package sketchupblocks.network;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -32,7 +33,8 @@ public class NetworkedLobby extends Thread implements Lobby
 		server = _server;
 		port = _port;
 		
-		connection = new Socket(server,port);
+		connection = new Socket();
+		connection.connect(new InetSocketAddress(server, port), 5000);
 		menu = _menu;
 		sessMan = _sessMan;
 	}
@@ -53,7 +55,7 @@ public class NetworkedLobby extends Thread implements Lobby
 	public Model getModel() throws ModelNotSetException
 	{
 		if(model == null)
-			throw new ModelNotSetException("Local Lobby: Model not set.");
+			throw new ModelNotSetException("Networked Lobby: Model not set.");
 		return model;
 	}
 
@@ -102,36 +104,20 @@ public class NetworkedLobby extends Thread implements Lobby
 						//reconnect here
 						menu.createReconnectPopup();
 						
-						Thread t = new Thread()
-						{
-							public void run()
-							{
-								try 
-								{
-									connection = new Socket(server,port);
-									menu.updateNetworkStatus(true);
-									sessMan.clearState();
-									online = true;
-								} 
-								catch (Exception e) 
-								{
-									e.printStackTrace();
-									menu.updateNetworkStatus(false);
-									sessMan.spectate(null);
-								}
-							}
-						};
-						
-						t.start();
-						
 						try 
 						{
-							t.join();
+							connection = new Socket();
+							connection.connect(new InetSocketAddress(server, port), 5000);
+							menu.updateNetworkStatus(true);
+							sessMan.clearState();
+							online = true;
 						} 
-						catch (InterruptedException e1) 
+						catch (Exception e2) 
 						{
-							e1.printStackTrace();
-							online = false;
+							menu.updateNetworkStatus(false);
+							menu.checkCalibrated();
+							sessMan.spectate(null);
+							e2.printStackTrace();
 						}
 					}
 				}
@@ -155,5 +141,10 @@ public class NetworkedLobby extends Thread implements Lobby
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public boolean isOnline()
+	{
+		return online;
 	}
 }

@@ -3,6 +3,11 @@ package sketchupblocks.calibrator;
 import sketchupblocks.math.Line;
 import sketchupblocks.math.Vec3;
 
+/**
+ *
+ * Evaluates the fiducial positions proposed by PSO 
+ * @author Hein
+ */
 public class BlockPosition implements Evaluator
 {
 	Vec3 [] positions;
@@ -41,6 +46,7 @@ public class BlockPosition implements Evaluator
 		return result;		
 	}
 	
+	
 	public EvalResults evaluate(double [] pa)
 	{
 		if(positions.length != pa.length)
@@ -75,6 +81,10 @@ public class BlockPosition implements Evaluator
 		return result;
 	}
 	
+	/**
+	 * Calculates the error between suggested positions (lin and s) and actual positions ( position)
+	 * @return The error between the actual distance and guessed distance
+	 */
 	public double error(Vec3 position1, Vec3 position2, Line lin1, Line lin2,double s1, double s2)
 	{
 		double distance = 0;

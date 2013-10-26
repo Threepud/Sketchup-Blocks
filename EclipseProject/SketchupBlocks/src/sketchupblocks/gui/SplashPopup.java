@@ -6,6 +6,13 @@ import processing.core.PImage;
 import processing.core.PShape;
 import sketchupblocks.base.Settings;
 
+/**
+ * @author Jacques Coetzee
+ * This class implements the popup interface.
+ * This popup is really a overridden version of the popup
+ * where is actually displays a splash screen, but the splash screen
+ * still has the same mechanics as the rest of the popups.
+ */
 public class SplashPopup implements Popup 
 {
 	public boolean active;
@@ -20,6 +27,11 @@ public class SplashPopup implements Popup
 	private PImage splashImage;
 	private PShape splashBase;
 	
+	/**
+	 * This constructor initializes the member variables
+	 * of the class.
+	 * @param _window PApplet window.
+	 */
 	public SplashPopup(PApplet _window)
 	{
 		window = _window;
@@ -28,18 +40,27 @@ public class SplashPopup implements Popup
 		splashBase = window.createShape(PConstants.RECT, 0, 0, window.width, window.height);
 	}
 	
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#activate()
+	 */
 	@Override
 	public void activate() 
 	{
 		active = true;
 	}
 
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#feedPoison()
+	 */
 	@Override
 	public void feedPoison() 
 	{
 		poisonStamp = System.currentTimeMillis();
 	}
 
+	/* (non-Javadoc)
+	 * @see sketchupblocks.gui.Popup#draw()
+	 */
 	@Override
 	public void draw() 
 	{
@@ -55,6 +76,10 @@ public class SplashPopup implements Popup
 		}
 	}
 	
+	/**
+	 * This function draws the splash graphical component
+	 * of the popup.
+	 */
 	private void drawSplash()
 	{	
 		splashBase.setTexture(splashImage);
