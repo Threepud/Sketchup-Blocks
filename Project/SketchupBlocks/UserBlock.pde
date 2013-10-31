@@ -1,3 +1,0 @@
-class UserBlock extends Block
-{
-}

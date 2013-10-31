@@ -1,1 +1,0 @@
-All resources to be loaded using the core API go in this folder.

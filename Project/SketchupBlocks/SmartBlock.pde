@@ -1,3 +1,0 @@
-class SmartBlock extends Block
-{
-}
